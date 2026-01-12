@@ -11,6 +11,5 @@ export { default as BookAppointment } from "./patient/BookAppointment";
 export { default as PatientProfile } from "./patient/PatientProfile";
 export { default as EditPatientProfile } from "./patient/EditPatientProfile";
 
-// doctor pages
-export { default as DoctorHome } from "./doctor/DoctorHome";
-export { default as DoctorProfile } from "./doctor/DoctorProfile";
+//doctor pagess
+export { default as DoctorHome } from "./doctor/DoctorHome.jsx";

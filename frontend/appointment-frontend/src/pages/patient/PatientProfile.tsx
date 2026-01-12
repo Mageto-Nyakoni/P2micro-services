@@ -170,13 +170,7 @@ function PatientProfile() {
   );
 }
 
-function ProfileCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
+function ProfileCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="bg-purple-50 rounded-xl p-4">
       <h4 className="text-lg font-semibold text-purple-700 mb-3">
@@ -187,13 +181,7 @@ function ProfileCard({
   );
 }
 
-function ProfileItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function ProfileItem({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between text-sm">
       <span className="text-gray-600 font-medium">{label}</span>

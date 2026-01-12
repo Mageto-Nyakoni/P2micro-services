@@ -1,16 +1,27 @@
-import { Navigate } from "react-router-dom";
-import { ReactNode } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../auth/useAuth";
+import { Role } from "../components/layout/NavBar/types";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
-}
 
-export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const token = localStorage.getItem("token");
+type ProtectedRouteProps = {
+  allowedRoles: Role[];
+  children: React.ReactNode;
+};
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
+export default function ProtectedRoute({ allowedRoles, children }: ProtectedRouteProps) {
+  const { isAuthenticated, user } = useAuth();
+  const location = useLocation();
+
+  //if the user is not logged in, send them to login page
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
+  //if the user is logged in but does not have the right role, send them to home page
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/" replace />;
+  }
+
+  //you shall pass
   return <>{children}</>;
 }
