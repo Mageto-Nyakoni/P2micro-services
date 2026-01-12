@@ -58,7 +58,7 @@ function PatientProfile() {
       {/* Header */}
       <div className="max-w-5xl mx-auto flex justify-between items-center mb-6">
         <button
-          onClick={() => navigate("/patient")}
+          onClick={() => navigate("/patient/home")}
           className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
         >
           ← Back

@@ -8,14 +8,15 @@ function Login() {
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!username || !password) {
       alert("Please fill all fields");
       return;
     }
-
+  localStorage.setItem("token", "dummy-token");
+  localStorage.setItem("role", role);
     // TEMP login success
     if (role === "patient") {
       navigate("/patient/home");

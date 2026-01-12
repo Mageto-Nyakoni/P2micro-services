@@ -1,20 +1,41 @@
 import { useEffect, useMemo, useState } from "react";
 
+export interface Appointment {
+  id?: number;
+  __backendId?: string;
+  patient_name: string;
+  appointment_type: string;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:MM
+}
+
+interface ActionResult {
+  isOk: boolean;
+}
+
+interface DoctorCalendarProps {
+  title?: string;
+  noAppointmentsMessage?: string;
+  appointments?: Appointment[];
+  onDelete?: (apt: Appointment) => Promise<ActionResult>;
+  onUpdate?: (apt: Appointment) => Promise<ActionResult>;
+}
+
 export default function DoctorCalendar({
   title = "Appointment Calendar",
   noAppointmentsMessage = "No appointments scheduled",
   appointments: appointmentsProp = [],
   onDelete = async () => ({ isOk: true }),
   onUpdate = async () => ({ isOk: true }),
-}) {
+}: DoctorCalendarProps) {
   const today = useMemo(() => new Date(), []);
-  const [currentMonth, setCurrentMonth] = useState(today.getMonth()); // 0-11
-  const [currentYear, setCurrentYear] = useState(today.getFullYear());
-  const [selectedDate, setSelectedDate] = useState(null); // "YYYY-MM-DD" | null
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentMonth, setCurrentMonth] = useState<number>(today.getMonth()); // 0-11
+  const [currentYear, setCurrentYear] = useState<number>(today.getFullYear());
+  const [selectedDate, setSelectedDate] = useState<string | null>(null); // "YYYY-MM-DD" | null
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   // Editing state
-  const [editingApt, setEditingApt] = useState(null);
+  const [editingApt, setEditingApt] = useState<Appointment | null>(null);
   const [editForm, setEditForm] = useState({
     patient_name: "",
     appointment_type: "",
@@ -23,9 +44,9 @@ export default function DoctorCalendar({
   });
 
   // UX state
-  const [deleteBusyId, setDeleteBusyId] = useState(null);
-  const [updateBusy, setUpdateBusy] = useState(false);
-  const [modalError, setModalError] = useState("");
+  const [deleteBusyId, setDeleteBusyId] = useState<string | number | null> (null);
+  const [updateBusy, setUpdateBusy] = useState<boolean>(false);
+  const [modalError, setModalError] = useState<string>("");
 
   const monthNames = useMemo(
     () => [
@@ -53,40 +74,46 @@ export default function DoctorCalendar({
   const firstDay = useMemo(() => new Date(currentYear, currentMonth, 1), [currentYear, currentMonth]);
   const lastDay = useMemo(() => new Date(currentYear, currentMonth + 1, 0), [currentYear, currentMonth]);
   const daysInMonth = lastDay.getDate();
-  const startingDayOfWeek = firstDay.getDay(); // 0 = Sun
+  const startingDayOfWeek = firstDay.getDay(); // 0 = Sunday, 1 = Monday, ...
 
   const appointments = useMemo(() => appointmentsProp ?? [], [appointmentsProp]);
 
   const appointmentsByDate = useMemo(() => {
-    const map = new Map();
-    for (const apt of appointments) {
+    const map = new Map<string, Appointment[]>();
+    appointments.forEach((apt) => {
+      if (!apt?.date) return;
+      const list = map.get(apt.date) ?? [];
+      list.push(apt);
+      map.set(apt.date, list);
+    });
+    /*for (const apt of appointments) {
       if (!apt?.date) continue;
-      const arr = map.get(apt.date) ?? [];
-      arr.push(apt);
-      map.set(apt.date, arr);
-    }
+      const list = map.get(apt.date) ?? [];
+      list.push(apt);
+      map.set(apt.date, list);
+    }*/
     return map;
   }, [appointments]);
 
-  const selectedDayAppointments = useMemo(() => {
+   const selectedDayAppointments = useMemo(() => {
     if (!selectedDate) return [];
-    const list = (appointmentsByDate.get(selectedDate) ?? []).slice();
-    // Canva used localeCompare; keep same behavior (works best with "HH:MM")
-    list.sort((a, b) => String(a.time || "").localeCompare(String(b.time || "")));
-    return list;
+    return [...(appointmentsByDate.get(selectedDate) ?? [])].sort((a, b) =>
+      a.time.localeCompare(b.time)
+    );
   }, [appointmentsByDate, selectedDate]);
+
 
   // Close modal with Esc
   useEffect(() => {
     if (!isModalOpen) return;
-    const onKeyDown = (e) => {
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeModal();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isModalOpen]);
 
-  function formatDateLong(dateStr) {
+  function formatDateLong(dateStr: string) {
     // dateStr: YYYY-MM-DD
     const d = new Date(`${dateStr}T00:00:00`);
     return d.toLocaleDateString("en-US", {
@@ -97,7 +124,7 @@ export default function DoctorCalendar({
     });
   }
 
-  function openDay(dateStr) {
+  function openDay(dateStr: string) {
     setModalError("");
     setEditingApt(null);
     setSelectedDate(dateStr);
@@ -143,7 +170,7 @@ export default function DoctorCalendar({
     });
   }
 
-  function beginEdit(apt) {
+  function beginEdit(apt: Appointment) {
     setModalError("");
     setEditingApt(apt);
     setEditForm({
@@ -154,7 +181,7 @@ export default function DoctorCalendar({
     });
   }
 
-  async function handleDelete(apt) {
+  async function handleDelete(apt: Appointment) {
     setModalError("");
     setDeleteBusyId(apt.__backendId ?? apt.id ?? "busy");
     try {
@@ -169,7 +196,7 @@ export default function DoctorCalendar({
     }
   }
 
-  async function handleUpdate(e) {
+  async function handleUpdate(e: React.FormEvent) {
     e.preventDefault();
     if (!editingApt) return;
 

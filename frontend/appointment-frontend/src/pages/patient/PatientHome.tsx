@@ -4,7 +4,7 @@ import "react-calendar/dist/Calendar.css";
 import { useNavigate } from "react-router-dom";
 
 function PatientHome() {
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const navigate = useNavigate();
 
   return (
@@ -29,7 +29,7 @@ function PatientHome() {
           {/* NO LOGIN BUTTON HERE */}
 
           <button
-            onClick={() => navigate("/doctors")}
+            onClick={() => navigate("/patient/doctors")}
             className="border-2 border-indigo-600 text-indigo-600 px-8 py-3 rounded-xl text-lg font-semibold hover:bg-indigo-600 hover:text-white transition"
           >
             Find Doctors
@@ -45,7 +45,7 @@ function PatientHome() {
           </h2>
 
           <Calendar
-            onChange={setSelectedDate}
+            onChange={(value) => setSelectedDate(value as Date)}
             value={selectedDate}
             className="rounded-lg"
           />

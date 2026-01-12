@@ -19,7 +19,7 @@ const PatientNavbar: React.FC = () => {
 
       {/* CENTER LINKS */}
       <div className="flex gap-6 text-gray-700 font-medium">
-        <Link to="/patient" className="hover:text-indigo-600">
+        <Link to="/patient/home" className="hover:text-indigo-600">
           Home
         </Link>
         <Link to="/patient/doctors" className="hover:text-indigo-600">
