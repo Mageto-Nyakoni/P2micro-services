@@ -14,7 +14,7 @@ function EditPatientProfile() {
     lifestyle: "Vegetarian, exercises regularly",
   });
 
-  function handleChange(e) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.name]: e.target.value });
   }
 
@@ -87,7 +87,11 @@ function EditPatientProfile() {
   );
 }
 
-function Input({ label, ...props }) {
+
+interface InputPrrops extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+}
+function Input({ label, ...props }: InputPrrops) {
   return (
     <div className="mb-4">
       <label className="block mb-1 font-medium">{label}</label>
