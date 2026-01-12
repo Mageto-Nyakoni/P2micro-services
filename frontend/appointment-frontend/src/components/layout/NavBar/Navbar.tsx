@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import NavbarView from "./NavbarView";
 import { getNavItems } from "./navConfig";
 import type { Role } from "./types";
+
+// Replace this import with your real hook path
 import { useAuth } from "../../../auth/useAuth";
 
 

@@ -1,5 +1,14 @@
 import { useState } from "react";
 
+type PatientForm = {
+  name: string;
+  age: number;
+  bloodGroup: string;
+  address: string;
+  allergies: string;
+  medicalHistory: string;
+  lifestyle: string;
+};
 
 type Props = {
     initialEmail: string;
