@@ -32,4 +32,12 @@ public class Doctor {
 
     @Column(name = "bio", nullable = true, length = 1000)
     private String bio;
+
+    public Doctor (User user, Integer experienceYears, String gender, Specialty specialty, String bio){
+        this.user = user;
+        this.experienceYears = experienceYears;
+        this.gender = gender;
+        this.specialty = specialty;
+        this.bio = bio;
+    }
 }
