@@ -2,7 +2,7 @@ import PatientNavbar from "../components/navbars/PatientNavbar";
 
 import { Outlet } from "react-router-dom";
 
-function PatientLayout() {
+const PatientLayout = ()=> {
   return (
     <>
       <PatientNavbar />

@@ -24,15 +24,7 @@ function App() {
   return (
     <Routes>
       
- {/* protected routes */}
-      <Route
-  path="/patient"
-  element={
-    <ProtectedRoute>
-      <PatientLayout />
-    </ProtectedRoute>
-  }
-/>
+
 
       {/* Guest Routes */}
       <Route element={<GuestLayout />}>
@@ -42,9 +34,21 @@ function App() {
         <Route path="/doctors" element={<DoctorsBrowse />} />
       </Route>
 
+
+     {/* Patient Routes (PROTECTED) */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <PatientLayout />
+          </ProtectedRoute>
+        }
+     />
+
+     
+
       {/* Patient Routes */}
       <Route element={<PatientLayout />}>
-        <Route path="/patient/home" element={<PatientHome />} />
+        <Route path="/patient" element={<PatientHome />} />
         <Route path="/patient/profile" element={<PatientProfile />} />
           <Route path="/patient/profile/edit" element={<EditPatientProfile />} /> 
       <Route path="/patient/book" element={<BookAppointment />} />

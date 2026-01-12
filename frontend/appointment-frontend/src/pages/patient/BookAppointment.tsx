@@ -1,8 +1,18 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
+//type
+type Doctor = {
+  id: number;
+  name: string;
+  specialty: string;
+  services: string[];
+};
+
 function BookAppointment() {
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null) ;
   const [selectedService, setSelectedService] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -12,6 +22,7 @@ const location = useLocation();
 const navigate = useNavigate();
 
 const preselectedDoctorId = location.state?.doctorId;
+const isRebook = Boolean(preselectedDoctorId);
 
   const doctors = [
     {
@@ -50,7 +61,7 @@ const preselectedDoctorId = location.state?.doctorId;
    useEffect(() => {
     if (preselectedDoctorId) {
       const doctor = doctors.find(
-        (d) => d.id === preselectedDoctorId
+        d => d.id === preselectedDoctorId
       );
       if (doctor) {
         setSelectedDoctor(doctor);
@@ -67,6 +78,7 @@ const preselectedDoctorId = location.state?.doctorId;
   ];
 
   const handleSubmit = () => {
+      if (!selectedDoctor) return;
     alert(
       `Appointment Booked!
 Doctor: ${selectedDoctor.name}
