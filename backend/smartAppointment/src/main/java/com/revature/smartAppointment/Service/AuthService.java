@@ -1,6 +1,9 @@
 package com.revature.smartAppointment.Service;
 
+import com.revature.smartAppointment.Controller.Request.RegisterRequest;
 import com.revature.smartAppointment.Controller.Response.LoginResponse;
+import com.revature.smartAppointment.Controller.Response.RegisterResponse;
+import com.revature.smartAppointment.Model.Privilege;
 import com.revature.smartAppointment.Model.User;
 import com.revature.smartAppointment.Util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +14,14 @@ import java.util.Optional;
 @Service
 public class AuthService {
     private UserService userService;
+    private PrivilegeService privilegeService;
 
     private JwtUtil jwtUtil;
 
     @Autowired
-    public AuthService(UserService userService, JwtUtil jwtUtil) {
+    public AuthService(UserService userService, PrivilegeService privilegeService, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.privilegeService = privilegeService;
         this.jwtUtil = jwtUtil;
     }
 
@@ -32,5 +37,20 @@ public class AuthService {
             }
         }
         throw new RuntimeException("Invalid username or password");
+    }
+
+    public RegisterResponse validateRegistration(RegisterRequest registerRequest) {
+        Optional<User> optionalUser = userService.findUserByEmail(registerRequest.getEmail());
+        if (optionalUser.isPresent()) {
+            throw new RuntimeException("Invalid email: email already in use");
+        }
+        Optional<Privilege> optionalPrivilege = privilegeService.findById(registerRequest.getPrivilegeId());
+        if (optionalPrivilege.isEmpty()) {
+            throw new RuntimeException("Invalid privilege: privilege does not exist");
+        }
+        User user = new User(registerRequest.getEmail(), registerRequest.getPassword(), registerRequest.getFirstName(), registerRequest.getLastName(), optionalPrivilege.get());
+
+        User newUser = userService.save(user);
+        return new RegisterResponse(newUser.getUserId(), newUser.getEmail(), newUser.getPrivilege());
     }
 }
