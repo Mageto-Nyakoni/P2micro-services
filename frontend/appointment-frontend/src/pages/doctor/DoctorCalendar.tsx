@@ -81,20 +81,20 @@ export default function DoctorCalendar({
     const map = new Map<string, Appointment[]>();
     for (const apt of appointments) {
       if (!apt?.date) continue;
-      const arr = map.get(apt.date) ?? [];
-      arr.push(apt);
-      map.set(apt.date, arr);
+      const list = map.get(apt.date) ?? [];
+      list.push(apt);
+      map.set(apt.date, list);
     }
     return map;
   }, [appointments]);
 
-  const selectedDayAppointments = useMemo(() => {
+   const selectedDayAppointments = useMemo(() => {
     if (!selectedDate) return [];
-    const list = (appointmentsByDate.get(selectedDate) ?? []).slice();
-    // Canva used localeCompare; keep same behavior (works best with "HH:MM")
-    list.sort((a, b) => String(a.time || "").localeCompare(String(b.time || "")));
-    return list;
+    return [...(appointmentsByDate.get(selectedDate) ?? [])].sort((a, b) =>
+      a.time.localeCompare(b.time)
+    );
   }, [appointmentsByDate, selectedDate]);
+
 
   // Close modal with Esc
   useEffect(() => {

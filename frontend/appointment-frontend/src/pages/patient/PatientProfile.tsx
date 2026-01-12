@@ -1,5 +1,14 @@
 import { useNavigate } from "react-router-dom";
 
+type Appointment = {
+  id: number;
+  date: string;
+  doctorId: number; 
+  doctor: string;
+  department: string;
+  canRebook: boolean;
+};
+
 function PatientProfile() {
   const navigate = useNavigate();
 
@@ -16,10 +25,11 @@ function PatientProfile() {
     photo: "https://i.pravatar.cc/150?img=47"
   };
 
-  const appointments = [
+  const appointments: Appointment[] = [
   {
     id: 1,
     date: "12 Jan 2026",
+    doctorId: 1,
     doctor: "Dr. Ben Martinez",
     department: "Cardiology",
     canRebook: true
@@ -27,6 +37,7 @@ function PatientProfile() {
   {
     id: 2,
     date: "28 Dec 2025",
+    doctorId: 2,    
     doctor: "Dr. Samuel Chen",
     department: "General Medicine",
     canRebook: true
@@ -34,6 +45,7 @@ function PatientProfile() {
   {
     id: 3,
     date: "05 Dec 2025",
+    doctorId: 3,
     doctor: "Dr. Leya Al-Sayed",
     department: "Pediatrics",
     canRebook: true
@@ -131,7 +143,13 @@ function PatientProfile() {
 
         <button
           disabled={!appt.canRebook}
-          onClick={() => navigate("/book_appt")}
+           onClick={() =>
+                    navigate("/patient/book", {
+                      state: {
+                        doctorId: appt.doctorId, // KEY LINE
+                      },
+                    })
+                  }
           className={`mt-3 md:mt-0 px-5 py-2 rounded-lg font-medium transition
             ${
               appt.canRebook
@@ -152,7 +170,13 @@ function PatientProfile() {
   );
 }
 
-function ProfileCard({ title, children }) {
+function ProfileCard({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <div className="bg-purple-50 rounded-xl p-4">
       <h4 className="text-lg font-semibold text-purple-700 mb-3">
@@ -163,7 +187,13 @@ function ProfileCard({ title, children }) {
   );
 }
 
-function ProfileItem({ label, value }) {
+function ProfileItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex justify-between text-sm">
       <span className="text-gray-600 font-medium">{label}</span>

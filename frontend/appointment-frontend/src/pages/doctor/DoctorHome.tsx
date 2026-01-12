@@ -2,11 +2,11 @@ export default function DoctorHome({
 
     // Sample data for demonstration purposes. Will connect to backend later.
   doctor = {
-    name: "Dr. Sarah Johnson",
+    name: "Dr. Ben Martinez",
     specialty: "Cardiology",
     experience: "15 years",
     education: "MD, Harvard Medical School",
-    contact: "sarah.johnson@hospital.com",
+    contact: "ben.martinez@hospital.com",
   },
   sectionTitle = "Today's Appointments",
   appointments = [

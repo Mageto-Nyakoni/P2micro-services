@@ -15,13 +15,13 @@ function Login() {
       alert("Please fill all fields");
       return;
     }
-  localStorage.setItem("token", "dummy-token");
-  localStorage.setItem("role", role);
+
     // TEMP login success
+    localStorage.setItem("token", "dummy-token");
     if (role === "patient") {
-      navigate("/patient/home");
+      navigate("/patient");
     } else if (role === "staff") {
-      navigate("/doctor/home");
+      navigate("/doctor");
     }
   };
 
@@ -117,5 +117,6 @@ function Login() {
     </div>
   );
 }
+
 
 export default Login;
