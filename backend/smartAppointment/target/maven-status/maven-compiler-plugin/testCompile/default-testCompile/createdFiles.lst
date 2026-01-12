@@ -1,1 +1,6 @@
+com\revature\smartAppointment\ControllerTest\AuthControllerTest.class
+com\revature\smartAppointment\ServiceTest\UserServiceTest.class
 com\revature\smartAppointment\Project1ApplicationTests.class
+com\revature\smartAppointment\ControllerTest\UserControllerTest.class
+com\revature\smartAppointment\ServiceTest\PrivilegeServiceTest.class
+com\revature\smartAppointment\ServiceTest\AuthServiceTest.class
