@@ -3,10 +3,12 @@ package com.revature.smartAppointment.Service;
 import com.revature.smartAppointment.Model.Privilege;
 import com.revature.smartAppointment.Repository.PrivilegeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class PrivilegeService implements ServiceInterface<Privilege> {
     private PrivilegeRepository privilegeRepository;
 
@@ -44,7 +46,7 @@ public class PrivilegeService implements ServiceInterface<Privilege> {
         Optional<Privilege> optionalPrivilege = privilegeRepository.findById(id);
         if (optionalPrivilege.isPresent()) {
             Privilege privilege = optionalPrivilege.get();
-            Privilege.setRoleName(newPrivilege.getRoleName());
+            privilege.setRoleName(newPrivilege.getRoleName());
             return privilegeRepository.save(privilege);
         }
         return null;

@@ -29,4 +29,12 @@ public class User {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "privilege_id")
     private Privilege privilege;
+
+    public User(String email, String password, String firstName, String lastName, Privilege privilege) {
+        this.email = email;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.privilege = privilege;
+    }
 }

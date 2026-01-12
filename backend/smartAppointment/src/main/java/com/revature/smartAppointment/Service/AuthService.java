@@ -40,6 +40,9 @@ public class AuthService {
     }
 
     public RegisterResponse validateRegistration(RegisterRequest registerRequest) {
+        if (registerRequest.getFirstName().length() == 0 || registerRequest.getLastName().length() == 0 || registerRequest.getEmail().length() == 0 || registerRequest.getPassword().length() == 0 || registerRequest.getPrivilegeId() == null) {
+            throw new RuntimeException("Error: one or more required fields are empty");
+        }
         Optional<User> optionalUser = userService.findUserByEmail(registerRequest.getEmail());
         if (optionalUser.isPresent()) {
             throw new RuntimeException("Invalid email: email already in use");
@@ -48,6 +51,7 @@ public class AuthService {
         if (optionalPrivilege.isEmpty()) {
             throw new RuntimeException("Invalid privilege: privilege does not exist");
         }
+
         User user = new User(registerRequest.getEmail(), registerRequest.getPassword(), registerRequest.getFirstName(), registerRequest.getLastName(), optionalPrivilege.get());
 
         User newUser = userService.save(user);

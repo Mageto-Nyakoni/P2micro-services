@@ -19,4 +19,8 @@ public class Privilege {
 
     @Column(name = "role_name")
     private String roleName;
+
+    public Privilege(String roleName) {
+        this.roleName = roleName;
+    }
 }
