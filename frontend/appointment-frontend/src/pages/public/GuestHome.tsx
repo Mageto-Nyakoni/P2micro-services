@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { CalendarAvail, DoctorAvailability } from "@/components/availability";
+import { CalendarAvail } from "@/components/availability";
+import { DoctorAvailability } from "@/components/availability/types";
 
 /* ============= MOCK DATA ================= */
 
@@ -75,7 +76,7 @@ const GuestHome: React.FC = () => {
 
       {/* CALENDAR + AVAILABILITY */}
       <section className="pb-20">
-      <CalendarAvail
+     <CalendarAvail
   availabilityByDate={availabilityByDate}
   onBook={(doctor, date) =>
     navigate("/login", {
@@ -87,6 +88,7 @@ const GuestHome: React.FC = () => {
     })
   }
 />
+
       </section>
     </div>
   );

@@ -121,13 +121,13 @@ Time: ${time}`
   return (
     <div className="min-h-screen bg-purple-50 px-6 py-10">
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
-   <button
-        onClick={() => navigate("/doctors")}
-        className="mb-4 text-indigo-600 hover:underline"
-      >
-        ← Back 
-      </button>
-        {/* HEADER */}
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-4 text-indigo-600 hover:underline"
+        >
+          ← Back
+        </button>
+
         <h1 className="text-3xl font-bold text-center text-purple-700 mb-2">
           Book Appointment
         </h1>
@@ -176,7 +176,7 @@ Time: ${time}`
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {selectedDoctor.services.map((service: string) => (
+              {selectedDoctor.services.map((service) => (
                 <button
                   key={service}
                   onClick={() => setSelectedService(service)}

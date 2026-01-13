@@ -97,5 +97,4 @@ const CalendarAvail: React.FC<CalendarAvailProps> = ({
     </>
   );
 };
-
 export default CalendarAvail;
