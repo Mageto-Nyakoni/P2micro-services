@@ -15,15 +15,16 @@ const CalendarAvail: React.FC<CalendarAvailProps> = ({
   onBook,
 }) => {
   const [selectedDate, setSelectedDate] =
-    useState<CalendarProps["value"]>(null);
+    useState<Date | null>(null);
 
   const [availableDoctors, setAvailableDoctors] =
     useState<DoctorAvailability[]>([]);
 
   const handleDateChange: CalendarProps["onChange"] = (value) => {
-    setSelectedDate(value);
-
     if (value instanceof Date) {
+      setSelectedDate(value);
+
+   
       const dateKey = value.toISOString().split("T")[0];
       setAvailableDoctors(availabilityByDate[dateKey] || []);
     } else {
@@ -81,7 +82,7 @@ const CalendarAvail: React.FC<CalendarAvailProps> = ({
                   onClick={() =>
                     onBook(
                       doctor,
-                      selectedDate.toISOString().split("T")[0]
+                      selectedDate
                     )
                   }
                   className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
