@@ -10,8 +10,9 @@ Endpoints (http://localhost:8080):
     - /api
       - /users (GET, returns all users)
         - /{user_id} (GET, returns user with specified id)
-      - /login (POST)
-      - /register (POST)
+      - /auth
+        - /login (POST)
+        - /register (POST)
       - /patients (GET, return all patients)
       - /doctors (GET)
         - /{doctor_id} (GET)
