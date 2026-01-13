@@ -3,7 +3,7 @@ package com.revature.smartAppointment.Model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "patient")
@@ -26,7 +26,7 @@ public class Patient {
     private String phoneNumber;
 
     @Column(name = "date_of_birth")
-    private Date dateOfBirth;
+    private LocalDateTime dateOfBirth;
 
     @Column(name = "address")
     private String address;
@@ -37,11 +37,11 @@ public class Patient {
     @Column(name = "allergies")
     private String allergies;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Patient(Integer age, String gender, String phoneNumber, Date dateOfBirth, String address, String bloodType, String allergies, User user) {
+    public Patient(Integer age, String gender, String phoneNumber, LocalDateTime dateOfBirth, String address, String bloodType, String allergies, User user) {
         this.age = age;
         this.gender = gender;
         this.phoneNumber = phoneNumber;

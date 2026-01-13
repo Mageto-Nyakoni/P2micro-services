@@ -1,7 +1,5 @@
 package com.revature.smartAppointment.Controller;
 
-import com.revature.smartAppointment.Controller.Request.LoginRequest;
-import com.revature.smartAppointment.Controller.Response.LoginResponse;
 import com.revature.smartAppointment.Model.User;
 
 import com.revature.smartAppointment.Service.UserService;

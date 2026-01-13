@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/smart-appointment/api/patient")
+@RequestMapping("/smart-appointment/api/patients")
 @CrossOrigin(origins = "http://localhost:4200")
 public class PatientController {
     private PatientService patientService;
