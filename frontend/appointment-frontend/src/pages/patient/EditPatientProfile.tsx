@@ -88,10 +88,9 @@ function EditPatientProfile() {
 }
 
 
-interface InputPrrops extends React.InputHTMLAttributes<HTMLInputElement> {
-  label: string;
-}
-function Input({ label, ...props }: InputPrrops) {
+
+
+function Input({ label, ...props }: {label: string} & React.InputHTMLAttributes<HTMLInputElement>)  {
   return (
     <div className="mb-4">
       <label className="block mb-1 font-medium">{label}</label>
