@@ -1,7 +1,6 @@
 package com.revature.smartAppointment.Service;
 
 import com.revature.smartAppointment.Model.User;
-import com.revature.smartAppointment.Repository.PrivilegeRepository;
 import com.revature.smartAppointment.Repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +12,10 @@ import java.util.Optional;
 @Service
 public class UserService implements ServiceInterface<User> {
     private UserRepository userRepository;
-    private PrivilegeRepository privilegeRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository, PrivilegeRepository privilegeRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.privilegeRepository = privilegeRepository;
     }
 
     @Override
