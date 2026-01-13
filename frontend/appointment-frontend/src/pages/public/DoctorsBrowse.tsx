@@ -3,8 +3,9 @@ import { useState } from "react";
 
 function DoctorsBrowse() {
   const navigate = useNavigate();
-  const [expandedId, setExpandedId] = useState(null);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
+  //TEMPORARY
   const doctors = [
     {
       id: 1,
@@ -32,7 +33,7 @@ function DoctorsBrowse() {
     },
   ];
 
-  const toggleExpand = (id) => {
+  const toggleExpand = (id: number) => {
     setExpandedId(expandedId === id ? null : id);
   };
 

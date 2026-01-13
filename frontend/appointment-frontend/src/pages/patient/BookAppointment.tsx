@@ -1,8 +1,18 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
+//type
+type Doctor = {
+  id: number;
+  name: string;
+  specialty: string;
+  services: string[];
+};
+
 function BookAppointment() {
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null) ;
   const [selectedService, setSelectedService] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -12,6 +22,7 @@ const location = useLocation();
 const navigate = useNavigate();
 
 const preselectedDoctorId = location.state?.doctorId;
+const isRebook = Boolean(preselectedDoctorId);
 
   const doctors = [
     {
@@ -50,7 +61,7 @@ const preselectedDoctorId = location.state?.doctorId;
    useEffect(() => {
     if (preselectedDoctorId) {
       const doctor = doctors.find(
-        (d) => d.id === preselectedDoctorId
+        d => d.id === preselectedDoctorId
       );
       if (doctor) {
         setSelectedDoctor(doctor);
@@ -67,6 +78,7 @@ const preselectedDoctorId = location.state?.doctorId;
   ];
 
   const handleSubmit = () => {
+      if (!selectedDoctor) return;
     alert(
       `Appointment Booked!
 Doctor: ${selectedDoctor.name}
@@ -80,7 +92,7 @@ Time: ${time}`
     <div className="min-h-screen bg-purple-50 px-6 py-10">
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
    <button
-        onClick={() => navigate("/patient/doctors")}
+        onClick={() => navigate("/doctors")}
         className="mb-4 text-indigo-600 hover:underline"
       >
         ← Back 
@@ -127,7 +139,7 @@ Time: ${time}`
               2. Select Service
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {selectedDoctor.services.map((service) => (
+              {selectedDoctor.services.map((service: string) => (
                 <button
                   key={service}
                   onClick={() => setSelectedService(service)}
