@@ -12,13 +12,13 @@ export default function Home() {
     }
 
     switch (user.role) {
-        case "PATIENT":
+        case "Patient":
             return <Navigate to="/patient/home" replace />;
-        case "DOCTOR":
+        case "Doctor":
             return <Navigate to="/doctor/home" replace />;
-        case "ADMIN":
+        case "Admin":
             return <Navigate to="/admin/home" replace />;
-        case "SUPER":
+        case "Super":
             return <Navigate to="/super/home" replace />;
         default:
             return <GuestHome />;

@@ -1,4 +1,4 @@
-export type Role = "GUEST" | "PATIENT" | "DOCTOR" | "ADMIN" | "SUPER";
+export type Role = "Guest" | "Patient" | "Doctor" | "Admin" | "Super";
 
 export type NavItem =
   | {
