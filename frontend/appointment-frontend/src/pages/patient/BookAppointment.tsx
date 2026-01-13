@@ -12,13 +12,18 @@ type Doctor = {
 
 /* ================= COMPONENT ================= */
 
-function BookAppointment() {
+export default function BookAppointment() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  /* Navigation state (from GuestHome / PatientHome) */
-  const preselectedDoctor = location.state?.doctor;
-  const preselectedDate = location.state?.selectedDate;
+  /* ================= NAVIGATION STATE ================= */
+
+  const preselectedDoctorId: number | undefined =
+    location.state?.doctorId ?? location.state?.doctor?.id;
+
+  const preselectedDate: string | undefined =
+    location.state?.selectedDate;
+
   const role: "guest" | "patient" | undefined =
     location.state?.role;
 
@@ -69,9 +74,9 @@ function BookAppointment() {
   /* ================= PRESELECT LOGIC ================= */
 
   useEffect(() => {
-    if (preselectedDoctor) {
+    if (preselectedDoctorId) {
       const foundDoctor = doctors.find(
-        (d) => d.id === preselectedDoctor.id
+        (d) => d.id === preselectedDoctorId
       );
       if (foundDoctor) {
         setSelectedDoctor(foundDoctor);
@@ -85,7 +90,7 @@ function BookAppointment() {
           .split("T")[0]
       );
     }
-  }, [preselectedDoctor, preselectedDate]);
+  }, [preselectedDoctorId, preselectedDate]);
 
   /* ================= TIME SLOTS ================= */
 
@@ -250,5 +255,3 @@ Time: ${time}`
     </div>
   );
 }
-
-export default BookAppointment;

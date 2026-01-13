@@ -57,7 +57,7 @@ const PatientHome: React.FC = () => {
         </p>
 
         <button
-          onClick={() => navigate("/patient/doctors")}
+          onClick={() => navigate("/doctors")}
           className="border-2 border-indigo-600 text-indigo-600 px-8 py-3 rounded-xl text-lg font-semibold hover:bg-indigo-600 hover:text-white transition"
         >
           Find Doctors

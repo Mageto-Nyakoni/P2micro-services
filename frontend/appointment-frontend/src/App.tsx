@@ -25,45 +25,6 @@ import SuperHome from "./pages/super/SuperHome";
 import Home from "./pages/public/Home";
 
 function App() {
-//   return (
-//     <Routes>
-      
-//  {/* protected routes */}
-//       <Route
-//   path="/patient"
-//   element={
-//     <ProtectedRoute>
-//       <PatientLayout />
-//     </ProtectedRoute>
-//   }
-// />
-
-//       {/* Guest Routes */}
-//       <Route element={<GuestLayout />}>
-//         <Route path="/" element={<GuestHome />} />
-//         <Route path="/login" element={<Login />} />
-//         <Route path="/register" element={<Register />} />
-//         <Route path="/doctors" element={<DoctorsBrowse />} />
-//       </Route>
-
-//       {/* Patient Routes */}
-//       <Route element={<PatientLayout />}>
-//         <Route path="/patient/home" element={<PatientHome />} />
-//         <Route path="/patient/profile" element={<PatientProfile />} />
-//           <Route path="/patient/profile/edit" element={<EditPatientProfile />} /> 
-//       <Route path="/patient/book" element={<BookAppointment />} />
-//         <Route path="/patient/doctors" element={<DoctorsBrowse />} />
-//       </Route>
-      
-
-//       {/* Doctor Routes */}
-//       <Route element={<DoctorLayout />}>
-//         <Route path="/doctor/home" element={<DoctorHome />} />
-//         <Route path="/doctor/calendar" element={<DoctorCalendar />} />
-//       </Route>
-
-//     </Routes>
-//   );
 
       return (
         <>
