@@ -3,6 +3,7 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { Value } from "react-calendar/dist/shared/types";
 import { useNavigate } from "react-router-dom";
+import { CalendarAvail, DoctorAvailability } from "@/components/availability";
 
 function PatientHome() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
@@ -22,12 +23,6 @@ function PatientHome() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white">
-
-      {/* TOP RIGHT PROFILE LINK */}
-      <div className="flex justify-end px-6 pt-6">
-      
-      </div>
-
       {/* HERO SECTION */}
       <section className="flex flex-col items-center text-center px-6 py-24">
         <h1 className="text-5xl font-extrabold text-gray-800 mb-6">
@@ -35,7 +30,8 @@ function PatientHome() {
         </h1>
 
         <p className="text-xl text-gray-600 max-w-2xl mb-10">
-          Book your appointment with ease and connect with the best healthcare professionals
+          Book your appointment with ease and connect with the best healthcare
+          professionals
         </p>
 
         <div className="flex gap-6">
@@ -71,9 +67,8 @@ function PatientHome() {
           />
         </div>
       </section>
-
     </div>
   );
-}
+};
 
 export default PatientHome;
