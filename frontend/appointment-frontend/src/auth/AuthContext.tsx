@@ -6,6 +6,8 @@ export type User = {
     id: number;
     email: string;
     role: Role;
+    firstName?: string;
+    lastName?: string;
 }
 
 export type AuthContextType = {
