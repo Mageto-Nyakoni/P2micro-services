@@ -1,11 +1,9 @@
 package com.revature.smartAppointment.Model;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.revature.smartAppointment.Model.Doctor;
 
 @Entity
 @Table(name = "time_slot")
