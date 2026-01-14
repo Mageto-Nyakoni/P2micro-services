@@ -23,9 +23,7 @@ public class DoctorController {
 
     private final DoctorService doctorService;
 
-    // -----------------------------
     // Basic CRUD for Doctor
-    // -----------------------------
 
     // POST /doctors
     @PostMapping
