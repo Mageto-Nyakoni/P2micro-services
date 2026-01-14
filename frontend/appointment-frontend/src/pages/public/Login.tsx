@@ -23,7 +23,6 @@ export default function LoginPage() {
     setBusy(true);
 
     try {
-      // MOCK login for now
       const res = await loginAPI(payload.email, payload.password);
 
       // Update AuthContext using YOUR expected shape
