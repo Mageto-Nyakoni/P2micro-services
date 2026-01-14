@@ -26,8 +26,11 @@ NOTES
 
 - Resgistration
     - make registration a 2 part process
-    - Part 1: ask for first/last name, email, and password (creates User Entity)
-    - Part 2: ask for age, blood type, address, allergies, phone number, DOB (Creates Patient Entity) 
+    - Part 1: ask for first/last name, email, and password (creates User Entity in DB)
+    - Part 2: ask for age, blood type, address, allergies, phone number, DOB (Creates Patient Entity in DB) 
 
+- Patient page
+    - update the info so that it actually shows the logged in pateint's info
 
-
+- Doctor page
+    - update the info so that it actually shows the logged in doctor's info
