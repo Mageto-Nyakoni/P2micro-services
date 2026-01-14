@@ -47,7 +47,7 @@ public class Patient {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Patient(Integer age, String gender, String phoneNumber, LocalDateTime dateOfBirth, String address, String bloodType, List<Allergy> allergies, User user) {
+    public Patient(Integer age, String gender, String phoneNumber, LocalDateTime dateOfBirth, String address, String bloodType, List<Allergy> allergies) {
         this.age = age;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
@@ -55,6 +55,5 @@ public class Patient {
         this.address = address;
         this.bloodType = bloodType;
         this.allergies = allergies;
-        this.user = user;
     }
 }
