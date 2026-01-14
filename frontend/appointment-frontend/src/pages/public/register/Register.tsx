@@ -1,7 +1,7 @@
 import { useState } from "react";
-import RegisterForm1 from "./register/RegisterForm1";
-import RegisterForm2 from "./register/RegisterForm2";
-import { PatientDetailsForm, RegisterUserForm } from "./register/types";
+import RegisterForm1 from "./RegisterForm1";
+import RegisterForm2 from "./RegisterForm2";
+import { PatientDetailsForm, RegisterUserForm } from "./types";
 
 export default function RegisterWizard() {
   const [step, setStep] = useState<1 | 2>(1);

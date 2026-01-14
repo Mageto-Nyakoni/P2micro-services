@@ -8,7 +8,7 @@ import DoctorLayout from "./layouts/DoctorLayout";
 
 // Pages
 import Login from "./pages/public/Login";
-import Register from "./pages/public/Register";
+import Register from "./pages/public/register/Register";
 import DoctorsBrowse from "./pages/public/DoctorsBrowse";
 
 import PatientHome from "./pages/patient/PatientHome";
