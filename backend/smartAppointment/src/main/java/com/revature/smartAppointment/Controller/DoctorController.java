@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/smart-appointment/api/doctors")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class DoctorController {
 
     private final DoctorService doctorService;
