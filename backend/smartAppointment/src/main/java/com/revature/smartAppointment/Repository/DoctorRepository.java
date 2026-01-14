@@ -11,6 +11,6 @@ import com.revature.smartAppointment.Model.Doctor;
 public interface DoctorRepository extends JpaRepository<Doctor, Integer> {
 
     Optional<Doctor> findByUserUserId(Integer userId);
-
-    Optional<Doctor> findByUserEmail(String email);
+    
 }
+//findbyUserUser

@@ -6,13 +6,16 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.revature.smartAppointment.Model.*;
+import com.revature.smartAppointment.Model.Appointment;
+import com.revature.smartAppointment.Model.Doctor;
+import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Repository.DoctorRepository;
@@ -24,15 +27,57 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class DoctorService {
+public class DoctorService implements ServiceInterface<Doctor> {
 
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
 
-    // -----------------------------
+    // Basic CRUD for Doctor
+
+    @Override
+    public Doctor save(Doctor entity) {
+        return doctorRepository.save(entity);
+    }
+
+    @Override
+    public Optional<Doctor> findById(int id) {
+        return doctorRepository.findById(id);
+    }
+
+    @Override
+    public List<Doctor> findAll() {
+        return doctorRepository.findAll();
+    }
+
+    @Override
+    public Optional<Doctor> deleteById(int id) {
+        Optional<Doctor> existing = doctorRepository.findById(id);
+        existing.ifPresent(d -> doctorRepository.deleteById(id));
+        return existing;
+    }
+
+    @Override
+    public Doctor updateById(int id, Doctor updated) {
+        Optional<Doctor> existingOpt = doctorRepository.findById(id);
+        if (existingOpt.isEmpty()) {
+            return null;
+        }
+
+        Doctor existing = existingOpt.get();
+        // Only core doctor fields are updated; relationships (user, specialty) come
+        // from the payload.
+        existing.setUser(updated.getUser());
+        existing.setExperienceYears(updated.getExperienceYears());
+        existing.setGender(updated.getGender());
+        existing.setSpecialty(updated.getSpecialty());
+        existing.setBio(updated.getBio());
+
+        return doctorRepository.save(existing);
+    }
+
     // Doctor Dashboard: Appointments
-    // -----------------------------
+
 
     public List<DoctorAppointmentView> getTodaysAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
@@ -42,9 +87,10 @@ public class DoctorService {
         LocalDateTime end = today.atTime(LocalTime.MAX);
 
         // Requires repo method:
-        // List<Appointment> findByDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
-        List<Appointment> appts =
-                appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+        // List<Appointment> findByDoctorDoctorIdAndDateTimeScheduledBetween(Integer
+        // doctorId, LocalDateTime start, LocalDateTime end);
+        List<Appointment> appts = appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start,
+                end);
 
         return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
     }
@@ -59,8 +105,8 @@ public class DoctorService {
         LocalDateTime start = weekStart.atStartOfDay();
         LocalDateTime end = weekEnd.atTime(LocalTime.MAX);
 
-        List<Appointment> appts =
-                appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+        List<Appointment> appts = appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start,
+                end);
 
         return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
     }
@@ -73,12 +119,11 @@ public class DoctorService {
         return toDoctorAppointmentView(appt);
     }
 
-    // ---------------------------------
     // Doctor Actions: Status Management
-    // ---------------------------------
 
     @Transactional
-    public DoctorAppointmentView updateAppointmentStatus(Integer doctorId, Integer appointmentId, AppointmentStatus newStatus) {
+    public DoctorAppointmentView updateAppointmentStatus(Integer doctorId, Integer appointmentId,
+            AppointmentStatus newStatus) {
         // Proposal: doctor can update status completed/cancelled/no-show
         // :contentReference[oaicite:7]{index=7}
 
@@ -101,9 +146,7 @@ public class DoctorService {
         return updateAppointmentStatus(doctorId, appointmentId, AppointmentStatus.CANCELLED);
     }
 
-    // -----------------------------
     // Read-only: Doctor time slots
-    // -----------------------------
 
     public List<DoctorTimeSlotView> getDoctorTimeSlots(Integer doctorId) {
         ensureDoctorExists(doctorId);
@@ -119,14 +162,11 @@ public class DoctorService {
                 .map(s -> new DoctorTimeSlotView(
                         s.getSlotId(),
                         s.getStartTime(),
-                        s.getEndTime()
-                ))
+                        s.getEndTime()))
                 .toList();
     }
 
-    // -----------------------------
     // Helpers / DTO mapping
-    // -----------------------------
 
     private void ensureDoctorExists(Integer doctorId) {
         doctorRepository.findById(doctorId)
@@ -135,11 +175,15 @@ public class DoctorService {
 
     /**
      * NOTE:
-     * The current {@link Appointment} entity does not maintain a relationship to {@link Doctor},
-     * so we cannot reliably enforce ownership of an appointment by a specific doctor.
+     * The current {@link Appointment} entity does not maintain a relationship to
+     * {@link Doctor},
+     * so we cannot reliably enforce ownership of an appointment by a specific
+     * doctor.
      *
-     * This method is intentionally left as a no-op to avoid runtime errors while still keeping
-     * the extension point for future ownership checks if/when the data model is expanded.
+     * This method is intentionally left as a no-op to avoid runtime errors while
+     * still keeping
+     * the extension point for future ownership checks if/when the data model is
+     * expanded.
      */
     private void enforceOwnership(Integer doctorId, Appointment appt) {
         // Ownership enforcement not implemented with current data model.
@@ -148,18 +192,15 @@ public class DoctorService {
     private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
         return new DoctorAppointmentView(
                 a.getAppointmentId(),
-                null,      // patientFirstName (not available with current Appointment model)
-                null,      // patientLastName  (not available with current Appointment model)
-                null,      // appointmentType  (not available with current Appointment model)
+                null, // patientFirstName (not ready with Appointment model currently, wip)
+                null, // patientLastName (not ready with Appointment model currently, wip)
+                null, // appointmentType (not ready with Appointment model currently, wip)
                 a.getDateTimeScheduled(),
-                null,      // estimatedDurationMinutes (not available with current Appointment model)
-                a.getStatus()
-        );
+                null, // estimatedDurationMinutes (not ready with Appointment model currently, wip)
+                a.getStatus());
     }
 
-    // -----------------------------
     // Lightweight response DTOs
-    // -----------------------------
 
     @Data
     @AllArgsConstructor

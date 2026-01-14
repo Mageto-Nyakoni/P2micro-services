@@ -71,7 +71,7 @@ public class AuthService {
         if (registerRequest.getPrivilegeId() == 2) {
             Doctor doctor = new Doctor();
             doctor.setUser(newUser);
-            docterService.save(doctor);
+            doctorService.save(doctor);
         }
 
         return new RegisterResponse(newUser.getUserId(), newUser.getEmail(), newUser.getPrivilege());

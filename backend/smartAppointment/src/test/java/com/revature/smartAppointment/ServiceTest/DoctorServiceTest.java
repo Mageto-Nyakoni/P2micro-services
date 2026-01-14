@@ -2,6 +2,9 @@ package com.revature.smartAppointment.ServiceTest;
 
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.TimeSlot;
+import com.revature.smartAppointment.Model.Doctor;
+import com.revature.smartAppointment.Model.Specialty;
+import com.revature.smartAppointment.Model.User;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Repository.DoctorRepository;
@@ -43,6 +46,121 @@ class DoctorServiceTest {
     @InjectMocks
     private DoctorService doctorService;
 
+    // -----------------------------
+    // CRUD behaviour
+    // -----------------------------
+
+    @Test
+    void saveDoctor_delegatesToRepository() {
+        Doctor doctor = Doctor.builder().doctorId(null).build();
+        given(doctorRepository.save(doctor)).willReturn(doctor);
+
+        Doctor result = doctorService.save(doctor);
+
+        assertThat(result).isSameAs(doctor);
+        then(doctorRepository).should().save(doctor);
+    }
+
+    @Test
+    void findById_returnsDoctor_whenPresent() {
+        Doctor doctor = Doctor.builder().doctorId(1).build();
+        given(doctorRepository.findById(1)).willReturn(Optional.of(doctor));
+
+        Optional<Doctor> result = doctorService.findById(1);
+
+        assertThat(result).isPresent();
+        assertThat(result.get()).isSameAs(doctor);
+    }
+
+    @Test
+    void findById_returnsEmpty_whenNotPresent() {
+        given(doctorRepository.findById(1)).willReturn(Optional.empty());
+
+        Optional<Doctor> result = doctorService.findById(1);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void findAll_returnsAllDoctors() {
+        Doctor d1 = Doctor.builder().doctorId(1).build();
+        Doctor d2 = Doctor.builder().doctorId(2).build();
+        given(doctorRepository.findAll()).willReturn(List.of(d1, d2));
+
+        List<Doctor> result = doctorService.findAll();
+
+        assertThat(result).containsExactly(d1, d2);
+    }
+
+    @Test
+    void deleteById_deletesAndReturnsDoctor_whenPresent() {
+        Doctor doctor = Doctor.builder().doctorId(1).build();
+        given(doctorRepository.findById(1)).willReturn(Optional.of(doctor));
+
+        Optional<Doctor> result = doctorService.deleteById(1);
+
+        assertThat(result).isPresent();
+        assertThat(result.get()).isSameAs(doctor);
+        then(doctorRepository).should().deleteById(1);
+    }
+
+    @Test
+    void deleteById_returnsEmpty_whenNotPresent() {
+        given(doctorRepository.findById(1)).willReturn(Optional.empty());
+
+        Optional<Doctor> result = doctorService.deleteById(1);
+
+        assertThat(result).isEmpty();
+        then(doctorRepository).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    void updateById_updatesFields_whenDoctorExists() {
+        User existingUser = new User();
+        Specialty existingSpecialty = new Specialty(1, "Old", "desc");
+        Doctor existing = Doctor.builder()
+                .doctorId(1)
+                .user(existingUser)
+                .experienceYears(5)
+                .gender("M")
+                .specialty(existingSpecialty)
+                .bio("Old bio")
+                .build();
+
+        User newUser = new User();
+        Specialty newSpecialty = new Specialty(2, "New", "desc2");
+        Doctor updatedPayload = Doctor.builder()
+                .user(newUser)
+                .experienceYears(10)
+                .gender("F")
+                .specialty(newSpecialty)
+                .bio("New bio")
+                .build();
+
+        given(doctorRepository.findById(1)).willReturn(Optional.of(existing));
+        given(doctorRepository.save(existing)).willReturn(existing);
+
+        Doctor result = doctorService.updateById(1, updatedPayload);
+
+        assertThat(result.getUser()).isSameAs(newUser);
+        assertThat(result.getExperienceYears()).isEqualTo(10);
+        assertThat(result.getGender()).isEqualTo("F");
+        assertThat(result.getSpecialty()).isSameAs(newSpecialty);
+        assertThat(result.getBio()).isEqualTo("New bio");
+        then(doctorRepository).should().save(existing);
+    }
+
+    @Test
+    void updateById_returnsNull_whenDoctorDoesNotExist() {
+        Doctor updatedPayload = Doctor.builder().build();
+        given(doctorRepository.findById(1)).willReturn(Optional.empty());
+
+        Doctor result = doctorService.updateById(1, updatedPayload);
+
+        assertThat(result).isNull();
+        then(doctorRepository).should().findById(1);
+    }
+
     @Test
     void getTodaysAppointments_returnsMappedViews_whenAppointmentsExist() {
         Integer doctorId = 1;
@@ -56,7 +174,8 @@ class DoctorServiceTest {
                 .status(AppointmentStatus.REQUESTED)
                 .build();
 
-        given(doctorRepository.findById(doctorId)).willReturn(Optional.ofNullable(null)); // existence check
+        Doctor doctor = Doctor.builder().doctorId(doctorId).build();
+        given(doctorRepository.findById(doctorId)).willReturn(Optional.of(doctor)); // existence check
         given(appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end))
                 .willReturn(List.of(appt));
 
@@ -90,7 +209,8 @@ class DoctorServiceTest {
                 .status(AppointmentStatus.CONFIRMED)
                 .build();
 
-        given(doctorRepository.findById(doctorId)).willReturn(Optional.ofNullable(null));
+        Doctor doctor = Doctor.builder().doctorId(doctorId).build();
+        given(doctorRepository.findById(doctorId)).willReturn(Optional.of(doctor));
         given(appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end))
                 .willReturn(List.of(appt));
 
@@ -108,9 +228,7 @@ class DoctorServiceTest {
 
         given(appointmentRepository.findById(appointmentId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() ->
-                doctorService.getAppointmentDetailsForDoctor(doctorId, appointmentId)
-        )
+        assertThatThrownBy(() -> doctorService.getAppointmentDetailsForDoctor(doctorId, appointmentId))
                 .isInstanceOf(ResponseStatusException.class)
                 .hasMessageContaining("Appointment not found");
     }
@@ -128,8 +246,8 @@ class DoctorServiceTest {
         given(appointmentRepository.findById(appointmentId)).willReturn(Optional.of(existing));
         given(appointmentRepository.save(existing)).willAnswer(invocation -> invocation.getArgument(0));
 
-        DoctorAppointmentView view =
-                doctorService.updateAppointmentStatus(doctorId, appointmentId, AppointmentStatus.CANCELLED);
+        DoctorAppointmentView view = doctorService.updateAppointmentStatus(doctorId, appointmentId,
+                AppointmentStatus.CANCELLED);
 
         assertThat(view.getStatus()).isEqualTo(AppointmentStatus.CANCELLED);
         then(appointmentRepository).should().save(existing);
@@ -167,7 +285,8 @@ class DoctorServiceTest {
                 .endTime(endTime)
                 .build();
 
-        given(doctorRepository.findById(doctorId)).willReturn(Optional.ofNullable(null));
+        Doctor doctor = Doctor.builder().doctorId(doctorId).build();
+        given(doctorRepository.findById(doctorId)).willReturn(Optional.of(doctor));
         given(timeSlotRepository.findByDoctorDoctorId(doctorId)).willReturn(List.of(slot));
 
         List<DoctorTimeSlotView> result = doctorService.getDoctorTimeSlots(doctorId);
@@ -192,4 +311,3 @@ class DoctorServiceTest {
         then(timeSlotRepository).should(never()).findByDoctorDoctorId(doctorId);
     }
 }
-

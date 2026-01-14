@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.revature.smartAppointment.Model.Doctor;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Service.DoctorService;
 import com.revature.smartAppointment.Service.DoctorService.DoctorAppointmentView;
@@ -20,6 +21,48 @@ import lombok.RequiredArgsConstructor;
 public class DoctorController {
 
     private final DoctorService doctorService;
+
+    // -----------------------------
+    // Basic CRUD for Doctor
+    // -----------------------------
+
+    // POST /doctors
+    @PostMapping
+    public ResponseEntity<Doctor> createDoctor(@RequestBody Doctor doctor) {
+        return ResponseEntity.ok(doctorService.save(doctor));
+    }
+
+    // GET /doctors
+    @GetMapping
+    public ResponseEntity<List<Doctor>> getAllDoctors() {
+        return ResponseEntity.ok(doctorService.findAll());
+    }
+
+    // GET /doctors/{doctorId}
+    @GetMapping("/{doctorId}")
+    public ResponseEntity<Doctor> getDoctorById(@PathVariable Integer doctorId) {
+        return doctorService.findById(doctorId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // PUT /doctors/{doctorId}
+    @PutMapping("/{doctorId}")
+    public ResponseEntity<Doctor> updateDoctor(@PathVariable Integer doctorId, @RequestBody Doctor doctor) {
+        Doctor updated = doctorService.updateById(doctorId, doctor);
+        if (updated == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updated);
+    }
+
+    // DELETE /doctors/{doctorId}
+    @DeleteMapping("/{doctorId}")
+    public ResponseEntity<?> deleteDoctor(@PathVariable Integer doctorId) {
+        return doctorService.deleteById(doctorId)
+                .map(d -> ResponseEntity.noContent().build())
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
     // -----------------------------
     // Dashboard: appointments today/week
