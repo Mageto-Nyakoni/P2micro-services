@@ -1,4 +1,3 @@
-
 package com.revature.smartAppointment.Controller;
 import com.revature.smartAppointment.Model.Appointment;
 

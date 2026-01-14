@@ -25,3 +25,11 @@ replay_pid*
 
 #node_modules folder
 node_modules/
+
+# Maven
+target/
+.DS_Store
+
+# IntelliJ IDEA
+.idea/
+*.iml

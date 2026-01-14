@@ -6,6 +6,8 @@ import com.revature.smartAppointment.Controller.Response.RegisterResponse;
 import com.revature.smartAppointment.Model.Privilege;
 import com.revature.smartAppointment.Model.User;
 import com.revature.smartAppointment.Service.AuthService;
+import com.revature.smartAppointment.Service.DoctorService;
+import com.revature.smartAppointment.Service.PatientService;
 import com.revature.smartAppointment.Service.PrivilegeService;
 import com.revature.smartAppointment.Service.UserService;
 import com.revature.smartAppointment.Util.JwtUtil;
@@ -28,6 +30,12 @@ public class AuthServiceTest {
 
     @Mock
     private PrivilegeService privilegeService;
+
+    @Mock
+    private PatientService patientService;
+
+    @Mock
+    private DoctorService doctorService;
 
     @Mock
     private JwtUtil jwtUtil;
@@ -80,6 +88,8 @@ public class AuthServiceTest {
         when(privilegeService.findById(1)).thenReturn(Optional.of(privilege));
         User savedUser = new User(1, "test@test.com", "pass123", "John", "Doe", privilege);
         when(userService.save(any(User.class))).thenReturn(savedUser);
+        // Mock patientService.save for privilegeId == 1 (ADMIN/Patient)
+        when(patientService.save(any())).thenReturn(null);
 
         RegisterResponse response = authService.validateRegistration(request);
 
