@@ -60,27 +60,27 @@ export function getNavItems(
   ];
 
   switch (role) {
-    case "GUEST":
+    case "Guest":
       return [
         ...common,
         { kind: "link", label: "Login / Sign Up", to: "/login" },
       ];
 
-    case "PATIENT":
+    case "Patient":
       return [
         ...common,
         { kind: "link", label: "Profile", to: "/patient/profile" },
         { kind: "button", label: "Logout", onClick: actions.logout },
       ];
 
-    case "DOCTOR":
+    case "Doctor":
       return [
         ...common, // ✅ Doctors link now visible
         { kind: "link", label: "Appointment Calendar", to: "/doctor/calendar" },
         { kind: "button", label: "Logout", onClick: actions.logout },
       ];
 
-    case "ADMIN":
+    case "Admin":
       return [
         ...common,
         { kind: "link", label: "Schedules", to: "/admin/home" },
@@ -88,7 +88,7 @@ export function getNavItems(
         { kind: "button", label: "Logout", onClick: actions.logout },
       ];
 
-    case "SUPER":
+    case "Super":
       return [
         ...common,
         { kind: "button", label: "Logout", onClick: actions.logout },
