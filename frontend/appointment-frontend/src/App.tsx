@@ -8,7 +8,7 @@ import DoctorLayout from "./layouts/DoctorLayout";
 
 // Pages
 import Login from "./pages/public/Login";
-import Register from "./pages/public/Register";
+import Register from "./pages/public/register/Register";
 import DoctorsBrowse from "./pages/public/DoctorsBrowse";
 
 import PatientHome from "./pages/patient/PatientHome";
@@ -25,45 +25,6 @@ import SuperHome from "./pages/super/SuperHome";
 import Home from "./pages/public/Home";
 
 function App() {
-//   return (
-//     <Routes>
-      
-//  {/* protected routes */}
-//       <Route
-//   path="/patient"
-//   element={
-//     <ProtectedRoute>
-//       <PatientLayout />
-//     </ProtectedRoute>
-//   }
-// />
-
-//       {/* Guest Routes */}
-//       <Route element={<GuestLayout />}>
-//         <Route path="/" element={<GuestHome />} />
-//         <Route path="/login" element={<Login />} />
-//         <Route path="/register" element={<Register />} />
-//         <Route path="/doctors" element={<DoctorsBrowse />} />
-//       </Route>
-
-//       {/* Patient Routes */}
-//       <Route element={<PatientLayout />}>
-//         <Route path="/patient/home" element={<PatientHome />} />
-//         <Route path="/patient/profile" element={<PatientProfile />} />
-//           <Route path="/patient/profile/edit" element={<EditPatientProfile />} /> 
-//       <Route path="/patient/book" element={<BookAppointment />} />
-//         <Route path="/patient/doctors" element={<DoctorsBrowse />} />
-//       </Route>
-      
-
-//       {/* Doctor Routes */}
-//       <Route element={<DoctorLayout />}>
-//         <Route path="/doctor/home" element={<DoctorHome />} />
-//         <Route path="/doctor/calendar" element={<DoctorCalendar />} />
-//       </Route>
-
-//     </Routes>
-//   );
 
       return (
         <>
@@ -82,22 +43,22 @@ function App() {
             {/* Patient Protected Routes */}
             <Route path="/patient/home" 
             element={
-              <ProtectedRoute allowedRoles={["PATIENT"]}> 
+              <ProtectedRoute allowedRoles={["Patient"]}> 
                 <PatientHome />
               </ProtectedRoute>
               } />
             <Route path="/patient/profile" element={
-              <ProtectedRoute allowedRoles={["PATIENT"]}> 
+              <ProtectedRoute allowedRoles={["Patient"]}> 
                 <PatientProfile />
               </ProtectedRoute>
               } />
             <Route path="/patient/profile/edit" element={
-              <ProtectedRoute allowedRoles={["PATIENT"]}> 
+              <ProtectedRoute allowedRoles={["Patient"]}> 
                 <EditPatientProfile />
               </ProtectedRoute>
               } />
             <Route path="/patient/book" element={
-              <ProtectedRoute allowedRoles={["PATIENT"]}> 
+              <ProtectedRoute allowedRoles={["Patient"]}> 
                 <BookAppointment />
               </ProtectedRoute>
               } />
@@ -105,12 +66,12 @@ function App() {
 
             {/* Doctor Protected Routes */}
             <Route path="/doctor/home" element={
-              <ProtectedRoute allowedRoles={["DOCTOR"]}>
+              <ProtectedRoute allowedRoles={["Doctor"]}>
                 <DoctorHome />
               </ProtectedRoute>
               } />
             <Route path="/doctor/calendar" element={
-              <ProtectedRoute allowedRoles={["DOCTOR"]}> 
+              <ProtectedRoute allowedRoles={["Doctor"]}> 
                 <DoctorCalendar />
               </ProtectedRoute>
               } />
@@ -118,12 +79,12 @@ function App() {
 
             {/* Admin Protected Routes */}
             <Route path="/admin/home" element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <ProtectedRoute allowedRoles={["Admin"]}>
                 <AdminSchedule />
               </ProtectedRoute>
               } />
             <Route path="/admin/staff" element={
-              <ProtectedRoute allowedRoles={["ADMIN"]}> 
+              <ProtectedRoute allowedRoles={["Admin"]}> 
                 <AdminStaffList />
               </ProtectedRoute>
               } />
@@ -131,7 +92,7 @@ function App() {
 
             {/* Super Admin Protected Routes */}
             <Route path="/super/home" element={
-              <ProtectedRoute allowedRoles={["SUPER"]}>
+              <ProtectedRoute allowedRoles={["Super"]}>
                 <SuperHome />
               </ProtectedRoute>
               } />

@@ -2,13 +2,13 @@ import { Role } from "../components/layout/NavBar/types";
 
 export function roleHomePath(role: Role): string {
   switch (role) {
-    case "PATIENT":
+    case "Patient":
       return "/patient/home";
-    case "DOCTOR":
+    case "Doctor":
       return "/doctor/home";
-    case "ADMIN":
+    case "Admin":
       return "/admin/home";
-    case "SUPER":
+    case "Super":
       return "/super/home";
     default:
       return "/";

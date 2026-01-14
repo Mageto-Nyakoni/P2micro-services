@@ -123,7 +123,7 @@ class DoctorServiceTest {
                 .user(existingUser)
                 .experienceYears(5)
                 .gender("M")
-                .specialty(existingSpeciality)
+                .speciality(existingSpeciality)
                 .bio("Old bio")
                 .build();
 
@@ -133,7 +133,7 @@ class DoctorServiceTest {
                 .user(newUser)
                 .experienceYears(10)
                 .gender("F")
-                .specialty(newSpeciality)
+                .speciality(newSpeciality)
                 .bio("New bio")
                 .build();
 
@@ -145,7 +145,7 @@ class DoctorServiceTest {
         assertThat(result.getUser()).isSameAs(newUser);
         assertThat(result.getExperienceYears()).isEqualTo(10);
         assertThat(result.getGender()).isEqualTo("F");
-        assertThat(result.getSpecialty()).isSameAs(newSpeciality);
+        assertThat(result.getSpeciality()).isSameAs(newSpeciality);
         assertThat(result.getBio()).isEqualTo("New bio");
         then(doctorRepository).should().save(existing);
     }

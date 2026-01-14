@@ -19,7 +19,7 @@ public class Speciality {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "speciality_id")
-    private Integer specialtyId;
+    private Integer specialityId;
 
     @Column(name = "speciality_name")
     private String specialityName;

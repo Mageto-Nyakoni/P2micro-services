@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth"
-import { mockLogin } from "../../auth/authService";
+//import { mockLogin } from "../../services/authService";
+import { login as loginAPI } from "../../services/authService";
 import { roleHomePath } from "../../utils/roleHomePath";
 import LoginForm from "../../components/LoginForm";
 
@@ -22,8 +23,7 @@ export default function LoginPage() {
     setBusy(true);
 
     try {
-      // MOCK login for now
-      const res = await mockLogin(payload.email, payload.password);
+      const res = await loginAPI(payload.email, payload.password);
 
       // Update AuthContext using YOUR expected shape
       login({ user: res.user, token: res.token });
@@ -55,18 +55,18 @@ export default function LoginPage() {
         </p>
 
         {/* Dev Tip (THIS IS TEMPORARY) */}
-        <div className="mt-6 rounded-xl border border-purple-200 bg-purple-50 p-4">
+        {/* <div className="mt-6 rounded-xl border border-purple-200 bg-purple-50 p-4">
           <p className="text-sm font-semibold text-purple-700">Testing Tip</p>
           <p className="mt-1 text-sm text-gray-600">
             Use <code className="font-mono text-purple-700">doctor@test.com</code>,{" "}
             <code className="font-mono text-purple-700">admin@test.com</code>, or{" "}
             <code className="font-mono text-purple-700">super@test.com</code> to test different role navbars.
           </p>
-        </div>
+        </div> */}
 
         {/* Login Form */}
         <LoginForm 
-          initialEmail="patient@test.com"
+          initialEmail="tester@mail.com"
           initialPassword="password"
           busy={busy}
           error={error}

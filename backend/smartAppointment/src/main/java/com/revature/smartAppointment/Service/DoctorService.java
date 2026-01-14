@@ -65,7 +65,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         }
 
         Doctor existing = existingOpt.get();
-        // Only core doctor fields are updated; relationships (user, specialty) come
+        // Only core doctor fields are updated; relationships (user, speciality) come
         // from the payload.
         existing.setUser(updated.getUser());
         existing.setExperienceYears(updated.getExperienceYears());
