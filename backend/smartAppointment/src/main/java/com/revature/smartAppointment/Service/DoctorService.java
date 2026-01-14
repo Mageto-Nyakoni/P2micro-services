@@ -29,7 +29,11 @@ public class DoctorService {
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
+     
 
+     public Doctor save(Doctor doctor) {
+        return doctorRepository.save(doctor);
+    }
     // -----------------------------
     // Doctor Dashboard: Appointments
     // -----------------------------
@@ -44,7 +48,7 @@ public class DoctorService {
         // Requires repo method:
         // List<Appointment> findByDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
         List<Appointment> appts =
-                appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+                appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
         return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
     }
@@ -60,7 +64,7 @@ public class DoctorService {
         LocalDateTime end = weekEnd.atTime(LocalTime.MAX);
 
         List<Appointment> appts =
-                appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+                appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
         return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
     }
@@ -133,17 +137,24 @@ public class DoctorService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
     }
 
-    private void enforceOwnership(Integer doctorId, Appointment appt) {
-        if (appt.getDoctor() == null || appt.getDoctor().getDoctorId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Appointment has no assigned doctor");
-        }
-        if (!appt.getDoctor() == null || appt.getDoctor().getDoctorId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Appointment has no assigned doctor");
-        }
-        if (!appt.getDoctor().getDoctorId().equals(doctorId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This appointment does not belong to the doctor");
-        }
+   private void enforceOwnership(Integer doctorId, Appointment appt) {
+
+    if (appt.getSlot() == null || appt.getSlot().getDoctor() == null) {
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Appointment has no assigned doctor"
+        );
     }
+
+    Integer apptDoctorId = appt.getSlot().getDoctor().getDoctorId();
+
+    if (!apptDoctorId.equals(doctorId)) {
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "This appointment does not belong to the doctor"
+        );
+    }
+}
 
     private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
         String patientFirst = (a.getPatient() != null) ? a.getPatient().getFirstName() : null;

@@ -33,19 +33,11 @@ public class AdminAppointmentService {
     }
 
     //  Reschedule appointment using a TimeSlot
-    public Appointment reschedule(Integer appointmentId, Integer newSlotId) {
+   public Appointment reschedule(Integer appointmentId, LocalDateTime newDateTime) {
+    Appointment appt = appointmentRepository.findById(appointmentId)
+            .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-        Appointment appt = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
-
-        TimeSlot slot = timeSlotRepository.findById(newSlotId)
-                .orElseThrow(() -> new RuntimeException("Time slot not found"));
-
-        //  Update flat fields
-        appt.setSlotId(slot.getSlotId());
-        appt.setDateTimeScheduled(slot.getStartTime());
-        appt.setStatus(AppointmentStatus.CONFIRMED);
-
-        return appointmentRepository.save(appt);
-    }
+    appt.setDateTimeScheduled(newDateTime);
+    return appointmentRepository.save(appt);
+}
 }

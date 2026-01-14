@@ -46,17 +46,19 @@ public class AdminController {
     }
 
     //  Reschedule appointment
-    @PutMapping("/appointments/{id}/reschedule")
-    public ResponseEntity<Appointment> reschedule(
-            @PathVariable Integer id,
-            @RequestParam LocalDate date,
-            @RequestParam LocalTime time) {
+   @PutMapping("/appointments/{id}/reschedule")
+public ResponseEntity<Appointment> reschedule(
+        @PathVariable Integer id,
+        @RequestParam LocalDate date,
+        @RequestParam LocalTime time) {
 
-        return ResponseEntity.ok(
-                adminAppointmentService.reschedule(id, date, time)
-        );
-    }
-
+    return ResponseEntity.ok(
+            adminAppointmentService.reschedule(
+                    id,
+                    java.time.LocalDateTime.of(date, time)
+            )
+    );
+}
     @PostMapping("/doctors/{doctorId}/schedule")
 public TimeSlot addSchedule(
         @PathVariable Integer doctorId,
