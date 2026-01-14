@@ -16,7 +16,7 @@ export default function Navbar() {
   const { user, isAuthenticated, logout: authLogout } = useAuth();
 
   // Derive role safely
-  const role: Role = isAuthenticated ? (user?.role as Role) : "GUEST";
+  const role: Role = isAuthenticated ? (user?.role as Role) : "Guest";
 
   const items = useMemo(() => {
     return getNavItems(role, {

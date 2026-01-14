@@ -1,15 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AuthContext, User } from "./AuthContext";
+import { setTokenGetter } from "../services/http";
 
 export function AuthProvider({children}: {children: React.ReactNode}) {
-    const [user, setUser] = useState<User | null>(() => {
-        const storedUser = localStorage.getItem("user");
-        return storedUser ? JSON.parse(storedUser) as User : null;
-    });
+    const [user, setUser] = useState<User | null>(null);
+    const [token, setToken] = useState<string | null>(null);
 
-    const [token, setToken] = useState<string | null>(() => {
-        return localStorage.getItem("token");
-    });
+    //lets axios read current token (in-memory)
+    useEffect(() => {
+        setTokenGetter(() => token);
+    }, [token]);
 
     const value = useMemo(() => {
         return {
@@ -20,17 +20,11 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
             login: ({user, token}: {user: User; token: string}) => {
                 setUser(user);
                 setToken(token);
-
-                // Optional persistence
-                localStorage.setItem("user", JSON.stringify(user));
-                localStorage.setItem("token", token);
             },
 
             logout: () => {
                 setUser(null);
                 setToken(null);
-                localStorage.removeItem("token");
-                localStorage.removeItem("role");
             },
         };
     }, [user, token]);

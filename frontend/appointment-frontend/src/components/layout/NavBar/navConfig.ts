@@ -4,13 +4,13 @@
 
 export function getNavItems(role: Role, actions: {logout: () => void}): NavItem[] {
     switch (role) {
-        case "GUEST":
+        case "Guest":
             return [
                 {kind: "link", label: "Doctors", to: "/doctors"},
                 {kind: "link", label: "Login/Sign Up", to: "/login"},
             ];
 
-        case "PATIENT":
+        case "Patient":
             return [
                 {kind: "link", label: "Doctors", to: "/doctors"},
                 {kind: "link", label: "Book an Appointment", to: "/patient/book"},
@@ -18,20 +18,20 @@ export function getNavItems(role: Role, actions: {logout: () => void}): NavItem[
                 {kind: "button", label: "Logout", onClick: actions.logout},
             ];
         
-        case "DOCTOR":
+        case "Doctor":
             return [
                 {kind: "link", label: "Appointment Calendar", to: "/doctor/calendar"},
                 {kind: "button", label: "Logout", onClick: actions.logout},
             ];
 
-        case "ADMIN":
+        case "Admin":
             return [
                 {kind: "link", label: "Schedules", to: "/admin/home"},
                 {kind: "link", label: "Staff List", to: "/admin/staff"},
                 {kind: "button", label: "Logout", onClick: actions.logout},
             ];
 
-        case "SUPER":
+        case "Super":
             return [
                 //{kind: "link", label: "User Management", to: "/super/users"},
                 {kind: "button", label: "Logout", onClick: actions.logout},

@@ -27,6 +27,6 @@ dist-ssr
 node_modules/
 
 # Maven
-target/
+**target/
 
 
