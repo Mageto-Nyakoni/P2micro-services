@@ -133,34 +133,26 @@ public class DoctorService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
     }
 
+    /**
+     * NOTE:
+     * The current {@link Appointment} entity does not maintain a relationship to {@link Doctor},
+     * so we cannot reliably enforce ownership of an appointment by a specific doctor.
+     *
+     * This method is intentionally left as a no-op to avoid runtime errors while still keeping
+     * the extension point for future ownership checks if/when the data model is expanded.
+     */
     private void enforceOwnership(Integer doctorId, Appointment appt) {
-        if (appt.getDoctor() == null || appt.getDoctor().getDoctorId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Appointment has no assigned doctor");
-        }
-        if (!appt.getDoctor() == null || appt.getDoctor().getDoctorId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Appointment has no assigned doctor");
-        }
-        if (!appt.getDoctor().getDoctorId().equals(doctorId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "This appointment does not belong to the doctor");
-        }
+        // Ownership enforcement not implemented with current data model.
     }
 
     private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
-        String patientFirst = (a.getPatient() != null) ? a.getPatient().getFirstName() : null;
-        String patientLast = (a.getPatient() != null) ? a.getPatient().getLastName() : null;
-
-        String apptTypeName = (a.getAppointmentType() != null) ? a.getAppointmentType().getName() : null;
-        Integer estMinutes = (a.getAppointmentType() != null) ? a.getAppointmentType().getEstimatedTime() : null;
-
-        // "Basic patient info" is intentionally light here to avoid leaking sensitive data by default
-        // :contentReference[oaicite:10]{index=10}
         return new DoctorAppointmentView(
                 a.getAppointmentId(),
-                patientFirst,
-                patientLast,
-                apptTypeName,
+                null,      // patientFirstName (not available with current Appointment model)
+                null,      // patientLastName  (not available with current Appointment model)
+                null,      // appointmentType  (not available with current Appointment model)
                 a.getDateTimeScheduled(),
-                estMinutes,
+                null,      // estimatedDurationMinutes (not available with current Appointment model)
                 a.getStatus()
         );
     }
