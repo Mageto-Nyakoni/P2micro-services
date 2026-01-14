@@ -21,31 +21,35 @@ Endpoints (http://localhost:8080):
       - /appointments (GET)*
       - /time-slots (GET)*
 
-Register (Post):
+Register User (Post):
 {
-	"firstName": "",
+  "firstName": "",
   "lastName": "",
   "email": "",
   "password": "",
   "privilegeId": 1
 }
+
 Login (Post): 
 {
   "email": "",
   "password": ""
 }
-Update Patient Info (Put/Patch)*:
+
+Update Patient Info (Patch):
 {
-  "age": 1,
-  "gender": "male/female",
-  "phoneNumber": "",
-  "DOB": "",
-  "Address": "",
-  "bloodType": "",
-  "allergies": {
-    "allergyId": 1,
-    "name": ""
-  }
+  "address": "" | null,
+  "age": 1 | null,
+  "allergies": [
+    {
+      "allergyId": 1,
+	  "name": ""
+    }, ...
+  ] | null,
+  "bloodType": "" | null,
+  "dateOfBirth": "YYYY-MM-DD" | null,
+  "gender": "" | null,
+  "phoneNumber": "" | null
 }
 
 *not implemented yet
