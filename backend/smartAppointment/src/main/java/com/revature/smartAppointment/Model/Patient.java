@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "patient")
@@ -34,14 +35,19 @@ public class Patient {
     @Column(name = "blood_type")
     private String bloodType;
 
-    @Column(name = "allergies")
-    private String allergies;
+    @ManyToMany
+    @JoinTable(
+            name = "patient_allergies",
+            joinColumns = @JoinColumn(name = "patient_id"),
+            inverseJoinColumns = @JoinColumn(name = "allergy_id")
+    )
+    private List<Allergy> allergies;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Patient(Integer age, String gender, String phoneNumber, LocalDateTime dateOfBirth, String address, String bloodType, String allergies, User user) {
+    public Patient(Integer age, String gender, String phoneNumber, LocalDateTime dateOfBirth, String address, String bloodType, List<Allergy> allergies, User user) {
         this.age = age;
         this.gender = gender;
         this.phoneNumber = phoneNumber;

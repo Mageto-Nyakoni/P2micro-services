@@ -3,7 +3,7 @@ package com.revature.smartAppointment.ServiceTest;
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.Doctor;
-import com.revature.smartAppointment.Model.Specialty;
+import com.revature.smartAppointment.Model.Speciality;
 import com.revature.smartAppointment.Model.User;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
@@ -117,23 +117,23 @@ class DoctorServiceTest {
     @Test
     void updateById_updatesFields_whenDoctorExists() {
         User existingUser = new User();
-        Specialty existingSpecialty = new Specialty(1, "Old", "desc");
+        Speciality existingSpeciality = new Speciality(1, "Old", "desc");
         Doctor existing = Doctor.builder()
                 .doctorId(1)
                 .user(existingUser)
                 .experienceYears(5)
                 .gender("M")
-                .specialty(existingSpecialty)
+                .specialty(existingSpeciality)
                 .bio("Old bio")
                 .build();
 
         User newUser = new User();
-        Specialty newSpecialty = new Specialty(2, "New", "desc2");
+        Speciality newSpeciality = new Speciality(2, "New", "desc2");
         Doctor updatedPayload = Doctor.builder()
                 .user(newUser)
                 .experienceYears(10)
                 .gender("F")
-                .specialty(newSpecialty)
+                .specialty(newSpeciality)
                 .bio("New bio")
                 .build();
 
@@ -145,7 +145,7 @@ class DoctorServiceTest {
         assertThat(result.getUser()).isSameAs(newUser);
         assertThat(result.getExperienceYears()).isEqualTo(10);
         assertThat(result.getGender()).isEqualTo("F");
-        assertThat(result.getSpecialty()).isSameAs(newSpecialty);
+        assertThat(result.getSpecialty()).isSameAs(newSpeciality);
         assertThat(result.getBio()).isEqualTo("New bio");
         then(doctorRepository).should().save(existing);
     }

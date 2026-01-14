@@ -70,7 +70,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         existing.setUser(updated.getUser());
         existing.setExperienceYears(updated.getExperienceYears());
         existing.setGender(updated.getGender());
-        existing.setSpecialty(updated.getSpecialty());
+        existing.setSpeciality(updated.getSpeciality());
         existing.setBio(updated.getBio());
 
         return doctorRepository.save(existing);
@@ -123,7 +123,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
     @Transactional
     public DoctorAppointmentView updateAppointmentStatus(Integer doctorId, Integer appointmentId,
-            AppointmentStatus newStatus) {
+                                                         AppointmentStatus newStatus) {
         // Proposal: doctor can update status completed/cancelled/no-show
         // :contentReference[oaicite:7]{index=7}
 
