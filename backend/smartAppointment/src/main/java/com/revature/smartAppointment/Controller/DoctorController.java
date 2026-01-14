@@ -17,7 +17,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/doctors")
+@RequestMapping("/smart-appointment/api/doctors")
 @RequiredArgsConstructor
 public class DoctorController {
 
