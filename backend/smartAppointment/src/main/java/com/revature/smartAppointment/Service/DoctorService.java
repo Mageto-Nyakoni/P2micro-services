@@ -32,7 +32,9 @@ public class DoctorService implements ServiceInterface<Doctor> {
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
+     
 
+<<<<<<< HEAD
     // Basic CRUD for Doctor
 
     @Override
@@ -76,6 +78,12 @@ public class DoctorService implements ServiceInterface<Doctor> {
         return doctorRepository.save(existing);
     }
 
+=======
+     public Doctor save(Doctor doctor) {
+        return doctorRepository.save(doctor);
+    }
+    // -----------------------------
+>>>>>>> backend-admin
     // Doctor Dashboard: Appointments
 
 
@@ -87,10 +95,16 @@ public class DoctorService implements ServiceInterface<Doctor> {
         LocalDateTime end = today.atTime(LocalTime.MAX);
 
         // Requires repo method:
+<<<<<<< HEAD
         // List<Appointment> findByDoctorDoctorIdAndDateTimeScheduledBetween(Integer
         // doctorId, LocalDateTime start, LocalDateTime end);
         List<Appointment> appts = appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start,
                 end);
+=======
+        // List<Appointment> findByDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
+        List<Appointment> appts =
+                appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+>>>>>>> backend-admin
 
         return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
     }
@@ -105,8 +119,13 @@ public class DoctorService implements ServiceInterface<Doctor> {
         LocalDateTime start = weekStart.atStartOfDay();
         LocalDateTime end = weekEnd.atTime(LocalTime.MAX);
 
+<<<<<<< HEAD
         List<Appointment> appts = appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start,
                 end);
+=======
+        List<Appointment> appts =
+                appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+>>>>>>> backend-admin
 
         return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
     }
@@ -173,6 +192,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
     }
 
+<<<<<<< HEAD
     /**
      * NOTE:
      * The current {@link Appointment} entity does not maintain a relationship to
@@ -187,7 +207,26 @@ public class DoctorService implements ServiceInterface<Doctor> {
      */
     private void enforceOwnership(Integer doctorId, Appointment appt) {
         // Ownership enforcement not implemented with current data model.
+=======
+   private void enforceOwnership(Integer doctorId, Appointment appt) {
+
+    if (appt.getSlot() == null || appt.getSlot().getDoctor() == null) {
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "Appointment has no assigned doctor"
+        );
+>>>>>>> backend-admin
     }
+
+    Integer apptDoctorId = appt.getSlot().getDoctor().getDoctorId();
+
+    if (!apptDoctorId.equals(doctorId)) {
+        throw new ResponseStatusException(
+                HttpStatus.FORBIDDEN,
+                "This appointment does not belong to the doctor"
+        );
+    }
+}
 
     private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
         return new DoctorAppointmentView(

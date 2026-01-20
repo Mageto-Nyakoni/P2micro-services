@@ -69,10 +69,17 @@ public class AuthService {
             patientService.save(patient);
         }
         if (registerRequest.getPrivilegeId() == 2) {
+<<<<<<< HEAD
             Doctor doctor = new Doctor();
             doctor.setUser(newUser);
             doctorService.save(doctor);
         }
+=======
+    Doctor doctor = new Doctor();
+    doctor.setUser(newUser);
+    doctorService.save(doctor);
+}
+>>>>>>> backend-admin
 
         return new RegisterResponse(newUser.getUserId(), newUser.getEmail(), newUser.getPrivilege());
     }

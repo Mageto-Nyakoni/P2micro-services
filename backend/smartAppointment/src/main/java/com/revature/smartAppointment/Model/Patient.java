@@ -4,8 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+<<<<<<< HEAD
 import java.util.List;
 
+=======
+@Getter
+@Setter
+>>>>>>> backend-admin
 @Entity
 @Table(name = "patient")
 @Data
@@ -16,7 +21,9 @@ public class Patient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "patient_id")
     private Integer patientId;
-
+    private String firstName;
+    private String lastName;
+    
     @Column(name = "age")
     private Integer age;
 
