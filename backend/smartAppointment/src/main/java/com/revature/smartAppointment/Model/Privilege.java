@@ -1,14 +1,12 @@
 package com.revature.smartAppointment.Model;
 
-import lombok.*;
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import lombok.*;
 
 @Entity
 @Table(name = "privilege")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Privilege {
@@ -17,7 +15,7 @@ public class Privilege {
     @Column(name = "privilege_id")
     private Integer privilegeId;
 
-    @Column(name = "role_name")
+    @Column(name = "role_name", nullable = false, unique = true)
     private String roleName;
 
     public Privilege(String roleName) {

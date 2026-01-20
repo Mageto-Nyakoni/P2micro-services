@@ -1,18 +1,15 @@
 package com.revature.smartAppointment.Model;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "speciality")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Speciality {
@@ -21,9 +18,22 @@ public class Speciality {
     @Column(name = "speciality_id")
     private Integer specialtyId;
 
-    @Column(name = "speciality_name")
+    @Column(name = "speciality_name", nullable = false, unique = true)
     private String specialityName;
 
-    @Column(name="description")
+    @Column(name = "description")
     private String description;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "speciality_appointment_type",
+            joinColumns = @JoinColumn(name = "speciality_id"),
+            inverseJoinColumns = @JoinColumn(name = "type_id")
+    )
+    private List<AppointmentType> appointmentTypes = new ArrayList<>();
+
+    public Speciality(String specialityName, String description) {
+        this.specialityName = specialityName;
+        this.description = description;
+    }
 }

@@ -1,13 +1,12 @@
 package com.revature.smartAppointment.Model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "allergy")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Allergy {
@@ -16,7 +15,7 @@ public class Allergy {
     @Column(name = "allergy_id")
     private Integer allergyId;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     public Allergy(String name) {
