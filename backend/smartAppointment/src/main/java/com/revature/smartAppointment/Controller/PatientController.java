@@ -69,11 +69,12 @@ public class PatientController {
                 int patient_id = patientService.findByUserId(user_id).get().getPatientId();
                 Patient patient = patientService.updateById(patient_id, patientUpdate);
                 return ResponseEntity.ok(patient);
+            } else {
+                throw new RuntimeException("Unauthorized access");
             }
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        return null;
     }
 }
