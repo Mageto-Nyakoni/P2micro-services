@@ -14,12 +14,16 @@ Endpoints (http://localhost:8080):
         - /login (POST)
         - /register (POST)
       - /patients (GET, return all patients)*
+		- /{user_id} (GET, PATCH)
       - /doctors (GET)*
-        - /{doctor_id} (GET)
+        - /{user_id} (GET)
           - /appointments (GET)
             - /{appointment_id} (GET)
       - /appointments (GET)*
       - /time-slots (GET)*
+	  - /info (or data or something)*
+		- /blood-types
+		- /allergies
 
 Register (Post):
 {
