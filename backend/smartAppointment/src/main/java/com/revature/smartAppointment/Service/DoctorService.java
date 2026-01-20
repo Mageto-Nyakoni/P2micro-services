@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public abstract class DoctorService implements ServiceInterface<Doctor> {
+public class DoctorService implements ServiceInterface<Doctor> {
 
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
@@ -39,6 +39,26 @@ public abstract class DoctorService implements ServiceInterface<Doctor> {
     }
     // -----------------------------
     // Doctor Dashboard: Appointments
+
+    @Override
+    public Optional<Doctor> findById(int id){
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Doctor> findAll(){
+        return List.of();
+    }
+
+    @Override
+    public Optional<Doctor> deleteById(int id){
+        return Optional.empty();
+    }
+
+    @Override
+    public Doctor updateById(int id, Doctor entity){
+        return null;
+    }
 
 
     public List<DoctorAppointmentView> getTodaysAppointments(Integer doctorId) {

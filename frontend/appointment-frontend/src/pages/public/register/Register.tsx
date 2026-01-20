@@ -5,7 +5,6 @@ import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm, RegisterUs
 import { AuthContext } from "@/auth/AuthContext";
 import { register, login } from "../../../services/authService";
 import { patchPatient } from "@/services/patientServices";
-import { setTokenGetter } from "@/services/http";
 
 //REPLACE THESE WHEN CONNECTING TO BACKEND
 const MOCK_BLOODTYPES: BloodType[] = [

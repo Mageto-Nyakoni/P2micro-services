@@ -1,5 +1,17 @@
 package com.revature.smartAppointment.ServiceTest;
 
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.revature.smartAppointment.Controller.Request.RegisterRequest;
 import com.revature.smartAppointment.Controller.Response.LoginResponse;
 import com.revature.smartAppointment.Controller.Response.RegisterResponse;
@@ -11,16 +23,6 @@ import com.revature.smartAppointment.Service.PatientService;
 import com.revature.smartAppointment.Service.PrivilegeService;
 import com.revature.smartAppointment.Service.UserService;
 import com.revature.smartAppointment.Util.JwtUtil;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthServiceTest {
@@ -49,7 +51,7 @@ public class AuthServiceTest {
         User user = new User(1, "test@test.com", "pass123", "John", "Doe", privilege);
 
         when(userService.findUserByEmail("test@test.com")).thenReturn(Optional.of(user));
-        when(jwtUtil.generateToken("test@test.com", "ADMIN")).thenReturn("token123");
+        when(jwtUtil.generateToken("test@test.com", 1, "ADMIN")).thenReturn("token123");
 
         LoginResponse response = authService.validateLogin("test@test.com", "pass123");
 
