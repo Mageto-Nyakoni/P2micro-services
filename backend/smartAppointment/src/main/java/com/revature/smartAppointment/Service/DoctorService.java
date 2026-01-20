@@ -49,7 +49,7 @@ public abstract class DoctorService implements ServiceInterface<Doctor> {
         LocalDateTime end = today.atTime(LocalTime.MAX);
 
         // Requires repo method:
-        // List<Appointment> findByDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
+        // List<Appointment> findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
         List<Appointment> appts =
                 appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
