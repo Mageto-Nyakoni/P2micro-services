@@ -3,12 +3,14 @@ package com.revature.smartAppointment.Model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "patient")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Patient {
@@ -27,7 +29,7 @@ public class Patient {
     private String phoneNumber;
 
     @Column(name = "date_of_birth")
-    private LocalDateTime dateOfBirth;
+    private LocalDate dateOfBirth;
 
     @Column(name = "address")
     private String address;
@@ -35,19 +37,19 @@ public class Patient {
     @Column(name = "blood_type")
     private String bloodType;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "patient_allergies",
             joinColumns = @JoinColumn(name = "patient_id"),
             inverseJoinColumns = @JoinColumn(name = "allergy_id")
     )
-    private List<Allergy> allergies;
+    private List<Allergy> allergies = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
-    public Patient(Integer age, String gender, String phoneNumber, LocalDateTime dateOfBirth, String address, String bloodType, List<Allergy> allergies) {
+    public Patient(Integer age, String gender, String phoneNumber, LocalDate dateOfBirth, String address, String bloodType, List<Allergy> allergies) {
         this.age = age;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
