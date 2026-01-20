@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { Allergy, BloodType, PatientDetailsForm } from "./types"
+import { Allergy, BloodType, PatientDetailsForm } from "../pages/public/register/types"
 
 type Props = {
     value: PatientDetailsForm;
     onChange: (next: PatientDetailsForm) => void;
+    onSubmit: () => void | Promise<void>;
 }
 
 
@@ -21,17 +22,27 @@ const MOCK_BLOODTYPES: BloodType[] = [
 
 const MOCK_ALLERGIES: Allergy[] = [
     { allergyId: 1, name: "Peanuts" },
-    { allergyId: 2, name: "Shellfish" },
+    { allergyId: 2, name: "Tree nuts" },
     { allergyId: 3, name: "Dairy" },
-    { allergyId: 4, name: "Eggs" },
-    { allergyId: 5, name: "Wheat" },
-    { allergyId: 6, name: "Soy" },
-    { allergyId: 7, name: "Pollen" },
-    { allergyId: 8, name: "Latex" },
-    { allergyId: 9, name: "Sesame" },
+    { allergyId: 4, name: "Egg" },
+    { allergyId: 5, name: "Soy" },
+    { allergyId: 6, name: "Shellfish" },
+    { allergyId: 7, name: "Penicillin" },
+    { allergyId: 8, name: "Aspirin" },
+    { allergyId: 9, name: "NSAIDs" },
+    { allergyId: 10, name: "Amoxicillin" },
+    { allergyId: 11, name: "Pollen" },
+    { allergyId: 12, name: "Mold" },
+    { allergyId: 13, name: "Cats" },
+    { allergyId: 14, name: "Dogs" },
+    { allergyId: 15, name: "Latex" },
+    { allergyId: 16, name: "Nickel" },
+    { allergyId: 17, name: "Fragrances" },
+    { allergyId: 18, name: "Bee venom" },
+    { allergyId: 19, name: "Wasp venom" },
 ];
 
-export default function RegisterForm2({value, onChange}: Props){
+export default function RegisterForm2({value, onChange, onSubmit}: Props){
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -50,16 +61,22 @@ export default function RegisterForm2({value, onChange}: Props){
         });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (!value.age || !value.DOB || !value.phoneNumber || !value.Address || !value.bloodTypeId) {
+        if (!value.age || !value.dateOfBirth || !value.phoneNumber || !value.address || !value.bloodType) {
             alert("Please fill all fields");
             return;
         }
 
-        console.log("Registration Step 2: ", value);
-        navigate("/login");
+        try {
+            await onSubmit();
+            alert("Registration Completed!");
+            navigate("/login");
+        } catch {
+            //register.tsx handles errors
+        }
+       
     };
 
     return (
@@ -93,12 +110,12 @@ export default function RegisterForm2({value, onChange}: Props){
 
                     <div>
                         <label className="block text-sm mb-1 text-gray-600">
-                            DOB
+                            Date of Birth
                         </label>
                         <input
                             type="date"
-                            name="DOB"
-                            value={value.DOB}
+                            name="dateOfBirth"
+                            value={value.dateOfBirth}
                             onChange={handleChange}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 
                                         focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -143,8 +160,8 @@ export default function RegisterForm2({value, onChange}: Props){
                         </label>
                         <input
                             type="text"
-                            name="Address"
-                            value={value.Address}
+                            name="address"
+                            value={value.address}
                             onChange={handleChange}
                             placeholder="Street, City, State"
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 
@@ -157,8 +174,8 @@ export default function RegisterForm2({value, onChange}: Props){
                             Blood Type
                         </label>
                         <select
-                            name="bloodTypeId"
-                            value={value.bloodTypeId}
+                            name="bloodType"
+                            value={value.bloodType}
                             onChange={handleChange}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 
                                         focus:outline-none focus:ring-2 focus:ring-purple-400"

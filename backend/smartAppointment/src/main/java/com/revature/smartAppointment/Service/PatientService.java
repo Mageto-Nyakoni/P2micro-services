@@ -60,4 +60,8 @@ public class PatientService implements ServiceInterface<Patient> {
         }
         return null;
     }
+
+    public Optional<Patient> findByUserId(int user_id) {
+        return patientRepository.findPatientByUser_UserId(user_id);
+    }
 }

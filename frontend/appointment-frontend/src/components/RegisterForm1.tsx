@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { RegisterUserForm } from "./types";
-import { useState } from "react";
+import { RegisterUserForm } from "../pages/public/register/types";
 
 type Props = {
     value: RegisterUserForm;
@@ -18,7 +17,7 @@ export default function RegisterForm1({value, onChange, onNext}: Props) {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         //Basic Validation
@@ -29,7 +28,7 @@ export default function RegisterForm1({value, onChange, onNext}: Props) {
 
         console.log("Registration Step 1: ", value);
 
-        onNext();
+        await onNext();
     }
 
     return (

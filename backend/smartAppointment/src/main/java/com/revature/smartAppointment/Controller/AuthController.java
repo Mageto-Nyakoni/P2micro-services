@@ -1,22 +1,19 @@
 package com.revature.smartAppointment.Controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.revature.smartAppointment.Controller.Request.LoginRequest;
 import com.revature.smartAppointment.Controller.Request.RegisterRequest;
 import com.revature.smartAppointment.Controller.Response.LoginResponse;
 import com.revature.smartAppointment.Controller.Response.RegisterResponse;
 import com.revature.smartAppointment.Service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/smart-appointment/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
     private AuthService authService;
 
