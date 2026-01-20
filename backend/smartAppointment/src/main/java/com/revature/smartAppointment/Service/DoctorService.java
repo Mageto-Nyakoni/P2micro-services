@@ -27,63 +27,17 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class DoctorService implements ServiceInterface<Doctor> {
+public abstract class DoctorService implements ServiceInterface<Doctor> {
 
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
      
 
-<<<<<<< HEAD
-    // Basic CRUD for Doctor
-
-    @Override
-    public Doctor save(Doctor entity) {
-        return doctorRepository.save(entity);
-    }
-
-    @Override
-    public Optional<Doctor> findById(int id) {
-        return doctorRepository.findById(id);
-    }
-
-    @Override
-    public List<Doctor> findAll() {
-        return doctorRepository.findAll();
-    }
-
-    @Override
-    public Optional<Doctor> deleteById(int id) {
-        Optional<Doctor> existing = doctorRepository.findById(id);
-        existing.ifPresent(d -> doctorRepository.deleteById(id));
-        return existing;
-    }
-
-    @Override
-    public Doctor updateById(int id, Doctor updated) {
-        Optional<Doctor> existingOpt = doctorRepository.findById(id);
-        if (existingOpt.isEmpty()) {
-            return null;
-        }
-
-        Doctor existing = existingOpt.get();
-        // Only core doctor fields are updated; relationships (user, specialty) come
-        // from the payload.
-        existing.setUser(updated.getUser());
-        existing.setExperienceYears(updated.getExperienceYears());
-        existing.setGender(updated.getGender());
-        existing.setSpeciality(updated.getSpeciality());
-        existing.setBio(updated.getBio());
-
-        return doctorRepository.save(existing);
-    }
-
-=======
      public Doctor save(Doctor doctor) {
         return doctorRepository.save(doctor);
     }
     // -----------------------------
->>>>>>> backend-admin
     // Doctor Dashboard: Appointments
 
 
@@ -95,16 +49,9 @@ public class DoctorService implements ServiceInterface<Doctor> {
         LocalDateTime end = today.atTime(LocalTime.MAX);
 
         // Requires repo method:
-<<<<<<< HEAD
-        // List<Appointment> findByDoctorDoctorIdAndDateTimeScheduledBetween(Integer
-        // doctorId, LocalDateTime start, LocalDateTime end);
-        List<Appointment> appts = appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start,
-                end);
-=======
         // List<Appointment> findByDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
         List<Appointment> appts =
                 appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
->>>>>>> backend-admin
 
         return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
     }
@@ -119,13 +66,8 @@ public class DoctorService implements ServiceInterface<Doctor> {
         LocalDateTime start = weekStart.atStartOfDay();
         LocalDateTime end = weekEnd.atTime(LocalTime.MAX);
 
-<<<<<<< HEAD
-        List<Appointment> appts = appointmentRepository.findByDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start,
-                end);
-=======
         List<Appointment> appts =
                 appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
->>>>>>> backend-admin
 
         return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
     }
@@ -192,22 +134,6 @@ public class DoctorService implements ServiceInterface<Doctor> {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
     }
 
-<<<<<<< HEAD
-    /**
-     * NOTE:
-     * The current {@link Appointment} entity does not maintain a relationship to
-     * {@link Doctor},
-     * so we cannot reliably enforce ownership of an appointment by a specific
-     * doctor.
-     *
-     * This method is intentionally left as a no-op to avoid runtime errors while
-     * still keeping
-     * the extension point for future ownership checks if/when the data model is
-     * expanded.
-     */
-    private void enforceOwnership(Integer doctorId, Appointment appt) {
-        // Ownership enforcement not implemented with current data model.
-=======
    private void enforceOwnership(Integer doctorId, Appointment appt) {
 
     if (appt.getSlot() == null || appt.getSlot().getDoctor() == null) {
@@ -215,7 +141,6 @@ public class DoctorService implements ServiceInterface<Doctor> {
                 HttpStatus.BAD_REQUEST,
                 "Appointment has no assigned doctor"
         );
->>>>>>> backend-admin
     }
 
     Integer apptDoctorId = appt.getSlot().getDoctor().getDoctorId();

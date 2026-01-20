@@ -1,16 +1,11 @@
 package com.revature.smartAppointment.Model;
-
+import java.util.List;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-<<<<<<< HEAD
-import java.util.List;
-
-=======
 @Getter
 @Setter
->>>>>>> backend-admin
 @Entity
 @Table(name = "patient")
 @Data
