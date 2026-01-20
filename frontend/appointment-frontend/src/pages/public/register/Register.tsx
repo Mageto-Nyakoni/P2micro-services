@@ -1,7 +1,8 @@
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import RegisterForm1 from "../../../components/RegisterForm1";
 import RegisterForm2 from "../../../components/RegisterForm2";
 import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm, RegisterUserForm } from "./types";
+import { AuthContext } from "@/auth/AuthContext";
 import { register, login } from "../../../services/authService";
 import { patchPatient } from "@/services/patientServices";
 import { setTokenGetter } from "@/services/http";
@@ -41,10 +42,14 @@ const MOCK_ALLERGIES: Allergy[] = [
 ];
 
 export default function RegisterWizard() {
+
+  const auth = useContext(AuthContext);
+  if (!auth){
+    throw new Error("AuthContext is null")
+  }
+
   const [step, setStep] = useState<1 | 2>(1);
   const [userId, setUserId] = useState<number | null>(null);
-
-  const tokenRef = useRef<string | null>(null);
 
   const [userForm, setUserForm] = useState<RegisterUserForm>({
     firstName: "",
@@ -83,13 +88,11 @@ export default function RegisterWizard() {
     }
 
     try {
-      //get token
-      const { token } = await login(userForm.email, userForm.password);
+      //login to get token
+      const loginResponse = await login(userForm.email, userForm.password);
 
-      tokenRef.current = token;
-
-      setTokenGetter(() => tokenRef.current);
-
+      //save user and token in AuthContext
+      auth.login(loginResponse);
 
       //build the payload for patch
       const allergyPayload: Allergy[] = MOCK_ALLERGIES.filter((a) => patientForm.allergyIds.includes(a.allergyId));
@@ -106,7 +109,7 @@ export default function RegisterWizard() {
 
       //patch
       await patchPatient(userId, payload);
-      
+
     } catch (err){
       console.error(err);
       alert("Updating Patient failed")
