@@ -37,7 +37,7 @@ public class AuthService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.getPassword().equals(password)) {
-                String token = jwtUtil.generateToken(email, user.getPrivilege().getRoleName());
+                String token = jwtUtil.generateToken(email, user.getUserId(), user.getPrivilege().getRoleName());
                 LoginResponse loginResponse = new LoginResponse(user.getUserId(), user.getEmail(), user.getPrivilege(), token);
 
                 return loginResponse;
