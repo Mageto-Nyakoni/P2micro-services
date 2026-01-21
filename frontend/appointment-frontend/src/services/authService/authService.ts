@@ -1,6 +1,6 @@
-import { Role } from "src/components/layout/NavBar/types";
-import { User } from "src/auth/AuthContext";
-import { http } from "src/services/http";
+import { Role } from "@/components/layout/NavBar/types";
+import { User } from "@/auth/AuthContext";
+import { http } from "@/services/http";
 import { RegisterUserPayload, LoginPayload, LoginResponse } from "./types";
 import { PatientPayload } from "./types";
 

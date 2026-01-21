@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { RegisterUserForm } from "src/pages/public/register/types";
+import { RegisterUserForm } from "@/pages/public/register/types";
 import { useState } from "react";
 import { isValidEmail, isStrongPassword } from "@/utils/validators";
 import { registerStep1 } from "@/services/authService/authService";
