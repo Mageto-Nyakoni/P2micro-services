@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Allergy, BloodType, PatientDetailsForm } from "./types";
+import { Allergy, BloodType, PatientDetailsForm } from "src/pages/public/register/types";
 import { register, RegisterPayload } from "@/services/authService"; // <-- import your service
 
 type Props = {
@@ -59,14 +59,17 @@ export default function RegisterForm2({ value, onChange,userForm }: Props) {
     e.preventDefault();
 
     // basic validation
-    if (!value.age || !value.DOB || !value.phoneNumber || !value.Address || !value.bloodTypeId) {
+    if (!value.age || !value.dateOfBirth || !value.phoneNumber || !value.address || !value.bloodType) {
       alert("Please fill all fields");
       return;
     }
 
        const payload: RegisterPayload = {
       ...userForm, // Step 1 data
-      ...value,    // Step 2 data
+      ...value, 
+       DOB: value.dateOfBirth,
+  Address: value.address,
+  bloodTypeId: value.bloodType,   // Step 2 data
     };
 
     
@@ -112,13 +115,13 @@ export default function RegisterForm2({ value, onChange,userForm }: Props) {
 
           <div>
             <label htmlFor="DOB" className="block text-sm mb-1 text-gray-600">
-              DOB
+              Date of Birth
             </label>
             <input
               id="DOB"
               type="date"
               name="DOB"
-              value={value.DOB}
+              value={value.dateOfBirth}
               onChange={handleChange}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
             />
@@ -165,7 +168,7 @@ export default function RegisterForm2({ value, onChange,userForm }: Props) {
               id="Address"
               type="text"
               name="Address"
-              value={value.Address}
+              value={value.address}
               onChange={handleChange}
               placeholder="Street, City, State"
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
@@ -179,7 +182,7 @@ export default function RegisterForm2({ value, onChange,userForm }: Props) {
             <select
               id="bloodTypeId"
               name="bloodTypeId"
-              value={value.bloodTypeId}
+              value={value.bloodType}
               onChange={handleChange}
               className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400"
             >
