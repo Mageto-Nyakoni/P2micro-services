@@ -207,7 +207,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     @AllArgsConstructor
     public static class DoctorTimeSlotView {
         private Integer slotId;
-        private LocalDateTime startTime;
-        private LocalDateTime endTime;
+        private LocalTime startTime;
+        private LocalTime endTime;
     }
 }

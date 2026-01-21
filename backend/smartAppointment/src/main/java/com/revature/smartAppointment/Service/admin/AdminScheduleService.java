@@ -43,8 +43,8 @@ public class AdminScheduleService {
         TimeSlot slot = TimeSlot.builder()
                 .doctor(doctor)
                 .dateAvailable(date)
-                .startTime(startDateTime)   // LocalDateTime
-                .endTime(endDateTime)       // LocalDateTime
+                .startTime(start)   // LocalDateTime
+                .endTime(end)       // LocalDateTime
                 .createdAt(LocalDateTime.now())
                 .build();
         return timeSlotRepository.save(slot);
