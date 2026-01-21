@@ -14,7 +14,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/smart-appointment/api/patients")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PatientController {
     private PatientService patientService;
     private JwtUtil jwtUtil;

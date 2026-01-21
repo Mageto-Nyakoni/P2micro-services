@@ -3,6 +3,7 @@ package com.revature.smartAppointment.Controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,14 +15,17 @@ import com.revature.smartAppointment.Service.DoctorService.DoctorTimeSlotView;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/smart-appointment/api/doctors")
-@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class DoctorController {
-
     private final DoctorService doctorService;
+
+    @Autowired
+    public DoctorController(DoctorService doctorService) {
+        this.doctorService = doctorService;
+    }
 
     // Basic CRUD for Doctor
 

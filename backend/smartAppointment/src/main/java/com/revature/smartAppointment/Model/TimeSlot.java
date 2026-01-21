@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 
@@ -24,10 +25,10 @@ public class TimeSlot {
     private LocalDateTime createdAt;
 
     @Column (name = "start_time")
-    private LocalDateTime startTime;
+    private LocalTime startTime;
 
     @Column (name = "end_time")
-    private LocalDateTime endTime;
+    private LocalTime endTime;
 
     @Column (name = "date_available")
     private LocalDate dateAvailable;
@@ -41,7 +42,7 @@ public class TimeSlot {
         if (createdAt == null) createdAt = LocalDateTime.now();
     }
 
-    public TimeSlot(LocalDateTime startTime, LocalDateTime endTime, LocalDate dateAvailable, Doctor doctor) {
+    public TimeSlot(LocalTime startTime, LocalTime endTime, LocalDate dateAvailable, Doctor doctor) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.dateAvailable = dateAvailable;
