@@ -1,18 +1,9 @@
 
-//Create a User on Step 1 of Registration.
-export type RegisterUserRequest = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
+//Reference Tables
+export type Privilege = {
     privilegeId: number;
-};
-
-//created after step 1 of registration is completed
-export type RegisterResponse = {
-    userId: number;
-    token?: string;
-};
+    roleName: string;
+}
 
 export type BloodType = {
     bloodTypeId: number;
@@ -24,27 +15,54 @@ export type Allergy = {
     name: string;
 };
 
-//Create a Patient on Step 2 of Registration
-
-export type CreatePatientRequest = {
-    userId: number;
-
-    age: number;
-    gender: "male" | "female" | "other" | "prefer_not_to_say";
-    phoneNumber: string;
-    DOB: string; 
-    Address: string;
-
-    bloodTypeId: number;
-    allergyIds: number[]; 
+//Create a User on Step 1 of Registration. (POST /auth/register)
+export type RegisterUserRequest = {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    privilegeId: number;
 };
 
-export type CreatePatientResponse = {
+export type RegisterResponse = {
+    userId: number;
+    email: string;
+    privilege: Privilege;
+};
+
+
+
+//Create a Patient on Step 2 of Registration (PATCH /patients/{patientID})
+export type PatchPatientRequest = {
+    address: string;
+    age: number;
+    allergies: Allergy[]; 
+    bloodType: string;
+    dateOfBirth: string;
+    gender: "male" | "female" | "other";
+    phoneNumber: string;
+};
+
+export type PatchPatientResponse = {
     patientId: number;
+    address: string;
+    age: number;
+    allergies: Allergy[];
+    bloodType: string;
+    dateOfBirth: string;
+    gender: string;
+    phoneNumber: string;
+    user: {
+        userId: number;
+        email: string;
+        firstName: string;
+        lastName: string;
+        privilege: Privilege;
+        password?: string;
+    };
 };
 
 //UI Forms
-
 export type RegisterUserForm = {
     firstName: string;
     lastName: string;
@@ -53,12 +71,11 @@ export type RegisterUserForm = {
 };
 
 export type PatientDetailsForm = {
+    address: string
     age: string;
-    gender: CreatePatientRequest['gender'];
+    gender: "male" | "female" | "other";
     phoneNumber: string;
-    DOB: string;
-    Address: string;
-
-    bloodTypeId: string;    //selected option value -> number   
+    dateOfBirth: string;
+    bloodType: string;      
     allergyIds: number[];   //checkbox
 };

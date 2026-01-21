@@ -25,7 +25,7 @@ export default function LoginPage() {
     try {
       const res = await loginAPI(payload.email, payload.password);
 
-      // Update AuthContext using YOUR expected shape
+      // Update AuthContext
       login({ user: res.user, token: res.token });
 
       // If redirected here from ProtectedRoute, go back after login

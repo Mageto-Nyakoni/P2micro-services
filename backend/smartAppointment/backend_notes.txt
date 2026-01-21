@@ -13,10 +13,43 @@ Endpoints (http://localhost:8080):
       - /auth
         - /login (POST)
         - /register (POST)
-      - /patients (GET, return all patients)
-      - /doctors (GET)
-        - /{doctor_id} (GET)
+      - /patients (GET, return all patients)*
+		- /{user_id} (GET, PATCH)
+      - /doctors (GET)*
+        - /{user_id} (GET)
           - /appointments (GET)
             - /{appointment_id} (GET)
-      - /appointments (GET)
-      - /time-slots (GET)
+      - /appointments (GET)*
+      - /time-slots (GET)*
+	  - /info (or data or something)*
+		- /blood-types
+		- /allergies
+
+Register (Post):
+{
+	"firstName": "",
+  "lastName": "",
+  "email": "",
+  "password": "",
+  "privilegeId": 1
+}
+Login (Post): 
+{
+  "email": "",
+  "password": ""
+}
+Update Patient Info (Put/Patch)*:
+{
+  "age": 1,
+  "gender": "male/female",
+  "phoneNumber": "",
+  "DOB": "",
+  "Address": "",
+  "bloodType": "",
+  "allergies": {
+    "allergyId": 1,
+    "name": ""
+  }
+}
+
+*not implemented yet

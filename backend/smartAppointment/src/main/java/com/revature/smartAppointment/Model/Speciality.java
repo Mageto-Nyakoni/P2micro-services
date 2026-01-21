@@ -11,18 +11,18 @@ import lombok.NoArgsConstructor;
 
 
 @Entity
-@Table(name = "specialty_type")
+@Table(name = "speciality")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Specialty {
+public class Speciality {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "specialty_id")
+    @Column(name = "speciality_id")
     private Integer specialtyId;
 
-    @Column(name = "specialty_name")
-    private String specialtyName;
+    @Column(name = "speciality_name")
+    private String specialityName;
 
     @Column(name="description")
     private String description;

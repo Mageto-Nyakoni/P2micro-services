@@ -3,7 +3,7 @@ export default function DoctorHome({
     // Sample data for demonstration purposes. Will connect to backend later.
   doctor = {
     name: "Dr. Ben Martinez",
-    specialty: "Cardiology",
+    speciality: "Cardiology",
     experience: "15 years",
     education: "MD, Harvard Medical School",
     contact: "ben.martinez@hospital.com",
@@ -44,7 +44,7 @@ export default function DoctorHome({
                 {doctor.name}
               </h1>
               <p className="m-0 mb-6 font-medium text-slate-500 text-lg">
-                {doctor.specialty}
+                {doctor.speciality}
               </p>
 
               <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">

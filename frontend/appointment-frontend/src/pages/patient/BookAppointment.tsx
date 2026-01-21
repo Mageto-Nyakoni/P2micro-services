@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 type Doctor = {
   id: number;
   name: string;
-  specialty: string;
+  speciality: string;
   services: string[];
 };
 
@@ -42,7 +42,7 @@ export default function BookAppointment() {
     {
       id: 1,
       name: "Dr. Ben Martinez",
-      specialty: "Cardiology",
+      speciality: "Cardiology",
       services: [
         "Heart Checkup",
         "ECG Review",
@@ -52,7 +52,7 @@ export default function BookAppointment() {
     {
       id: 2,
       name: "Dr. Samuel Chen",
-      specialty: "General Medicine",
+      speciality: "General Medicine",
       services: [
         "General Checkup",
         "Physical Examination",
@@ -62,7 +62,7 @@ export default function BookAppointment() {
     {
       id: 3,
       name: "Dr. Layal Al-Sayed",
-      specialty: "Pediatrics",
+      speciality: "Pediatrics",
       services: [
         "Vaccination",
         "Fever/Cold Treatment",
@@ -166,7 +166,7 @@ Time: ${time}`
                   {doctor.name}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {doctor.specialty}
+                  {doctor.speciality}
                 </p>
               </div>
             </div>

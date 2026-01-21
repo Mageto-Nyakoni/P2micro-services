@@ -20,7 +20,7 @@ export default function RegisterForm1({value, onChange, onNext}: Props) {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         //Basic Validation
@@ -46,7 +46,7 @@ if (!isStrongPassword(value.password)) {
   setError(null);
         console.log("Registration Step 1: ", value);
 
-        onNext();
+        await onNext();
     }
 
     return (

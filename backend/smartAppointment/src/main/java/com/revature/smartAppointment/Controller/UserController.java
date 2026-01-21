@@ -18,8 +18,8 @@ import com.revature.smartAppointment.Service.UserService;
 @RequestMapping("/smart-appointment/api/users")
 @CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
-
     private UserService userService;
+
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
@@ -37,6 +37,5 @@ public class UserController {
             return ResponseEntity.status(200).body(optionalUser.get());
         }
         return ResponseEntity.status(400).build();
-
     }
 }

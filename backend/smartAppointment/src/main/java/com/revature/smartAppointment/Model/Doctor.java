@@ -27,17 +27,17 @@ public class Doctor {
     private String gender;
 
     @ManyToOne (optional = false)
-    @JoinColumn(name="specialty_id", nullable = false)
-    private Specialty specialty;
+    @JoinColumn(name="speciality_id", nullable = false)
+    private Speciality speciality;
 
     @Column(name = "bio", nullable = true, length = 1000)
     private String bio;
 
-    public Doctor (User user, Integer experienceYears, String gender, Specialty specialty, String bio){
+    public Doctor (User user, Integer experienceYears, String gender, Speciality speciality, String bio){
         this.user = user;
         this.experienceYears = experienceYears;
         this.gender = gender;
-        this.specialty = specialty;
+        this.speciality = speciality;
         this.bio = bio;
     }
 }
