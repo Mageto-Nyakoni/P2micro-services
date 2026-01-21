@@ -1,20 +1,18 @@
 package com.revature.smartAppointment.Model;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 @Entity
-@Table(name = "appointments")
-@NoArgsConstructor
-@AllArgsConstructor
+@Table(name = "appointment")
 @Getter
 @Setter
-@Builder
-@ToString(exclude = {"doctor", "patient", "appointmentType", "slot"})
+@NoArgsConstructor
+@AllArgsConstructor
 public class Appointment {
 
     @Id
@@ -23,19 +21,19 @@ public class Appointment {
     private Integer appointmentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id")
+    @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "slot_id")
+    @JoinColumn(name = "slot_id", nullable = false)
     private TimeSlot slot;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id")
+    @JoinColumn(name = "type_id", nullable = false)
     private AppointmentType appointmentType;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id")
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
     @Column(name = "created_at")
@@ -52,5 +50,13 @@ public class Appointment {
     public void prePersist() {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (status == null) status = AppointmentStatus.REQUESTED;
+    }
+
+    public Appointment(Doctor doctor, TimeSlot slot, AppointmentType appointmentType, Patient patient, LocalDateTime dateTimeScheduled) {
+        this.doctor = doctor;
+        this.slot = slot;
+        this.appointmentType = appointmentType;
+        this.patient = patient;
+        this.dateTimeScheduled = dateTimeScheduled;
     }
 }

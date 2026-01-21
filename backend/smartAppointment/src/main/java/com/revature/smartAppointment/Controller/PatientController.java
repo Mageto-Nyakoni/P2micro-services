@@ -1,5 +1,14 @@
 package com.revature.smartAppointment.Controller;
 
+import com.revature.smartAppointment.Model.Patient;
+import com.revature.smartAppointment.Model.User;
+import com.revature.smartAppointment.Service.PatientService;
+import com.revature.smartAppointment.Util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Optional;
 

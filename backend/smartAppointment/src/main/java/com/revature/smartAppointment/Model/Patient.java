@@ -1,6 +1,10 @@
 package com.revature.smartAppointment.Model;
 
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -21,7 +25,8 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "patient")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Patient {
@@ -48,16 +53,16 @@ public class Patient {
     @Column(name = "blood_type")
     private String bloodType;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "patient_allergies",
             joinColumns = @JoinColumn(name = "patient_id"),
             inverseJoinColumns = @JoinColumn(name = "allergy_id")
     )
-    private List<Allergy> allergies;
+    private List<Allergy> allergies = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
     public Patient(Integer age, String gender, String phoneNumber, LocalDate dateOfBirth, String address, String bloodType, List<Allergy> allergies) {
