@@ -1,10 +1,11 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RegisterForm1 from "../../../components/RegisterForm1";
 import RegisterForm2 from "../../../components/RegisterForm2";
 import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm, RegisterUserForm } from "./types";
 import { register, login } from "../../../services/authService";
 import { patchPatient } from "@/services/patientServices";
 import { setTokenGetter } from "@/services/http";
+import { getAllergies } from "@/services/allergyService";
 
 //REPLACE THESE WHEN CONNECTING TO BACKEND
 const MOCK_BLOODTYPES: BloodType[] = [
@@ -18,33 +19,32 @@ const MOCK_BLOODTYPES: BloodType[] = [
   { bloodTypeId: 8, name: "AB-" },
 ];
 
-const MOCK_ALLERGIES: Allergy[] = [
-  { allergyId: 1, name: "Peanuts" },
-  { allergyId: 2, name: "Tree nuts" },
-  { allergyId: 3, name: "Dairy" },
-  { allergyId: 4, name: "Egg" },
-  { allergyId: 5, name: "Soy" },
-  { allergyId: 6, name: "Shellfish" },
-  { allergyId: 7, name: "Penicillin" },
-  { allergyId: 8, name: "Aspirin" },
-  { allergyId: 9, name: "NSAIDs" },
-  { allergyId: 10, name: "Amoxicillin" },
-  { allergyId: 11, name: "Pollen" },
-  { allergyId: 12, name: "Mold" },
-  { allergyId: 13, name: "Cats" },
-  { allergyId: 14, name: "Dogs" },
-  { allergyId: 15, name: "Latex" },
-  { allergyId: 16, name: "Nickel" },
-  { allergyId: 17, name: "Fragrances" },
-  { allergyId: 18, name: "Bee venom" },
-  { allergyId: 19, name: "Wasp venom" },
-];
 
 export default function RegisterWizard() {
   const [step, setStep] = useState<1 | 2>(1);
   const [userId, setUserId] = useState<number | null>(null);
 
+  const [allergies, setAllergies] = useState<Allergy[]>([]);
+  
   const tokenRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await getAllergies();
+        if (!cancelled) setAllergies(data);
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load allergies")
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    }
+  }, []);
 
   const [userForm, setUserForm] = useState<RegisterUserForm>({
     firstName: "",
@@ -92,7 +92,7 @@ export default function RegisterWizard() {
 
 
       //build the payload for patch
-      const allergyPayload: Allergy[] = MOCK_ALLERGIES.filter((a) => patientForm.allergyIds.includes(a.allergyId));
+      const allergyPayload: Allergy[] = allergies.filter((a) => patientForm.allergyIds.includes(a.allergyId));
       
       const payload: PatchPatientRequest = {
         address: patientForm.address,
@@ -127,6 +127,7 @@ export default function RegisterWizard() {
           value={patientForm}
           onChange={setPatientForm} 
           onSubmit={handleRegistrationStep2}
+          allergies={allergies}
         />
       )}
     </>

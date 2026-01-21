@@ -1,10 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { Allergy, BloodType, PatientDetailsForm } from "../pages/public/register/types"
+import { useEffect, useState } from "react";
+import { getAllergies } from "@/services/allergyService";
 
 type Props = {
     value: PatientDetailsForm;
     onChange: (next: PatientDetailsForm) => void;
     onSubmit: () => void | Promise<void>;
+
+    allergies: Allergy[];
 }
 
 
@@ -20,29 +24,7 @@ const MOCK_BLOODTYPES: BloodType[] = [
     { bloodTypeId: 8, name: "AB-" },
 ];
 
-const MOCK_ALLERGIES: Allergy[] = [
-    { allergyId: 1, name: "Peanuts" },
-    { allergyId: 2, name: "Tree nuts" },
-    { allergyId: 3, name: "Dairy" },
-    { allergyId: 4, name: "Egg" },
-    { allergyId: 5, name: "Soy" },
-    { allergyId: 6, name: "Shellfish" },
-    { allergyId: 7, name: "Penicillin" },
-    { allergyId: 8, name: "Aspirin" },
-    { allergyId: 9, name: "NSAIDs" },
-    { allergyId: 10, name: "Amoxicillin" },
-    { allergyId: 11, name: "Pollen" },
-    { allergyId: 12, name: "Mold" },
-    { allergyId: 13, name: "Cats" },
-    { allergyId: 14, name: "Dogs" },
-    { allergyId: 15, name: "Latex" },
-    { allergyId: 16, name: "Nickel" },
-    { allergyId: 17, name: "Fragrances" },
-    { allergyId: 18, name: "Bee venom" },
-    { allergyId: 19, name: "Wasp venom" },
-];
-
-export default function RegisterForm2({value, onChange, onSubmit}: Props){
+export default function RegisterForm2({value, onChange, onSubmit, allergies}: Props){
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -195,7 +177,7 @@ export default function RegisterForm2({value, onChange, onSubmit}: Props){
                         </p>
 
                         <div className="max-h-40 overflow-auto space-y-2 pr-1">
-                        {MOCK_ALLERGIES.map((a) => (
+                        {allergies.map((a) => (
                             <label key={a.allergyId} className="flex items-center gap-2 text-sm text-gray-700">
                             <input
                                 type="checkbox"
