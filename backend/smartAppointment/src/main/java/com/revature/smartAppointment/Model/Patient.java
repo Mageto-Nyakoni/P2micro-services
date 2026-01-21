@@ -1,9 +1,9 @@
 package com.revature.smartAppointment.Model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -13,15 +13,18 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "patient")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Patient {
@@ -45,22 +48,23 @@ public class Patient {
     @Column(name = "address")
     private String address;
 
-    @Column(name = "blood_type")
-    private String bloodType;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "blood_type_id")
+    private BloodType bloodType;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "patient_allergies",
             joinColumns = @JoinColumn(name = "patient_id"),
             inverseJoinColumns = @JoinColumn(name = "allergy_id")
     )
-    private List<Allergy> allergies;
+    private List<Allergy> allergies = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id")
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
-    public Patient(Integer age, String gender, String phoneNumber, LocalDate dateOfBirth, String address, String bloodType, List<Allergy> allergies) {
+    public Patient(Integer age, String gender, String phoneNumber, LocalDate dateOfBirth, String address, BloodType bloodType, List<Allergy> allergies) {
         this.age = age;
         this.gender = gender;
         this.phoneNumber = phoneNumber;

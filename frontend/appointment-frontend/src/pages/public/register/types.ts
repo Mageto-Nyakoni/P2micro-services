@@ -36,7 +36,7 @@ export type RegisterResponse = {
 export type PatchPatientRequest = {
     address: string;
     age: number;
-    allergies: Allergy[]; 
+    allergies: string[]; 
     bloodType: string;
     dateOfBirth: string;
     gender: "male" | "female" | "other";
@@ -48,7 +48,7 @@ export type PatchPatientResponse = {
     address: string;
     age: number;
     allergies: Allergy[];
-    bloodType: string;
+    bloodType: BloodType;
     dateOfBirth: string;
     gender: string;
     phoneNumber: string;

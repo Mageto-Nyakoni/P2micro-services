@@ -8,6 +8,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,43 +24,44 @@ import com.revature.smartAppointment.Repository.TimeSlotRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class DoctorService implements ServiceInterface<Doctor> {
-
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
-     
 
-     public Doctor save(Doctor doctor) {
+    @Autowired
+    public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, TimeSlotRepository timeSlotRepository) {
+        this.doctorRepository = doctorRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.timeSlotRepository = timeSlotRepository;
+    }
+     
+    @Override
+    public Doctor save(Doctor doctor) {
         return doctorRepository.save(doctor);
     }
-    // -----------------------------
-    // Doctor Dashboard: Appointments
 
     @Override
-    public Optional<Doctor> findById(int id){
+    public Optional<Doctor> findById(int id) {
+        return doctorRepository.findById(id);
+    }
+
+    @Override
+    public List<Doctor> findAll() {
+        return doctorRepository.findAll();
+    }
+
+    @Override
+    public Optional<Doctor> deleteById(int id) {
         return Optional.empty();
     }
 
     @Override
-    public List<Doctor> findAll(){
-        return List.of();
-    }
-
-    @Override
-    public Optional<Doctor> deleteById(int id){
-        return Optional.empty();
-    }
-
-    @Override
-    public Doctor updateById(int id, Doctor entity){
+    public Doctor updateById(int id, Doctor entity) {
         return null;
     }
-
 
     public List<DoctorAppointmentView> getTodaysAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
@@ -205,7 +207,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     @AllArgsConstructor
     public static class DoctorTimeSlotView {
         private Integer slotId;
-        private LocalDateTime startTime;
-        private LocalDateTime endTime;
+        private LocalTime startTime;
+        private LocalTime endTime;
     }
 }

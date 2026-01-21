@@ -5,18 +5,22 @@ import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Repository.TimeSlotRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class AdminAppointmentService {
-
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
+
+    @Autowired
+    public AdminAppointmentService(AppointmentRepository appointmentRepository, TimeSlotRepository timeSlotRepository) {
+        this.appointmentRepository = appointmentRepository;
+        this.timeSlotRepository = timeSlotRepository;
+    }
 
     //  View all appointments
     public List<Appointment> getAllAppointments() {
@@ -33,11 +37,11 @@ public class AdminAppointmentService {
     }
 
     //  Reschedule appointment using a TimeSlot
-   public Appointment reschedule(Integer appointmentId, LocalDateTime newDateTime) {
-    Appointment appt = appointmentRepository.findById(appointmentId)
+    public Appointment reschedule(Integer appointmentId, LocalDateTime newDateTime) {
+        Appointment appt = appointmentRepository.findById(appointmentId)
             .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
-    appt.setDateTimeScheduled(newDateTime);
-    return appointmentRepository.save(appt);
-}
+        appt.setDateTimeScheduled(newDateTime);
+        return appointmentRepository.save(appt);
+    }
 }

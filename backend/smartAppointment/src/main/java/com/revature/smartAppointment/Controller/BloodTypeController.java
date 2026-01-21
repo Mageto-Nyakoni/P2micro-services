@@ -11,30 +11,31 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.revature.smartAppointment.Model.Allergy;
-import com.revature.smartAppointment.Service.AllergyService;
+import com.revature.smartAppointment.Model.BloodType;
+import com.revature.smartAppointment.Service.BloodTypeService;
 import com.revature.smartAppointment.Util.JwtUtil;
 
+
 @RestController
-@RequestMapping("/smart-appointment/api/allergies")
+@RequestMapping("/smart-appointment/api/blood-types")
 @CrossOrigin(origins = "http://localhost:5173")
-public class AllergyController {
-    private AllergyService allergyService;
+public class BloodTypeController {
+    private BloodTypeService bloodTypeService;
     private JwtUtil jwtUtil;
 
     @Autowired
-    public AllergyController(AllergyService allergyService, JwtUtil jwtUtil) {
-        this.allergyService = allergyService;
+    public BloodTypeController(BloodTypeService bloodTypeService, JwtUtil jwtUtil){
+        this.bloodTypeService = bloodTypeService;
         this.jwtUtil = jwtUtil;
     }
 
     @GetMapping()
-    public ResponseEntity<List<Allergy>> getAllergies(){
-        return ResponseEntity.ok(allergyService.findAll());
+    public ResponseEntity<List<BloodType>> getBloodType(){
+        return ResponseEntity.ok(bloodTypeService.findAll());
     }
 
-    @GetMapping("/{allergy_id}")
-    public ResponseEntity<Allergy> getAllergy(@RequestHeader("Authorization") String authHeader, @PathVariable int allergy_id) {
+    @GetMapping({"bloodType_id"})
+    public ResponseEntity<BloodType> getBloodType(@RequestHeader("Authorization") String authHeader, @PathVariable int blood_type_id){
         try {
             String token = authHeader.substring(7); 
 
@@ -42,7 +43,7 @@ public class AllergyController {
                 throw new RuntimeException("Invalid token");
             }
 
-            return allergyService.findById(allergy_id)
+            return bloodTypeService.findById(blood_type_id)
                     .map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.status(404).build());
 
@@ -50,5 +51,4 @@ public class AllergyController {
             return ResponseEntity.status(401).build();
         }
     }
-
 }

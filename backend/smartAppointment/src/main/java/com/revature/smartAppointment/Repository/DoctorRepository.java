@@ -10,7 +10,7 @@ import com.revature.smartAppointment.Model.Doctor;
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Integer> {
 
-    Optional<Doctor> findByUserUserId(Integer userId);
+    Optional<Doctor> findDoctorByUser_UserId(Integer userId);
     
 }
 //findbyUserUser

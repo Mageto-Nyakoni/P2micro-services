@@ -74,6 +74,7 @@ public class AuthService {
             doctorService.save(doctor);
         }
 
+
         return new RegisterResponse(newUser.getUserId(), newUser.getEmail(), newUser.getPrivilege());
     }
 }

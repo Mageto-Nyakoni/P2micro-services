@@ -9,22 +9,10 @@ type Props = {
     onSubmit: () => void | Promise<void>;
 
     allergies: Allergy[];
+    bloodTypes: BloodType[];
 }
 
-
-//REPLACE THESE WHEN CONNECTING TO BACKEND
-const MOCK_BLOODTYPES: BloodType[] = [
-    { bloodTypeId: 1, name: "O+" },
-    { bloodTypeId: 2, name: "O-" },
-    { bloodTypeId: 3, name: "A+" },
-    { bloodTypeId: 4, name: "A-" },
-    { bloodTypeId: 5, name: "B+" },
-    { bloodTypeId: 6, name: "B-" },
-    { bloodTypeId: 7, name: "AB+" },
-    { bloodTypeId: 8, name: "AB-" },
-];
-
-export default function RegisterForm2({value, onChange, onSubmit, allergies}: Props){
+export default function RegisterForm2({value, onChange, onSubmit, allergies, bloodTypes}: Props){
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -163,8 +151,8 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies}: Pr
                                         focus:outline-none focus:ring-2 focus:ring-purple-400"
                         >
                             <option value="">Select blood type</option>
-                            {MOCK_BLOODTYPES.map((bt) => (
-                                <option key={bt.bloodTypeId} value={String(bt.bloodTypeId)}>
+                            {(bloodTypes ?? []).map((bt) => (
+                                <option key={bt.bloodTypeId} value={String(bt.name)}>
                                 {bt.name}
                                 </option>
                             ))}

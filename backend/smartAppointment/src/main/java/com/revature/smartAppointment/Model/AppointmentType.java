@@ -4,27 +4,29 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "appointment_types")
+@Table(name = "appointment_type")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AppointmentType {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "type_id")
     private Integer typeId;
 
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
-      @Column(name = "estimated_time")
+
+    @Column(name = "estimated_time")
     private Integer estimatedTime; // minutes
 
+    @Column(name = "description")
+    private String description;
 
-    @Column(name = "type_name", nullable = false)
-    private String typeName;
-
-    @Column(name = "duration_minutes")
-    private Integer durationMinutes;
+    public AppointmentType(String name, Integer estimatedTime, String description) {
+        this.name = name;
+        this.estimatedTime = estimatedTime;
+        this.description = description;
+    }
 }

@@ -24,9 +24,9 @@ public class BloodType {
     private Integer bloodTypeId;
 
     @Column(name = "name")
-    private String bloodType;
+    private String name;
 
-    public BloodType(String bloodType){
-        this.bloodType = bloodType;
+    public BloodType(String name){
+        this.name = name;
     }
 }
