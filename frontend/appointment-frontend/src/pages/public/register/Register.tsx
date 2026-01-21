@@ -3,8 +3,9 @@ import RegisterForm1 from "../../../components/RegisterForm1";
 import RegisterForm2 from "../../../components/RegisterForm2";
 import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm, RegisterUserForm } from "./types";
 import { AuthContext } from "@/auth/AuthContext";
-import { register, login } from "../../../services/authService";
+import { registerStep1, login, registerStep2 } from "../../../services/authService/authService";
 import { patchPatient } from "@/services/patientServices";
+
 
 //REPLACE THESE WHEN CONNECTING TO BACKEND
 const MOCK_BLOODTYPES: BloodType[] = [
@@ -41,15 +42,13 @@ const MOCK_ALLERGIES: Allergy[] = [
 ];
 
 export default function RegisterWizard() {
-
   const auth = useContext(AuthContext);
-  if (!auth){
-    throw new Error("AuthContext is null")
-  }
+  if (!auth) throw new Error("AuthContext is null");
 
   const [step, setStep] = useState<1 | 2>(1);
   const [userId, setUserId] = useState<number | null>(null);
 
+  // Step 1 state
   const [userForm, setUserForm] = useState<RegisterUserForm>({
     firstName: "",
     lastName: "",
@@ -57,6 +56,7 @@ export default function RegisterWizard() {
     password: "",
   });
 
+  // Step 2 state
   const [patientForm, setPatientForm] = useState<PatientDetailsForm>({
     age: "",
     gender: "other",
@@ -67,52 +67,63 @@ export default function RegisterWizard() {
     allergyIds: [],
   });
 
+  // Step 1: Register user
   const handleRegistrationStep1 = async () => {
     try {
-      const res = await register(userForm.firstName, userForm.lastName, userForm.email, userForm.password);
-      
-      setUserId(res.userId);
-      setStep(2);
+      const res = await registerStep1({
+        firstName: userForm.firstName,
+        lastName: userForm.lastName,
+        email: userForm.email,
+        password: userForm.password,
+        privilegeId: 1,
+      });
+
+      setUserId(res.userId); // save the backend userId
+      setStep(2); // move to Step 2
     } catch (err) {
-      console.error(err);
-      alert("registration failed");
+      console.error("Registration failed:", err);
+      alert("Registration failed");
     }
   };
 
+  // Step 2: Patch patient details
   const handleRegistrationStep2 = async () => {
-    if (userId == null){
+    if (userId == null) {
       alert("ERROR: Missing User ID");
       setStep(1);
       return;
     }
 
     try {
-      //login to get token
+      // Login to get token
       const loginResponse = await login(userForm.email, userForm.password);
 
-      //save user and token in AuthContext
+      // Save user and token in AuthContext
       auth.login(loginResponse);
 
-      //build the payload for patch
-      const allergyPayload: Allergy[] = MOCK_ALLERGIES.filter((a) => patientForm.allergyIds.includes(a.allergyId));
-      
+      // Build allergy payload
+      const allergyPayload: Allergy[] = MOCK_ALLERGIES.filter((a) =>
+        patientForm.allergyIds.includes(a.allergyId)
+      );
+
+      // Build patient payload
       const payload: PatchPatientRequest = {
-        address: patientForm.address,
         age: Number(patientForm.age),
-        allergies: allergyPayload,
-        bloodType: patientForm.bloodType,
-        dateOfBirth: patientForm.dateOfBirth,
         gender: patientForm.gender,
-        phoneNumber: patientForm.phoneNumber
+        phoneNumber: patientForm.phoneNumber,
+        dateOfBirth: patientForm.dateOfBirth,
+        address: patientForm.address,
+        bloodType: patientForm.bloodType,
+        allergies: allergyPayload,
       };
 
-      //patch
+      // Patch patient info
       await patchPatient(userId, payload);
 
-    } catch (err){
-      console.error(err);
-      alert("Updating Patient failed")
-      throw err;
+      alert("Registration complete!");
+    } catch (err) {
+      console.error("Updating Patient failed:", err);
+      alert("Updating patient details failed");
     }
   };
 
@@ -125,13 +136,14 @@ export default function RegisterWizard() {
           onNext={handleRegistrationStep1}
         />
       ) : (
-        <RegisterForm2
-          value={patientForm}
-          onChange={setPatientForm} 
-          onSubmit={handleRegistrationStep2}
-        />
+       <RegisterForm2
+  value={patientForm}
+  onChange={setPatientForm}
+  step1Data={userForm}  // pass Step 1 info explicitly
+  onSubmit={handleRegistrationStep2}
+  userId={userId!}  // non-null assertion since we check before
+/>
       )}
     </>
   );
 }
-export default Register;

@@ -1,12 +1,22 @@
 import { useNavigate } from "react-router-dom";
-import { Allergy, BloodType, PatientDetailsForm } from "src/pages/public/register/types";
-import { register, RegisterPayload } from "@/services/authService"; // <-- import your service
+import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm, RegisterUserForm } from "src/pages/public/register/types";
+import { registerStep1, RegisterPayload } from "@/services/authService/authService"; // <-- import your service
+import { patchPatient } from "@/services/patientServices";
 
-type Props = {
+
+
+interface Props {
   value: PatientDetailsForm;
   onChange: (next: PatientDetailsForm) => void;
-   userForm: { firstName: string; lastName: string; email: string; password: string };
-};
+  onSubmit: () => Promise<void>;
+   step1Data: RegisterUserForm;
+   userId: number;
+}
+/*type Props = {
+  value: PatientDetailsForm;
+  onChange: (next: PatientDetailsForm) => void;
+   userForm: { firstName: string; lastName: string; email: string; password: string; age: string; gender: string; phoneNumber: string; dateOfBirth: string; address: string; bloodTypeId: string; allergyIds: number[] };
+};*/
 
 // MOCK DATA (replace with backend fetch later)
 const MOCK_BLOODTYPES: BloodType[] = [
@@ -32,12 +42,13 @@ const MOCK_ALLERGIES: Allergy[] = [
   { allergyId: 9, name: "Sesame" },
 ];
 
-export default function RegisterForm2({ value, onChange,userForm }: Props) {
+export default function RegisterForm2({ value, onChange, userId, step1Data }: Props) {
   const navigate = useNavigate();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
+     const { name, value: val } = e.target;
     onChange({
       ...value,
       [e.target.name]: e.target.value,
@@ -64,17 +75,20 @@ export default function RegisterForm2({ value, onChange,userForm }: Props) {
       return;
     }
 
-       const payload: RegisterPayload = {
-      ...userForm, // Step 1 data
-      ...value, 
-       DOB: value.dateOfBirth,
-  Address: value.address,
-  bloodTypeId: value.bloodType,   // Step 2 data
-    };
-
+       const payload: PatchPatientRequest = {
+  age: Number(value.age),
+    gender: value.gender,
+    phoneNumber: value.phoneNumber,
+    dateOfBirth: value.dateOfBirth,
+    address: value.address,
+    bloodType: value.bloodType,
+     allergies: MOCK_ALLERGIES.filter(a =>
+    value.allergyIds.includes(a.allergyId)
+  ),
+  };
     
     try {
-      await register(payload); //  call the new register function
+      await patchPatient(userId,payload); //  call the new register function
       navigate("/login");
     } catch (err) {
       console.error("Registration failed:", err);

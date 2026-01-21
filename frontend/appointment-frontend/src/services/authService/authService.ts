@@ -1,6 +1,10 @@
-import { Role } from "../components/layout/NavBar/types";
-import { User } from "../auth/AuthContext";
-import { http } from "./http";
+import { Role } from "src/components/layout/NavBar/types";
+import { User } from "src/auth/AuthContext";
+import { http } from "src/services/http";
+import { RegisterUserPayload, LoginPayload, LoginResponse } from "./types";
+import { PatientPayload } from "./types";
+
+
 import { RegisterResponse, RegisterUserRequest } from "@/pages/public/register/types";
 
 
@@ -47,15 +51,19 @@ export type RegisterPayload = {
   allergyIds: number[];
 };
 
-export async function register(payload: RegisterPayload) {
-  const { data } = await http.post("/auth/register", payload);
+export async function registerStep1(payload: RegisterUserRequest) {
+  const { data } = await http.post<RegisterResponse>("/auth/register", payload);
   return data;
 }
 
-export async function register(firstName: string, lastName: string, email: string, password: string): Promise<RegisterResponse>{
+export async function handleRegistrationStep1(firstName: string, lastName: string, email: string, password: string): Promise<RegisterResponse>{
   const payload: RegisterUserRequest = {firstName, lastName, email, password, privilegeId: 1}
 
   const {data} = await http.post<RegisterResponse>("/auth/register", payload);
   return data
 }
 
+export async function registerStep2(userId: number, payload: PatientPayload) {
+  const { data } = await http.patch(`/patients/${userId}`, payload);
+  return data;
+}

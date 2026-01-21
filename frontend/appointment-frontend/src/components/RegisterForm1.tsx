@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { RegisterUserForm } from "src/pages/public/register/types";
 import { useState } from "react";
 import { isValidEmail, isStrongPassword } from "@/utils/validators";
+import { registerStep1 } from "@/services/authService/authService";
 
 
 type Props = {
@@ -44,10 +45,24 @@ if (!isStrongPassword(value.password)) {
 }
 
   setError(null);
-        console.log("Registration Step 1: ", value);
+
+  
+    try {
+        // Step 1: Call backend
+        const res = await registerStep1({
+            firstName: value.firstName,
+            lastName: value.lastName,
+            email: value.email,
+            password: value.password,
+            privilegeId: 1, // usually 1 for normal user
+        });
+        console.log("Registration Step 1: ", res);
 
         await onNext();
+    }catch (err:any) {
+         setError(err.response?.data?.message || "Registration failed. Try again.");
     }
+};
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-100 to-white px-4">

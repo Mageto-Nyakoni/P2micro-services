@@ -1,4 +1,4 @@
-import PatientNavbar from "../components/navbars/PatientNavbar";
+import PatientNavbar from "../components/layout/NavBar/Navbar";
 
 import { Outlet } from "react-router-dom";
 
