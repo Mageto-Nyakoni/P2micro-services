@@ -42,17 +42,15 @@ public class DoctorService implements ServiceInterface<Doctor> {
     public Doctor save(Doctor doctor) {
         return doctorRepository.save(doctor);
     }
-    // -----------------------------
-    // Doctor Dashboard: Appointments
 
     @Override
-    public Optional<Doctor> findById(int id){
-        return Optional.empty();
+    public Optional<Doctor> findById(int id) {
+        return doctorRepository.findById(id);
     }
 
     @Override
-    public List<Doctor> findAll(){
-        return List.of();
+    public List<Doctor> findAll() {
+        return doctorRepository.findAll();
     }
 
     @Override

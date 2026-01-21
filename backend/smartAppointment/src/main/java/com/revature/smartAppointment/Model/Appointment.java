@@ -14,7 +14,6 @@ import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Appointment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "appointment_id")

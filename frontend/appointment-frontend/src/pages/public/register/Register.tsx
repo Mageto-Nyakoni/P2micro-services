@@ -1,44 +1,15 @@
-import { useContext, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import RegisterForm1 from "../../../components/RegisterForm1";
 import RegisterForm2 from "../../../components/RegisterForm2";
 import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm, RegisterUserForm } from "./types";
 import { AuthContext } from "@/auth/AuthContext";
 import { register, login } from "../../../services/authService";
 import { patchPatient } from "@/services/patientServices";
+import { setTokenGetter } from "@/services/http";
+import { getAllergies } from "@/services/allergyService";
+import { getBloodType } from "@/services/bloodTypeService";
 
-//REPLACE THESE WHEN CONNECTING TO BACKEND
-const MOCK_BLOODTYPES: BloodType[] = [
-  { bloodTypeId: 1, name: "O+" },
-  { bloodTypeId: 2, name: "O-" },
-  { bloodTypeId: 3, name: "A+" },
-  { bloodTypeId: 4, name: "A-" },
-  { bloodTypeId: 5, name: "B+" },
-  { bloodTypeId: 6, name: "B-" },
-  { bloodTypeId: 7, name: "AB+" },
-  { bloodTypeId: 8, name: "AB-" },
-];
 
-const MOCK_ALLERGIES: Allergy[] = [
-  { allergyId: 1, name: "Peanuts" },
-  { allergyId: 2, name: "Tree nuts" },
-  { allergyId: 3, name: "Dairy" },
-  { allergyId: 4, name: "Egg" },
-  { allergyId: 5, name: "Soy" },
-  { allergyId: 6, name: "Shellfish" },
-  { allergyId: 7, name: "Penicillin" },
-  { allergyId: 8, name: "Aspirin" },
-  { allergyId: 9, name: "NSAIDs" },
-  { allergyId: 10, name: "Amoxicillin" },
-  { allergyId: 11, name: "Pollen" },
-  { allergyId: 12, name: "Mold" },
-  { allergyId: 13, name: "Cats" },
-  { allergyId: 14, name: "Dogs" },
-  { allergyId: 15, name: "Latex" },
-  { allergyId: 16, name: "Nickel" },
-  { allergyId: 17, name: "Fragrances" },
-  { allergyId: 18, name: "Bee venom" },
-  { allergyId: 19, name: "Wasp venom" },
-];
 
 export default function RegisterWizard() {
 
@@ -49,6 +20,34 @@ export default function RegisterWizard() {
 
   const [step, setStep] = useState<1 | 2>(1);
   const [userId, setUserId] = useState<number | null>(null);
+
+  const [allergies, setAllergies] = useState<Allergy[]>([]);
+  const [bloodTypes, setBloodTypes] = useState<BloodType[]>([]);
+  
+  const tokenRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const allergyData = await getAllergies();
+        const bloodData = await getBloodType();
+        
+        if (!cancelled) {
+          setAllergies(allergyData);
+          setBloodTypes(bloodData);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load allergies or bloddTypes")
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    }
+  }, []);
 
   const [userForm, setUserForm] = useState<RegisterUserForm>({
     firstName: "",
@@ -86,16 +85,20 @@ export default function RegisterWizard() {
       return;
     }
 
+    
+
     try {
       //login to get token
       const loginResponse = await login(userForm.email, userForm.password);
 
-      //save user and token in AuthContext
-      auth.login(loginResponse);
+      tokenRef.current = token;
 
-      //build the payload for patch
-      const allergyPayload: Allergy[] = MOCK_ALLERGIES.filter((a) => patientForm.allergyIds.includes(a.allergyId));
+      setTokenGetter(() => tokenRef.current);   
       
+      console.log(token);
+      
+      const allergyPayload: string[] = allergies.filter((a) => patientForm.allergyIds.includes(a.allergyId)).map((a) => a.name);
+
       const payload: PatchPatientRequest = {
         address: patientForm.address,
         age: Number(patientForm.age),
@@ -105,13 +108,14 @@ export default function RegisterWizard() {
         gender: patientForm.gender,
         phoneNumber: patientForm.phoneNumber
       };
+      
+      console.log("PATCH payload", payload);
 
       //patch
       await patchPatient(userId, payload);
-
-    } catch (err){
-      console.error(err);
-      alert("Updating Patient failed")
+      
+    } catch (err: any) {
+      console.log("Backend response data", err?.response?.data);
       throw err;
     }
   };
@@ -129,6 +133,8 @@ export default function RegisterWizard() {
           value={patientForm}
           onChange={setPatientForm} 
           onSubmit={handleRegistrationStep2}
+          allergies={allergies}
+          bloodTypes={bloodTypes}
         />
       )}
     </>

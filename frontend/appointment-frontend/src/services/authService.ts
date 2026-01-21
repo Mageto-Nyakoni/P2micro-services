@@ -3,7 +3,6 @@ import { User } from "../auth/AuthContext";
 import { http } from "./http";
 import { RegisterResponse, RegisterUserRequest } from "@/pages/public/register/types";
 
-
 type LoginResponse = {
   userId: number;
   email: string;
@@ -35,4 +34,3 @@ export async function register(firstName: string, lastName: string, email: strin
   const {data} = await http.post<RegisterResponse>("/auth/register", payload);
   return data
 }
-

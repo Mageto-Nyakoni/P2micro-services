@@ -114,18 +114,6 @@
 //         then(doctorRepository).shouldHaveNoMoreInteractions();
 //     }
 
-    @Test
-    void updateById_updatesFields_whenDoctorExists() {
-        User existingUser = new User();
-        Speciality existingSpeciality = new Speciality(1, "Old", "desc");
-        Doctor existing = Doctor.builder()
-                .doctorId(1)
-                .user(existingUser)
-                .experienceYears(5)
-                .gender("M")
-                .speciality(existingSpeciality)
-                .bio("Old bio")
-                .build();
 //     @Test
 //     void updateById_updatesFields_whenDoctorExists() {
 //         User existingUser = new User();
