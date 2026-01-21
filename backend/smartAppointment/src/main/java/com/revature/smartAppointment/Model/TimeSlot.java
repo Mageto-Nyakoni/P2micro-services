@@ -15,7 +15,6 @@ import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class TimeSlot {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
