@@ -2,8 +2,6 @@ package com.revature.smartAppointment.Controller;
 
 import java.util.List;
 
-import com.revature.smartAppointment.Model.Allergy;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.revature.smartAppointment.Model.Allergy;
 import com.revature.smartAppointment.Service.AllergyService;
 import com.revature.smartAppointment.Util.JwtUtil;
 
