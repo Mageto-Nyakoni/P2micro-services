@@ -117,9 +117,9 @@ export default function LoginPage() {
     return;
   }
 
-  if (!isStrongPassword(payload.password)) {
+  if (!payload.password) {
     setError(
-      "Password is too weak. Use at least 6 characters with uppercase, number, and special character."
+      "Password is required"
     );
     return;
   }
