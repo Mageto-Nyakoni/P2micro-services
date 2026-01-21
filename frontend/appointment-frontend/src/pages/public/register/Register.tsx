@@ -3,7 +3,7 @@ import RegisterForm1 from "./RegisterForm1";
 import RegisterForm2 from "./RegisterForm2";
 import { PatientDetailsForm, RegisterUserForm } from "./types";
 
-export default function RegisterWizard() {
+const Register = () => {
   const [step, setStep] = useState<1 | 2>(1);
 
   const [userForm, setUserForm] = useState<RegisterUserForm>({
@@ -35,8 +35,10 @@ export default function RegisterWizard() {
         <RegisterForm2
           value={patientForm}
           onChange={setPatientForm}
+          userForm={userForm}
         />
       )}
     </>
   );
 }
+export default Register;

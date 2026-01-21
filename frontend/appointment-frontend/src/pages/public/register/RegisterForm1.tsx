@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { RegisterUserForm } from "./types";
 import { useState } from "react";
+import { isValidEmail, isStrongPassword } from "@/utils/validators";
+
 
 type Props = {
     value: RegisterUserForm;
@@ -10,7 +12,7 @@ type Props = {
 
 export default function RegisterForm1({value, onChange, onNext}: Props) {
     const navigate = useNavigate();
-
+      const [error, setError] = useState<string | null>(null);
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         onChange({
             ...value,
@@ -27,6 +29,21 @@ export default function RegisterForm1({value, onChange, onNext}: Props) {
             return;
         }
 
+       
+        if (!isValidEmail(value.email)) {
+    alert("Please enter a valid email address");
+    return;
+}
+
+// Validate password strength
+if (!isStrongPassword(value.password)) {
+    alert(
+      "Password is too weak. Use at least 6 characters with uppercase, number, and special character."
+    );
+    return;
+}
+
+  setError(null);
         console.log("Registration Step 1: ", value);
 
         onNext();
@@ -45,11 +62,13 @@ export default function RegisterForm1({value, onChange, onNext}: Props) {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+                     {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
                     <div>
-                        <label className="block text-sm mb-1 text-gray-600">
+                        <label htmlFor="firstName" className="block text-sm mb-1 text-gray-600">
                             First Name
                         </label>
                         <input
+                            id="firstName"
                             type="text"
                             name="firstName"
                             value={value.firstName}
@@ -60,10 +79,11 @@ export default function RegisterForm1({value, onChange, onNext}: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm mb-1 text-gray-600">
+                        <label htmlFor="lastName" className="block text-sm mb-1 text-gray-600">
                             Last Name
                         </label>
                         <input
+                            id="lastName"
                             type="text"
                             name="lastName"
                             value={value.lastName}
@@ -74,10 +94,11 @@ export default function RegisterForm1({value, onChange, onNext}: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm mb-1 text-gray-600">
+                        <label htmlFor="email" className="block text-sm mb-1 text-gray-600">
                             Email
                         </label>
                         <input
+                            id="email"
                             type="email"
                             name="email"
                             value={value.email}
@@ -89,10 +110,11 @@ export default function RegisterForm1({value, onChange, onNext}: Props) {
                     </div>
 
                     <div>
-                        <label className="block text-sm mb-1 text-gray-600">
+                        <label htmlFor="password" className="block text-sm mb-1 text-gray-600">
                             Password
                         </label>
                         <input
+                            id="password"
                             type="password"
                             name="password"
                             value={value.password}
