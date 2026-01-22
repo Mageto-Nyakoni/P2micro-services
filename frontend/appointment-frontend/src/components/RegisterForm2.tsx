@@ -12,13 +12,50 @@ type Props = {
     bloodTypes: BloodType[];
 }
 
+function formatPhoneNUmber(value: string) {
+    const digits = value.replace(/\D/g, "").slice(0, 10);
+    const length = digits.length;
+
+    if (length < 4) return digits;
+    if (length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+function getAgeFromDOB(dob: string): number | null {
+    if (!dob) return null;
+
+    const birthday = new Date(dob + "T00:00:00");
+    if (Number.isNaN(birthday.getTime())) return null;
+
+    const today = new Date();
+    let age = today.getFullYear() - birthday.getFullYear();
+
+    const month = today.getMonth() - birthday.getMonth();
+    if (month < 0 || (month === 0 && today.getDate() < birthday.getDate())) {
+        age -= 1;
+    }
+
+    return age;
+}
+
 export default function RegisterForm2({value, onChange, onSubmit, allergies, bloodTypes}: Props){
     const navigate = useNavigate();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        
+        const { name, value: inputValue } = e.target;
+
+        if (name === "phoneNumber") {
+            onChange({
+                ...value,
+                phoneNumber: formatPhoneNUmber(inputValue),
+            });
+            return;
+        }
+        
         onChange({
             ...value,
-            [e.target.name]: e.target.value,
+            [name]: inputValue,
         });
     };
 
@@ -36,6 +73,14 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
 
         if (!value.age || !value.dateOfBirth || !value.phoneNumber || !value.address || !value.bloodType) {
             alert("Please fill all fields");
+            return;
+        }
+
+        const enteredAge = Number(value.age);
+        const computedAge = getAgeFromDOB(value.dateOfBirth);
+
+        if (computedAge != computedAge) {
+            alert(`Age and Birthday do not match. Based on DOB, age should be ${computedAge}`);
             return;
         }
 
@@ -61,7 +106,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                 </p>
 
                 <form onSubmit={handleSubmit} className="mt-8 spacy-y-5">
-                    <div>
+                    <div className="mb-2">
                         <label className="block text-sm mb-1 text-gray-600">
                             Age
                         </label>
@@ -78,7 +123,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                         />
                     </div>
 
-                    <div>
+                    <div className="mb-2">
                         <label className="block text-sm mb-1 text-gray-600">
                             Date of Birth
                         </label>
@@ -92,7 +137,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                         />
                     </div>
 
-                    <div>
+                    <div className="mb-2">
                         <label className="block text-sm mb-1 text-gray-600">
                             Gender
                         </label>
@@ -109,7 +154,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                         </select>
                     </div>
 
-                    <div>
+                    <div className="mb-2">
                         <label className="block text-sm mb-1 text-gray-600">
                             Phone Number
                         </label>
@@ -124,7 +169,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                         />
                     </div>
 
-                    <div>
+                    <div className="mb-2">
                         <label className="block text-sm mb-1 text-gray-600">
                             Address
                         </label>
@@ -139,7 +184,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                         />
                     </div>
 
-                    <div>
+                    <div className="mb-2">
                         <label className="block text-sm mb-1 text-gray-600">
                             Blood Type
                         </label>
@@ -159,14 +204,15 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                         </select>
                     </div>
 
-                    <div className="rounded-lg border border-gray-200 p-3">
-                        <p className="text-sm font-semibold text-gray-700 mb-2">
+                    <div className="mb-2">
+                        <p className="block text-sm mb-1 text-gray-600">
                         Allergies (optional)
                         </p>
 
-                        <div className="max-h-40 overflow-auto space-y-2 pr-1">
+                        <div className="w-full rounded-lg border border-gray-300 px-4 py-2 
+                                        focus:outline-none focus:ring-2 focus:ring-purple-400 max-h-40 overflow-auto space-y-2 pr-1">
                         {allergies.map((a) => (
-                            <label key={a.allergyId} className="flex items-center gap-2 text-sm text-gray-700">
+                            <label key={a.allergyId} className="flex items-center gap-2 text-gray-700">
                             <input
                                 type="checkbox"
                                 checked={value.allergyIds.includes(a.allergyId)}
