@@ -25,9 +25,9 @@ export type RegisterUserRequest = {
 };
 
 export type RegisterResponse = {
-    userId: number;
-    email: string;
-    privilege: Privilege;
+    userId: number
+  email: string
+  privilege: number
 };
 
 
