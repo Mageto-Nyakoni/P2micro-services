@@ -1,5 +1,11 @@
 package com.revature.smartAppointment.Service;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.revature.smartAppointment.Controller.Request.RegisterRequest;
 import com.revature.smartAppointment.Controller.Response.LoginResponse;
 import com.revature.smartAppointment.Controller.Response.RegisterResponse;
@@ -8,11 +14,6 @@ import com.revature.smartAppointment.Model.Patient;
 import com.revature.smartAppointment.Model.Privilege;
 import com.revature.smartAppointment.Model.User;
 import com.revature.smartAppointment.Util.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class AuthService {
@@ -38,7 +39,7 @@ public class AuthService {
             User user = optionalUser.get();
             if (user.getPassword().equals(password)) {
                 String token = jwtUtil.generateToken(email, user.getUserId(), user.getPrivilege().getRoleName());
-                LoginResponse loginResponse = new LoginResponse(user.getUserId(), user.getEmail(), user.getPrivilege(), token);
+                LoginResponse loginResponse = new LoginResponse(user.getUserId(), user.getEmail(), user.getFirstName(), user.getLastName(), user.getPrivilege(), token);
 
                 return loginResponse;
             }

@@ -6,6 +6,8 @@ import { RegisterResponse, RegisterUserRequest } from "@/pages/public/register/t
 type LoginResponse = {
   userId: number;
   email: string;
+  firstName: string;
+  lastName: string;
   privilege:{
     privilegeId: number;
     roleName: string;
@@ -23,7 +25,9 @@ export async function login(email: string, password: string): Promise<{user: Use
     user:{
       id: data.userId,
       email: data.email,
-      role: roleName
+      role: roleName,
+      firstName: data.firstName,
+      lastName: data.lastName,
     },
   };
 }
