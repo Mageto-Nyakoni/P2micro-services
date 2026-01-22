@@ -15,8 +15,13 @@ describe("authService.login (UNIT TEST)", () => {
 });
   it("calls login API with correct email and password", async () => {
     (http.post as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
-      data: { token: "fake-token", user: { role: "Patient" } },
-    });
+     data: {
+    token: "fake-token",
+    privilege: {
+      roleName: "Patient",
+    },
+  },
+});
 
     const result = await login("tester@mail.com", "password");
 
