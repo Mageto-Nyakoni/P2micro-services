@@ -2,7 +2,7 @@
 export { default as Home } from "./public/Home";
 export { default as GuestHome } from "./public/GuestHome";
 export { default as Login } from "./public/Login";
-export { default as Register } from "./public/register/Register";
+export { default as Register } from "./public/Register";
 export { default as DoctorsBrowse } from "./public/DoctorsBrowse";
 
 // patient pages

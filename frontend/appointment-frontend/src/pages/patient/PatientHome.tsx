@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { CalendarAvail, DoctorAvailability } from "@/components/availability";
+import { useContext } from "react";
+import { AuthContext } from "@/auth/AuthContext";
 
 /* ============= MOCK DATA ================= */
 
@@ -43,17 +45,28 @@ const availabilityByDate: Record<string, DoctorAvailability[]> = {
 const PatientHome: React.FC = () => {
   const navigate = useNavigate();
 
+  const auth = useContext(AuthContext);
+
+  if (!auth || !auth?.isAuthenticated || !auth.user) {
+    return <h1 className="text-5xl font-extrabold text-gray-800 mb-6">
+          Welcome
+        </h1>
+  }
+
+  const {firstName, lastName} = auth.user;
+
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white">
       {/* HERO SECTION */}
       <section className="flex flex-col items-center text-center px-6 py-24">
         <h1 className="text-5xl font-extrabold text-gray-800 mb-6">
-          Welcome to Your Health Journey
+          Welcome {firstName ? `${firstName}` : ''}!
         </h1>
 
         <p className="text-xl text-gray-600 max-w-2xl mb-10">
           Book your appointment with ease and connect with the best healthcare
-          professionals
+          professionals.
         </p>
 
         <button

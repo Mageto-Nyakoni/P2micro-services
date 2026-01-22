@@ -1,19 +1,19 @@
 package com.revature.smartAppointment.ControllerTest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+
 import com.revature.smartAppointment.Controller.AuthController;
 import com.revature.smartAppointment.Controller.Request.LoginRequest;
 import com.revature.smartAppointment.Controller.Response.LoginResponse;
 import com.revature.smartAppointment.Model.Privilege;
 import com.revature.smartAppointment.Service.AuthService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.ResponseEntity;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthControllerTest {
@@ -27,7 +27,7 @@ public class AuthControllerTest {
     @Test
     void testLoginSuccess() {
         Privilege privilege = new Privilege(1, "ADMIN");
-        LoginResponse loginResponse = new LoginResponse(1, "test@email.com", privilege, "token123");
+        LoginResponse loginResponse = new LoginResponse(1, "test@email.com", "TestFirstName", "TestLastName", privilege, "token123");
 
         when(authService.validateLogin("test@email.com", "pass123"))
                 .thenReturn(loginResponse);

@@ -15,6 +15,26 @@ export type Allergy = {
     name: string;
 };
 
+export type User = {
+    userId: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+    privilege?: Privilege;
+}
+
+export type Patient = {
+    patientId: number;
+    address: string | null;
+    age: number | null;
+    bloodType: BloodType | null;
+    dateOfBirth: string | null;
+    gender: string | null;
+    phoneNumber: string | null;
+    allergies: Allergy[];
+    user: User;
+}
+
 //Create a User on Step 1 of Registration. (POST /auth/register)
 export type RegisterUserRequest = {
     firstName: string;

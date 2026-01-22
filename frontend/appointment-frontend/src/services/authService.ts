@@ -1,11 +1,13 @@
 import { Role } from "../components/layout/NavBar/types";
 import { User } from "../auth/AuthContext";
 import { http } from "./http";
-import { RegisterResponse, RegisterUserRequest } from "@/pages/public/register/types";
+import { RegisterResponse, RegisterUserRequest } from "@/types/types";
 
 type LoginResponse = {
   userId: number;
   email: string;
+  firstName: string;
+  lastName: string;
   privilege:{
     privilegeId: number;
     roleName: string;
@@ -23,7 +25,9 @@ export async function login(email: string, password: string): Promise<{user: Use
     user:{
       id: data.userId,
       email: data.email,
-      role: roleName
+      role: roleName,
+      firstName: data.firstName,
+      lastName: data.lastName,
     },
   };
 }
