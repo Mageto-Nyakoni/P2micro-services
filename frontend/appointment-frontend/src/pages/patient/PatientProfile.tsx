@@ -117,7 +117,10 @@ function PatientProfile() {
               {patient.user.firstName} {patient.user.lastName}
             </h3>
             <p className="text-gray-500">
-              {patient.gender}, {patient.age} years
+            {patient.gender
+              ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)
+              : "—"
+            }, {patient.age} years
             </p>
 
           </div>
