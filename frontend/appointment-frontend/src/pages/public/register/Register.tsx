@@ -33,7 +33,7 @@ export default function RegisterWizard() {
         }
       } catch (err) {
         console.error(err);
-        alert("Failed to load allergies or bloddTypes")
+        alert("Failed to load allergies or bloodTypes")
       }
     })();
 
@@ -99,7 +99,7 @@ export default function RegisterWizard() {
         bloodType: patientForm.bloodType,
         dateOfBirth: patientForm.dateOfBirth,
         gender: patientForm.gender,
-        phoneNumber: patientForm.phoneNumber
+        phoneNumber: patientForm.phoneNumber.replace(/\D/g, ""),
       };
       
       console.log("PATCH payload", payload);
