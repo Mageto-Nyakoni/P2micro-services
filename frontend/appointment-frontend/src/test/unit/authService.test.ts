@@ -1,6 +1,6 @@
 /// <reference types="vitest" />
 
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect,vi, beforeEach } from "vitest";
 import { http } from "@/services/http";
 import { login } from "@/services/authService";
 
