@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Allergy, BloodType, PatientDetailsForm } from "../pages/public/register/types"
+import { Allergy, BloodType, PatientDetailsForm } from "../types/types"
 import { useEffect, useState } from "react";
 import { getAllergies } from "@/services/allergyService";
 
