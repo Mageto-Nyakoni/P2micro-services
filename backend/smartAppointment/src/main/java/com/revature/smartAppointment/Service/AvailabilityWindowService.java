@@ -4,7 +4,8 @@ import com.revature.smartAppointment.Model.*;
 import com.revature.smartAppointment.Repository.*;
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 import java.util.List;
-
+import java.util.stream.Collectors;
+import com.revature.smartAppointment.dto.AvailabilityWindowDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -78,7 +79,24 @@ public class AvailabilityWindowService {
         }
     }
 
-    public List<AvailabilityWindow> getWindowsForDoctor(Integer doctorId) {
+  /* public List<AvailabilityWindow> getWindowsForDoctor(Integer doctorId) {
     return windowRepository.findByDoctor_DoctorIdAndActiveTrue(doctorId);
+}*/
+
+
+public List<AvailabilityWindowDTO> getWindowsForDoctor(Integer doctorId) {
+    List<AvailabilityWindow> windows = windowRepository.findByDoctor_DoctorIdAndActiveTrue(doctorId);
+
+    return windows.stream().map(w -> new AvailabilityWindowDTO(
+        w.getWindowId(),
+        w.getDate(),
+        w.getStartTime(),
+        w.getEndTime(),
+        w.isActive(),
+        w.getDoctor().getDoctorId(),
+         w.getDoctor().getUser().getFirstName() + " " + w.getDoctor().getUser().getLastName()
+    )).collect(Collectors.toList());
 }
+
+
 }

@@ -1,5 +1,6 @@
 package com.revature.smartAppointment.Controller;
 import java.util.List;
+import com.revature.smartAppointment.dto.AvailabilityWindowDTO;
 import com.revature.smartAppointment.Model.AvailabilityWindow;
 import com.revature.smartAppointment.Service.AvailabilityWindowService;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +19,19 @@ public class AdminAvailabilityController {
         this.availabilityWindowService = availabilityWindowService;
     }
     
-    @GetMapping("/{doctorId}/availability-windows")
+   /*  @GetMapping("/{doctorId}/availability-windows")
 public List<AvailabilityWindow> getAvailabilityWindows(
         @PathVariable Integer doctorId
 ) {
     return availabilityWindowService.getWindowsForDoctor(doctorId);
-}
+}*/
+    
+    @GetMapping("/{doctorId}/availability-windows")
+public List<AvailabilityWindowDTO> getAvailabilityWindows(
+        @PathVariable Integer doctorId
+) {
+    return availabilityWindowService.getWindowsForDoctor(doctorId);
+} 
 
     @PostMapping("/{doctorId}/availability-windows")
     public void createAvailabilityWindow(
