@@ -1,11 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-// Layouts
-import GuestLayout from "./layouts/GuestLayout";
-import PatientLayout from "./layouts/PatientLayout";
-import DoctorLayout from "./layouts/DoctorLayout";
-
 // Pages
 import Login from "./pages/public/Login";
 import Register from "./pages/public/Register";
