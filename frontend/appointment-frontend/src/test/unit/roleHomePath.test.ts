@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { roleHomePath } from "@/utils/roleHomePath";
-import { Role } from "@/components/layout/NavBar/types";
+import { Role } from "@/components/NavBar/types";
 
 describe("roleHomePath (UNIT TEST)", () => {
   it("returns patient home path", () => {

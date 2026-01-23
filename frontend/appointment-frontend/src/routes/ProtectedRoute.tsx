@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../auth/useAuth";
-import { Role } from "../components/layout/NavBar/types";
+import { Role } from "../components/NavBar/types";
 
 
 type ProtectedRouteProps = {

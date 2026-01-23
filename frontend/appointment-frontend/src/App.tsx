@@ -20,7 +20,7 @@ import DoctorHome from "./pages/doctor/DoctorHome";
 import DoctorCalendar from "./pages/doctor/DoctorCalendar";
 import AdminSchedule from "./pages/admin/AdminSchedule";
 import AdminStaffList from "./pages/admin/AdminStaffList";
-import Navbar from "./components/layout/NavBar/Navbar";
+import Navbar from "./components/NavBar/Navbar";
 import SuperHome from "./pages/super/SuperHome";
 import Home from "./pages/public/Home";
 

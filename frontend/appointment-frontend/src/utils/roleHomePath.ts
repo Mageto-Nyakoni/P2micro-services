@@ -1,4 +1,4 @@
-import { Role } from "../components/layout/NavBar/types";
+import { Role } from "../components/NavBar/types";
 
 export function roleHomePath(role: Role): string {
   switch (role) {

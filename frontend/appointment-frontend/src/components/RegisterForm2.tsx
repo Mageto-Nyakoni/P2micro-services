@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Allergy, BloodType, PatientDetailsForm } from "../types/types"
-import { useEffect, useState } from "react";
-import { getAllergies } from "@/services/allergyService";
+import { formatPhoneNumber, getAgeFromDOB } from "@/utils/validators";
 
 type Props = {
     value: PatientDetailsForm;
@@ -10,32 +9,6 @@ type Props = {
 
     allergies: Allergy[];
     bloodTypes: BloodType[];
-}
-
-export function formatPhoneNumber(value: string) {
-    const digits = value.replace(/\D/g, "").slice(0, 10);
-    const length = digits.length;
-
-    if (length < 4) return digits;
-    if (length < 7) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-}
-
-export function getAgeFromDOB(dob: string): number | null {
-    if (!dob) return null;
-
-    const birthday = new Date(dob + "T00:00:00");
-    if (Number.isNaN(birthday.getTime())) return null;
-
-    const today = new Date();
-    let age = today.getFullYear() - birthday.getFullYear();
-
-    const month = today.getMonth() - birthday.getMonth();
-    if (month < 0 || (month === 0 && today.getDate() < birthday.getDate())) {
-        age -= 1;
-    }
-
-    return age;
 }
 
 export default function RegisterForm2({value, onChange, onSubmit, allergies, bloodTypes}: Props){
