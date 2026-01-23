@@ -1,5 +1,6 @@
 package com.revature.smartAppointment.Service;
 
+import com.revature.smartAppointment.Controller.Response.UserTableResponse;
 import com.revature.smartAppointment.Model.User;
 import com.revature.smartAppointment.Repository.UserRepository;
 
@@ -59,5 +60,9 @@ public class UserService implements ServiceInterface<User> {
 
     public Optional<User> findUserByEmail(String email) {
         return userRepository.findUserByEmail(email);
+    }
+
+    public List<UserTableResponse> getUsersForTable() {
+        return userRepository.findUsersForTable();
     }
 }

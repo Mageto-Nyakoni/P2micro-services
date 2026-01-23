@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.revature.smartAppointment.Controller.Response.UserTableResponse;
 import com.revature.smartAppointment.Model.User;
 import com.revature.smartAppointment.Service.UserService;
 
@@ -37,5 +38,10 @@ public class UserController {
             return ResponseEntity.status(200).body(optionalUser.get());
         }
         return ResponseEntity.status(400).build();
+    }
+
+    @GetMapping("/table")
+    public ResponseEntity<List<UserTableResponse>> getUsersForTable() {
+        return ResponseEntity.ok(userService.getUsersForTable());
     }
 }

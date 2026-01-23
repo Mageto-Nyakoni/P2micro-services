@@ -59,8 +59,6 @@ public class PatientService implements ServiceInterface<Patient> {
             if (newPatient.getPhoneNumber() != null) patient.setPhoneNumber(newPatient.getPhoneNumber());
             if (newPatient.getDateOfBirth() != null) patient.setDateOfBirth(newPatient.getDateOfBirth());
             if (newPatient.getAddress() != null) patient.setAddress(newPatient.getAddress());
-
-
             if (newPatient.getBloodType() != null) patient.setBloodType(newPatient.getBloodType());
             if (newPatient.getAllergies() != null) patient.setAllergies(newPatient.getAllergies());
 

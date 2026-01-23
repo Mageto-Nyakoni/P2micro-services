@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,8 +15,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.revature.smartAppointment.Controller.Request.DoctorInfoRequest;
+import com.revature.smartAppointment.Model.Allergy;
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.Doctor;
+import com.revature.smartAppointment.Model.Patient;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
@@ -30,12 +34,14 @@ public class DoctorService implements ServiceInterface<Doctor> {
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final SpecialityService specialityService;
 
     @Autowired
-    public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, TimeSlotRepository timeSlotRepository) {
+    public DoctorService(DoctorRepository doctorRepository, AppointmentRepository appointmentRepository, TimeSlotRepository timeSlotRepository, SpecialityService specialityService) {
         this.doctorRepository = doctorRepository;
         this.appointmentRepository = appointmentRepository;
         this.timeSlotRepository = timeSlotRepository;
+        this.specialityService = specialityService;
     }
      
     @Override
@@ -55,12 +61,30 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
     @Override
     public Optional<Doctor> deleteById(int id) {
-        return Optional.empty();
+        Optional<Doctor> optionalDoctor = doctorRepository.findById(id);
+        if (optionalDoctor.isPresent()) {
+            doctorRepository.deleteById(id);
+        }
+        return optionalDoctor;
     }
 
     @Override
-    public Doctor updateById(int id, Doctor entity) {
+    public Doctor updateById(int id, Doctor newDoctor) {
+        Optional<Doctor> optionalDoctor = doctorRepository.findById(id);
+        if (optionalDoctor.isPresent()) {
+            Doctor doctor = optionalDoctor.get();
+            if (newDoctor.getExperienceYears() != null) doctor.setExperienceYears(newDoctor.getExperienceYears());
+            if (newDoctor.getGender() != null) doctor.setGender(newDoctor.getGender());
+            if (newDoctor.getSpeciality() != null) doctor.setSpeciality(newDoctor.getSpeciality());
+            if (newDoctor.getBio() != null) doctor.setBio(newDoctor.getBio());
+
+            return doctorRepository.save(doctor);
+        }
         return null;
+    }
+
+    public Optional<Doctor> findByUserId(int user_id) {
+        return doctorRepository.findDoctorByUser_UserId(user_id);
     }
 
     public List<DoctorAppointmentView> getTodaysAppointments(Integer doctorId) {
@@ -209,5 +233,16 @@ public class DoctorService implements ServiceInterface<Doctor> {
         private Integer slotId;
         private LocalTime startTime;
         private LocalTime endTime;
+    }
+
+    public Doctor convertRequestToObject(DoctorInfoRequest info) {
+        Doctor doctor = new Doctor();
+
+        doctor.setExperienceYears(info.getExperience());
+        doctor.setBio(info.getBio());
+        doctor.setGender(info.getGender());
+        doctor.setSpeciality(specialityService.findSpecialityBySpecialityName(info.getSpeciality()).get());
+        
+        return doctor;
     }
 }
