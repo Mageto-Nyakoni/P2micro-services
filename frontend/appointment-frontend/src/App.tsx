@@ -18,7 +18,7 @@ import EditPatientProfile from "./pages/patient/EditPatientProfile";
 
 import DoctorHome from "./pages/doctor/DoctorHome";
 import DoctorCalendar from "./pages/doctor/DoctorCalendar";
-import AdminSchedule from "./pages/admin/AdminSchedule";
+import AdminHome from "./pages/admin/AdminHome";
 import AdminStaffList from "./pages/admin/AdminStaffList";
 import Navbar from "./components/layout/NavBar/Navbar";
 import SuperHome from "./pages/super/SuperHome";
@@ -80,7 +80,7 @@ function App() {
             {/* Admin Protected Routes */}
             <Route path="/admin/home" element={
               <ProtectedRoute allowedRoles={["Admin"]}>
-                <AdminSchedule />
+                <AdminHome />
               </ProtectedRoute>
               } />
             <Route path="/admin/staff" element={
