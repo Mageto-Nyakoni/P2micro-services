@@ -12,7 +12,7 @@ type Props = {
     bloodTypes: BloodType[];
 }
 
-function formatPhoneNUmber(value: string) {
+export function formatPhoneNumber(value: string) {
     const digits = value.replace(/\D/g, "").slice(0, 10);
     const length = digits.length;
 
@@ -21,7 +21,7 @@ function formatPhoneNUmber(value: string) {
     return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
-function getAgeFromDOB(dob: string): number | null {
+export function getAgeFromDOB(dob: string): number | null {
     if (!dob) return null;
 
     const birthday = new Date(dob + "T00:00:00");
@@ -48,7 +48,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
         if (name === "phoneNumber") {
             onChange({
                 ...value,
-                phoneNumber: formatPhoneNUmber(inputValue),
+                phoneNumber: formatPhoneNumber(inputValue),
             });
             return;
         }
@@ -79,7 +79,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
         const enteredAge = Number(value.age);
         const computedAge = getAgeFromDOB(value.dateOfBirth);
 
-        if (computedAge != computedAge) {
+        if (computedAge != enteredAge) {
             alert(`Age and Birthday do not match. Based on DOB, age should be ${computedAge}`);
             return;
         }

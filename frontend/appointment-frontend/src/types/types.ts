@@ -122,3 +122,14 @@ export type PatientDetailsForm = {
     bloodType: string;      
     allergyIds: number[];   //checkbox
 };
+
+export type PatientEditForm = {
+  patientId: number;
+  address: string;
+  age: string;               // keep as string for inputs
+  dateOfBirth: string;
+  gender: "male" | "female" | "other";
+  phoneNumber: string;
+  bloodType: string;
+  allergyIds: number[];
+};

@@ -44,17 +44,6 @@ function PatientProfile() {
   if (error) return <p className="text-red-600">{error}</p>;
   if (!patient) return <p>Loading profile...</p>;
 
-  // const patient = {
-  //   name: "Jane Smith",
-  //   age: 23,
-  //   gender: "Female",
-  //   dob: "03/04/2003",
-  //   bloodType: "O+",
-  //   address: "123 Green Street, New York",
-  //   allergies: "Peanuts",
-  //   phoneNumber: "(901) 304-1852"
-  // };
-
   const appointments: Appointment[] = [
   {
     id: 1,
@@ -99,7 +88,7 @@ function PatientProfile() {
         </h2>
 
         <button
-          onClick={() => navigate("/patient/profile/edit")}
+          onClick={() => navigate("/patient/profile/edit", {state: { patient }})}
           className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
         >
           Edit Profile
