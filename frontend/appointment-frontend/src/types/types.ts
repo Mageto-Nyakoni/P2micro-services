@@ -15,6 +15,20 @@ export type Allergy = {
     name: string;
 };
 
+export type Speciality = {
+    description: string | null;
+    specialityName: string | null;
+    specialityId: number;
+    appointmentTypes: AppointmentType[];
+}
+
+export type AppointmentType = {
+    typeId: number;
+    name: string | null;
+    estimatedTime: number | null;
+    description: string | null;
+}
+
 export type User = {
     userId: number;
     email: string;
@@ -32,6 +46,15 @@ export type Patient = {
     gender: string | null;
     phoneNumber: string | null;
     allergies: Allergy[];
+    user: User;
+}
+
+export type Doctor = {
+    doctorId: number;
+    bio: string | null;
+    experienceYears: number | null;
+    gender: string | null;
+    speciality: Speciality | null;
     user: User;
 }
 

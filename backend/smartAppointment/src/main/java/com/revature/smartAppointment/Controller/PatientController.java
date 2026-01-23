@@ -25,8 +25,8 @@ import com.revature.smartAppointment.Util.JwtUtil;
 @RequestMapping("/smart-appointment/api/patients")
 @CrossOrigin(origins = "http://localhost:5173")
 public class PatientController {
-    private PatientService patientService;
-    private JwtUtil jwtUtil;
+    private final PatientService patientService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
     public PatientController(PatientService patientService, JwtUtil jwtUtil) {
