@@ -45,6 +45,7 @@ function EditPatientProfile() {
 
 	const [allergies, setAllergies] = useState<Allergy[]>([]);
 	const [bloodTypes, setBloodTypes] = useState<BloodType[]>([]);
+	const [loading, setLoading] = useState(true);
 
 	const [form, setForm] = useState<PatientEditForm>(emptyForm);
 
@@ -60,8 +61,12 @@ function EditPatientProfile() {
 	
 		(async () => {
 		  	try{
-				const allergyData = await getAllergies();
-				const bloodData = await getBloodType();
+				setLoading(true);
+
+				const [allergyData, bloodData] = await Promise.all([
+					getAllergies(),
+					getBloodType(),
+				]);
 
 				if (cancelled) return;
 
@@ -72,6 +77,8 @@ function EditPatientProfile() {
 		  	} catch (err) {
 				console.error(err);
 				if (!cancelled) setError("Failed to load Profile");
+		  	} finally {
+				if (!cancelled) setLoading(false);
 		  	}
 
 		})();
@@ -288,13 +295,14 @@ function EditPatientProfile() {
                             Blood Type
                         </label>
                         <select
+							disabled={loading}
                             name="bloodType"
                             value={form.bloodType}
                             onChange={handleChange}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 
                                         focus:outline-none focus:ring-2 focus:ring-purple-400"
                         >
-                            <option value="">Select blood type</option>
+                            <option value="">{loading ? "Loading blood types..." : "Select blood type"}</option>
                             {(bloodTypes ?? []).map((bt) => (
                                 <option key={bt.bloodTypeId} value={String(bt.name)}>
                                 {bt.name}
@@ -305,21 +313,27 @@ function EditPatientProfile() {
 
                     <div className="mb-2">
                         <p className="block text-sm mb-1 text-gray-600">
-                        Allergies (optional)
+                        Allergies
                         </p>
 
                         <div className="w-full rounded-lg border border-gray-300 px-4 py-2 
                                         focus:outline-none focus:ring-2 focus:ring-purple-400 max-h-40 overflow-auto space-y-2 pr-1">
-                        {allergies.map((a) => (
-                            <label key={a.allergyId} className="flex items-center gap-2 text-gray-700">
-                            <input
-                                type="checkbox"
-                                checked={form.allergyIds.includes(a.allergyId)}
-                                onChange={() => toggleAllergy(a.allergyId)}
-                            />
-                            {a.name}
-                            </label>
-                        ))}
+                        	{loading ? (
+								<p className="text-sm text-slate-500">Loading allergies...</p>
+							) : allergies.length === 0 ? (
+								<p className="text-sm text-slate-500">No allergies available.</p>
+							) : (
+								allergies.map((a) => (
+									<label key={a.allergyId} className="flex items-center gap-2 text-gray-700">
+										<input
+											type="checkbox"
+											checked={form.allergyIds.includes(a.allergyId)}
+											onChange={() => toggleAllergy(a.allergyId)}
+										/>
+										{a.name}
+									</label>
+								))
+							)}
                         </div>
                     </div>
 
