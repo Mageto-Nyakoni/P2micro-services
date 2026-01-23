@@ -83,9 +83,9 @@ public class AvailabilityWindowService {
     return windowRepository.findByDoctor_DoctorIdAndActiveTrue(doctorId);
 }*/
 
-
+@Transactional
 public List<AvailabilityWindowDTO> getWindowsForDoctor(Integer doctorId) {
-    List<AvailabilityWindow> windows = windowRepository.findByDoctor_DoctorIdAndActiveTrue(doctorId);
+    List<AvailabilityWindow> windows = windowRepository.findActiveWindowsByDoctorIdWithDoctor(doctorId);
 
     return windows.stream().map(w -> new AvailabilityWindowDTO(
         w.getWindowId(),
