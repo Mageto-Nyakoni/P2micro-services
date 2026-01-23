@@ -3,6 +3,7 @@ package com.revature.smartAppointment.Service;
 import com.revature.smartAppointment.Model.*;
 import com.revature.smartAppointment.Repository.*;
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
+import java.util.List;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -76,4 +77,8 @@ public class AvailabilityWindowService {
             current = slotEnd;
         }
     }
+
+    public List<AvailabilityWindow> getWindowsForDoctor(Integer doctorId) {
+    return windowRepository.findByDoctor_DoctorIdAndActiveTrue(doctorId);
+}
 }
