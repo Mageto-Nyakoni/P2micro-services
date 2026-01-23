@@ -8,6 +8,7 @@ import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/admin/doctors")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AdminAvailabilityController {
 
     private final AvailabilityWindowService availabilityWindowService;
