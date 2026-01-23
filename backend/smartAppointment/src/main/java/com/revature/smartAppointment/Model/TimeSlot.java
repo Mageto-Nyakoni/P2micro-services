@@ -37,9 +37,18 @@ public class TimeSlot {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
+     @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private TimeSlotStatus status;
+
     @PrePersist
     public void prePersist() {
         if (createdAt == null) createdAt = LocalDateTime.now();
+    
+
+     if (status == null) {
+            status = TimeSlotStatus.AVAILABLE;
+        }
     }
 
     public TimeSlot(LocalTime startTime, LocalTime endTime, LocalDate dateAvailable, Doctor doctor) {
