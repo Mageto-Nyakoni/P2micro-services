@@ -22,6 +22,7 @@ export const UserModal: React.FC<UserModalProps> = ({
         firstName: "",
         lastName: "",
         email: "",
+        password: "",
         privilege: initialPrivilege || "Doctor",
         speciality: "",
         gender: "other",
@@ -38,16 +39,24 @@ export const UserModal: React.FC<UserModalProps> = ({
                 firstName: user.firstName,
                 lastName: user.lastName,
                 email: user.email,
+                password: user.password || "",
                 privilege: user.privilege,
-                speciality: user.speciality || '',
+                speciality: user.speciality || "",
+                gender: user.gender,
+                experience: user.experience,
+                bio: user.bio
             });
         } else {
             setFormData({
-                firstName: '',
-                lastName: '',
-                email: '',
+                firstName: "",
+                lastName: "",
+                email: "",
+                password: "",
                 privilege: initialPrivilege || "Doctor",
-                speciality: '',
+                speciality: "",
+                experience: 0,
+                gender: "other",
+                bio: "",
             });
         }
         setErrors({});
@@ -88,11 +97,17 @@ export const UserModal: React.FC<UserModalProps> = ({
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Invalid email format';
         }
+        if(!formData.password.trim()) {
+            newErrors.password = 'Password is required';
+        }
         if (formData.privilege === 'Doctor' && !formData.speciality) {
             newErrors.speciality = 'Specialty is required for doctors';
         }
         if (formData.privilege === 'Doctor' && !formData.experience) {
             newErrors.experience = 'Years of Experience is required for doctors';
+        }
+        if (formData.privilege === 'Doctor' && !formData.gender) {
+            newErrors.experience = 'Gender is required for doctors';
         }
 
         setErrors(newErrors);
@@ -192,6 +207,28 @@ export const UserModal: React.FC<UserModalProps> = ({
                             )}
                         </div>
 
+                        {/* Password only when creating new user */}
+                        {!user && (
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Password
+                                </label>
+                                <input
+                                    type="text"
+                                    id="password"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                                        errors.password ? 'border-red-300' : 'border-gray-300'
+                                    }`}
+                                />
+                                {errors.password && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                                )}
+                            </div>
+                        )}
+                        
+
                         {/* Privilege */}
                         <div>
                             <label htmlFor="privilege" className="block text-sm font-medium text-gray-700 mb-1">
@@ -219,7 +256,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                         {formData.privilege === "Doctor" && (
                             <div>
                                 <label htmlFor="speciality" className="block text-sm font-medium text-gray-700 mb-1">
-                                    Specialty
+                                    Speciality
                                 </label>
                                 <select
                                     id="speciality"
@@ -238,6 +275,75 @@ export const UserModal: React.FC<UserModalProps> = ({
                                 </select>
                                 {errors.speciality && (
                                     <p className="mt-1 text-sm text-red-600">{errors.speciality}</p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Years of Experience (only for doctors) */}
+                        {formData.privilege === "Doctor" && (
+                            <div>
+                                <label htmlFor="experience" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Years of Experience
+                                </label>
+                                <input
+                                    type="number"
+                                    id="experience"
+                                    value={formData.experience}
+                                    onChange={(e) => setFormData({ ...formData, experience: Number(e.target.value)})}
+                                    min={1}
+                                    step={1}
+                                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                                        errors.experience ? 'border-red-300' : 'border-gray-300'
+                                    }`}
+                                />
+                                {errors.experience && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.experience}</p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Gender (only for doctors) */ }
+                        {formData.privilege === "Doctor" && (
+                            <div>
+                                <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Gender
+                                </label>
+                                <select
+                                    id="gender"
+                                    value={formData.gender}
+                                    onChange={(e) => setFormData({ ...formData, gender: e.target.value as "male" | "female" | "other"})}
+                                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                                        errors.gender ? 'border-red-300' : 'border-gray-300'
+                                    }`}
+                                >
+                                    <option value="">Select a specialty</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                {errors.gender && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.gender}</p>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Bio (only for doctors) */}
+                        {formData.privilege === "Doctor" && (
+                            <div>
+                                <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Bio
+                                </label>
+                                <input
+                                    type="textarea"
+                                    id="bio"
+                                    value={formData.bio}
+                                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                                    className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                                        errors.bio ? 'border-red-300' : 'border-gray-300'
+                                    }`}
+                                />
+                                {errors.bio && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.bio}</p>
                                 )}
                             </div>
                         )}
