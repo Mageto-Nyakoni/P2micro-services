@@ -11,4 +11,10 @@ import com.revature.smartAppointment.Model.TimeSlot;
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
 
     List<TimeSlot> findByDoctorDoctorId(Integer doctorId);
+
+    boolean existsByDoctorAndDateAvailableAndStartTime(
+            com.revature.smartAppointment.Model.Doctor doctor,
+            java.time.LocalDate dateAvailable,
+            java.time.LocalTime startTime
+    );
 }
