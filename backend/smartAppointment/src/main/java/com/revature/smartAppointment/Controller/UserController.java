@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,22 +12,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.smartAppointment.Controller.Response.UserTableResponse;
 import com.revature.smartAppointment.Model.User;
 import com.revature.smartAppointment.Service.UserService;
+import com.revature.smartAppointment.Util.JwtUtil;
 
 @RestController
 @RequestMapping("/smart-appointment/api/users")
 @CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
     private UserService userService;
+    private JwtUtil jwtUtil;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, JwtUtil jwtUtil) {
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping()
@@ -44,8 +49,24 @@ public class UserController {
     }
 
     @GetMapping("/table")
-    public ResponseEntity<List<UserTableResponse>> getUsersForTable() {
-        return ResponseEntity.ok(userService.getUsersForTable());
+    public ResponseEntity<?> getUsersForTable(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.substring(7);
+
+            if (!jwtUtil.validateToken(token)) {
+                throw new RuntimeException("Invalid token");
+            }
+
+            String privilege = jwtUtil.extractPrivilege(token);
+            if (privilege.equals("Super")) {
+                return ResponseEntity.ok(userService.getUsersForTable());
+            } else {
+                throw new RuntimeException("Unauthorized access");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
     }
 
     @PatchMapping("/{user_id}")
