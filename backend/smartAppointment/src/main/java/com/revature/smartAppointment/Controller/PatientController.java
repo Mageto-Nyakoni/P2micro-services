@@ -20,12 +20,13 @@ import com.revature.smartAppointment.Model.Patient;
 import com.revature.smartAppointment.Service.PatientService;
 import com.revature.smartAppointment.Util.JwtUtil;
 
+
 @RestController
 @RequestMapping("/smart-appointment/api/patients")
 @CrossOrigin(origins = "http://localhost:5173")
 public class PatientController {
-    private PatientService patientService;
-    private JwtUtil jwtUtil;
+    private final PatientService patientService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
     public PatientController(PatientService patientService, JwtUtil jwtUtil) {
@@ -57,6 +58,29 @@ public class PatientController {
             } else {
                 throw new RuntimeException("Invalid token");
             }
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+    
+    @GetMapping("/me")
+    public ResponseEntity<Patient> getMyPatient(@RequestHeader("Authorization") String authHeader) {
+        try {
+            String token = authHeader.substring(7);
+
+            if (!jwtUtil.validateToken(token)) {
+                throw new RuntimeException("Invalid token");
+            }
+
+            String privilege = jwtUtil.extractPrivilege(token);
+            if (!privilege .equals("Patient")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            int userId = jwtUtil.extractId(token);
+
+            return patientService.findByUserId(userId).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

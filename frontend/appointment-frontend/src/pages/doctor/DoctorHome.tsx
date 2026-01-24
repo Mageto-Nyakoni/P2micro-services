@@ -1,13 +1,19 @@
+import { AuthContext } from "@/auth/AuthContext";
+import { getMyDoctor } from "@/services/doctorServices";
+import { Doctor } from "@/types/doctorTypes";
+import { use, useContext, useEffect, useState } from "react";
+import { FaHospital } from "react-icons/fa6";
+
 export default function DoctorHome({
 
     // Sample data for demonstration purposes. Will connect to backend later.
-  doctor = {
-    name: "Dr. Ben Martinez",
-    speciality: "Cardiology",
-    experience: "15 years",
-    education: "MD, Harvard Medical School",
-    contact: "ben.martinez@hospital.com",
-  },
+  // doctor = {
+  //   name: "Dr. Ben Martinez",
+  //   speciality: "Cardiology",
+  //   experience: "15 years",
+  //   education: "MD, Harvard Medical School",
+  //   contact: "ben.martinez@hospital.com",
+  // },
   sectionTitle = "Today's Appointments",
   appointments = [
     { id: 1, patientName: "Michael Chen", age: 54, date: "Dec 18, 2024", time: "9:00 AM", type: "Follow-up" },
@@ -17,56 +23,69 @@ export default function DoctorHome({
     { id: 5, patientName: "David Kim", age: 58, date: "Dec 18, 2024", time: "4:00 PM", type: "Follow-up" },
   ],
 }) {
+
+  const [doctor, setDoctor] = useState <Doctor | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try{
+        const data = await getMyDoctor();
+        if (!cancelled) {
+          setDoctor(data);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setError("Failed to load Profile");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);    
+  
+  if (error) return <p className="text-red-600">{error}</p>;
+  if (!doctor) return <p>Loading profile...</p>;
+
+
   return (
     <div className="w-full min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Doctor Profile Section */}
         <div className="rounded-2xl p-8 mb-8 shadow-sm bg-white">
           <div className="flex gap-8 items-start flex-wrap">
-            {/* Doctor Image */}
-            <div className="flex-shrink-0">
-              <svg
-                width="120"
-                height="120"
-                viewBox="0 0 120 120"
-                className="rounded-full"
-                style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}
-                aria-hidden="true"
-              >
-                <circle cx="60" cy="45" r="20" fill="white" opacity="0.9" />
-                <ellipse cx="60" cy="85" rx="30" ry="20" fill="white" opacity="0.9" />
-              </svg>
+            {/* Hospital Icon */}
+            <div className="flex items-center justify-center w-32 h-32 bg-purple-100 rounded-full">
+              <FaHospital className="text-9xl"/>
             </div>
 
             {/* Doctor Info */}
             <div className="flex-1 min-w-[300px]">
               <h1 className="m-0 mb-2 font-bold leading-tight text-slate-800 text-3xl">
-                {doctor.name}
+                Dr. {doctor.user.firstName} {doctor.user.lastName}
               </h1>
               <p className="m-0 mb-6 font-medium text-slate-500 text-lg">
-                {doctor.speciality}
+                {doctor.speciality ? doctor.speciality.specialityName : "—"}
               </p>
 
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_4fr] gap-4">
                 <div>
                   <p className="m-0 mb-1 font-semibold uppercase tracking-wide text-slate-500 text-sm">
                     Experience
                   </p>
-                  <p className="m-0 text-slate-800">{doctor.experience}</p>
+                  <p className="m-0 text-slate-800">{doctor.experienceYears} years</p>
                 </div>
 
                 <div>
                   <p className="m-0 mb-1 font-semibold uppercase tracking-wide text-slate-500 text-sm">
-                    Education
+                    About
                   </p>
-                  <p className="m-0 text-slate-800">{doctor.education}</p>
-                </div>
-
-                <div>
-                  <p className="m-0 mb-1 font-semibold uppercase tracking-wide text-slate-500 text-sm">
-                    Contact
-                  </p>
-                  <p className="m-0 text-slate-800">{doctor.contact}</p>
+                  <p className="m-0 text-slate-800">{doctor.bio}</p>
                 </div>
               </div>
             </div>

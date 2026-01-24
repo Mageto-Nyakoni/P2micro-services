@@ -1,14 +1,9 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-// Layouts
-import GuestLayout from "./layouts/GuestLayout";
-import PatientLayout from "./layouts/PatientLayout";
-import DoctorLayout from "./layouts/DoctorLayout";
-
 // Pages
 import Login from "./pages/public/Login";
-import Register from "./pages/public/register/Register";
+import Register from "./pages/public/Register";
 import DoctorsBrowse from "./pages/public/DoctorsBrowse";
 
 import PatientHome from "./pages/patient/PatientHome";
@@ -18,9 +13,9 @@ import EditPatientProfile from "./pages/patient/EditPatientProfile";
 
 import DoctorHome from "./pages/doctor/DoctorHome";
 import DoctorCalendar from "./pages/doctor/DoctorCalendar";
-import AdminSchedule from "./pages/admin/AdminSchedule";
+import AdminHome from "./pages/admin/AdminHome";
 import AdminStaffList from "./pages/admin/AdminStaffList";
-import Navbar from "./components/layout/NavBar/Navbar";
+import Navbar from "./components/NavBar/Navbar";
 import SuperHome from "./pages/super/SuperHome";
 import Home from "./pages/public/Home";
 
@@ -80,7 +75,7 @@ function App() {
             {/* Admin Protected Routes */}
             <Route path="/admin/home" element={
               <ProtectedRoute allowedRoles={["Admin"]}>
-                <AdminSchedule />
+                <AdminHome />
               </ProtectedRoute>
               } />
             <Route path="/admin/staff" element={

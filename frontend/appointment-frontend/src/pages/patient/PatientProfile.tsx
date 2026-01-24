@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getMyPatient } from "@/services/patientServices";
+import { Patient } from "@/types/patientTypes";
 
 type Appointment = {
   id: number;
@@ -9,21 +12,37 @@ type Appointment = {
   canRebook: boolean;
 };
 
+
 function PatientProfile() {
   const navigate = useNavigate();
 
-  const patient = {
-    name: "Jane Smith",
-    age: 23,
-    gender: "Female",
-    dob: "03/04/2003",
-    bloodGroup: "O+",
-    address: "123 Green Street, New York",
-    allergies: "Peanuts",
-    medicalHistory: "No chronic illness",
-    lifestyle: "Vegetarian, exercises regularly",
-    photo: "https://i.pravatar.cc/150?img=47"
-  };
+  const [patient, setPatient] = useState <Patient | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try{
+        const data = await getMyPatient();
+        if (!cancelled) {
+          setPatient(data);
+        }
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setError("Failed to load Profile");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    }
+  }, []);
+
+  if (error) return <p className="text-red-600">{error}</p>;
+  if (!patient) return <p>Loading profile...</p>;
 
   const appointments: Appointment[] = [
   {
@@ -64,12 +83,12 @@ function PatientProfile() {
           ← Back
         </button>
 
-        <h2 className="text-2xl font-bold text-purple-700">
+        <h2 className="text-4xl font-bold text-purple-700">
           Patient Profile
         </h2>
 
         <button
-          onClick={() => navigate("/patient/profile/edit")}
+          onClick={() => navigate("/patient/profile/edit", {state: { patient }})}
           className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600"
         >
           Edit Profile
@@ -81,23 +100,18 @@ function PatientProfile() {
         
         {/* Top Section */}
         <div className="flex flex-col md:flex-row items-center gap-6 border-b pb-6">
-          <img
-            src={patient.photo}
-            alt="Patient"
-            className="w-32 h-32 rounded-full border-4 border-purple-200"
-          />
 
           <div className="text-center md:text-left">
             <h3 className="text-2xl font-bold text-gray-800">
-              {patient.name}
+              {patient.user.firstName} {patient.user.lastName}
             </h3>
             <p className="text-gray-500">
-              {patient.gender}, {patient.age} years
+            {patient.gender
+              ? patient.gender.charAt(0).toUpperCase() + patient.gender.slice(1)
+              : "—"
+            }, {patient.age} years
             </p>
 
-            <div className="mt-3 inline-block bg-purple-100 text-purple-700 px-4 py-1 rounded-full font-medium">
-              Blood Group: {patient.bloodGroup}
-            </div>
           </div>
         </div>
 
@@ -105,14 +119,14 @@ function PatientProfile() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
           
           <ProfileCard title="Personal Information">
-            <ProfileItem label="Date of Birth" value={patient.dob} />
+            <ProfileItem label="Date of Birth" value={patient.dateOfBirth} />
             <ProfileItem label="Address" value={patient.address} />
+            <ProfileItem label="Phone Number" value={patient.phoneNumber} />
           </ProfileCard>
 
           <ProfileCard title="Medical Information">
-            <ProfileItem label="Allergies" value={patient.allergies} />
-            <ProfileItem label="Medical History" value={patient.medicalHistory} />
-            <ProfileItem label="Lifestyle" value={patient.lifestyle} />
+            <ProfileItem label="Allergies" value={patient.allergies?.length ? patient.allergies.map(a => a.name).join(", ") : "None"} />
+            <ProfileItem label="Blood Type" value={patient.bloodType?.name ?? "-"} />
           </ProfileCard>
 
         </div>
@@ -181,7 +195,7 @@ function ProfileCard({ title, children }: { title: string; children: React.React
   );
 }
 
-function ProfileItem({ label, value }: { label: string; value: string }) {
+function ProfileItem({ label, value }: { label: string; value: string | null}) {
   return (
     <div className="flex justify-between text-sm">
       <span className="text-gray-600 font-medium">{label}</span>

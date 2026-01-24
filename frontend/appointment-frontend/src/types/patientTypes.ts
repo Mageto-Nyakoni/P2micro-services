@@ -1,8 +1,15 @@
+import { Privilege, User } from "./userTypes";
 
-//Reference Tables
-export type Privilege = {
-    privilegeId: number;
-    roleName: string;
+export type Patient = {
+    patientId: number;
+    address: string | null;
+    age: number | null;
+    bloodType: BloodType | null;
+    dateOfBirth: string | null;
+    gender: string | null;
+    phoneNumber: string | null;
+    allergies: Allergy[];
+    user: User;
 }
 
 export type BloodType = {
@@ -15,24 +22,6 @@ export type Allergy = {
     name: string;
 };
 
-//Create a User on Step 1 of Registration. (POST /auth/register)
-export type RegisterUserRequest = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    privilegeId: number;
-};
-
-export type RegisterResponse = {
-    userId: number;
-    email: string;
-    privilege: Privilege;
-};
-
-
-
-//Create a Patient on Step 2 of Registration (PATCH /patients/{patientID})
 export type PatchPatientRequest = {
     address: string;
     age: number;
@@ -62,14 +51,6 @@ export type PatchPatientResponse = {
     };
 };
 
-//UI Forms
-export type RegisterUserForm = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-};
-
 export type PatientDetailsForm = {
     address: string
     age: string;
@@ -78,4 +59,15 @@ export type PatientDetailsForm = {
     dateOfBirth: string;
     bloodType: string;      
     allergyIds: number[];   //checkbox
+};
+
+export type PatientEditForm = {
+  patientId: number;
+  address: string;
+  age: string;               // keep as string for inputs
+  dateOfBirth: string;
+  gender: "male" | "female" | "other";
+  phoneNumber: string;
+  bloodType: string;
+  allergyIds: number[];
 };

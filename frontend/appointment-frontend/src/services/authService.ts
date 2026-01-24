@@ -1,7 +1,7 @@
-import { Role } from "../components/layout/NavBar/types";
+import { Role } from "../components/NavBar/types";
 import { User } from "../auth/AuthContext";
 import { http } from "./http";
-import { RegisterResponse, RegisterUserRequest } from "@/pages/public/register/types";
+import { RegisterResponse, RegisterUserRequest } from "@/types/userTypes";
 
 type LoginResponse = {
   userId: number;

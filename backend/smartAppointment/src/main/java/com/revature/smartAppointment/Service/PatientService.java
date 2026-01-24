@@ -1,5 +1,8 @@
 package com.revature.smartAppointment.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +27,14 @@ public class PatientService implements ServiceInterface<Patient> {
         this.bloodTypeService = bloodTypeService;
         this.allergyService = allergyService;
     }
-
+     
     @Override
     public Patient save(Patient entity) {
         return patientRepository.save(entity);
     }
 
     @Override
+    @Transactional
     public Optional<Patient> findById(int id) {
         return patientRepository.findById(id);
     }
@@ -66,7 +70,8 @@ public class PatientService implements ServiceInterface<Patient> {
         }
         return null;
     }
-
+     
+    @Transactional
     public Optional<Patient> findByUserId(int user_id) {
         return patientRepository.findPatientByUser_UserId(user_id);
     }

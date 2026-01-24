@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { Role } from "../components/layout/NavBar/types";
+import { Role } from "../components/NavBar/types";
 
 //SHAPE OF AUTH STATE
 export type User = {

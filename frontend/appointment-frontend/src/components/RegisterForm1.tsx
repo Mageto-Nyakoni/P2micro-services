@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { RegisterUserForm } from "../pages/public/register/types";
+import { RegisterUserForm } from "../types/userTypes";
 
 type Props = {
     value: RegisterUserForm;
