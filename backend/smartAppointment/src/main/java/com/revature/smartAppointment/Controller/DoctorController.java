@@ -79,7 +79,6 @@ public class DoctorController {
                 int doctor_id = doctorService.findByUserId(user_id).get().getDoctorId();
 
                 Doctor newDoctor = doctorService.convertRequestToObject(doctorInfo);
-                System.out.println(newDoctor.toString());
 
                 Doctor doctor = doctorService.updateById(doctor_id, newDoctor);
 
@@ -90,7 +89,6 @@ public class DoctorController {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }

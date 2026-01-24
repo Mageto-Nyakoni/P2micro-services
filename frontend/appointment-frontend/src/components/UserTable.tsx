@@ -49,7 +49,7 @@ export const UserTable: React.FC<UserTableProps> = ({ users, onEdit, onDelete })
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                     {users.map((user) => (
-                        <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                        <tr key={user.userId} className="hover:bg-gray-50 transition-colors">
                             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                 {user.privilege === "Doctor" ? "Dr." : ""} {user.firstName} {user.lastName}
                             </td>

@@ -97,25 +97,28 @@ export const UserModal: React.FC<UserModalProps> = ({
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Invalid email format';
         }
-        if(!formData.password.trim()) {
+        if(!user && !formData.password.trim()) {
             newErrors.password = 'Password is required';
         }
-        if (formData.privilege === 'Doctor' && !formData.speciality) {
-            newErrors.speciality = 'Specialty is required for doctors';
+        if (formData.privilege === 'Doctor') {
+            if (!formData.speciality) {
+                newErrors.speciality = 'Specialty is required for doctors';
+            }
+            if (!formData.experience) {
+                newErrors.experience = 'Years of Experience is required for doctors';
+            }
+            if (!formData.gender) {
+                newErrors.experience = 'Gender is required for doctors';
+            }
         }
-        if (formData.privilege === 'Doctor' && !formData.experience) {
-            newErrors.experience = 'Years of Experience is required for doctors';
-        }
-        if (formData.privilege === 'Doctor' && !formData.gender) {
-            newErrors.experience = 'Gender is required for doctors';
-        }
-
+        
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         if (validate()) {
             onSubmit(formData);
             onClose();
@@ -244,11 +247,12 @@ export const UserModal: React.FC<UserModalProps> = ({
                                         speciality: e.target.value !== "Doctor" ? "" : formData.speciality,
                                     })
                                 }
+                                disabled={ user ? true : false }
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                             >
-                            <option value="Doctor">Doctor</option>
-                            <option value="Admin">Admin</option>
-                            <option value="Super">Super User</option>
+                                <option value="Doctor">Doctor</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Super">Super User</option>
                             </select>
                         </div>
 

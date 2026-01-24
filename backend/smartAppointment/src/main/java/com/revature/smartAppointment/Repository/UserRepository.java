@@ -23,7 +23,10 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             u.lastName,
             u.email,
             p.roleName,
-            s.specialityName
+            s.specialityName,
+            d.experienceYears,
+            d.gender,
+            d.bio
         )
         FROM User u
         JOIN u.privilege p

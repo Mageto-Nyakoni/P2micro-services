@@ -45,6 +45,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     }
      
     @Override
+    @Transactional
     public Doctor save(Doctor doctor) {
         return doctorRepository.save(doctor);
     }
@@ -242,6 +243,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         doctor.setBio(info.getBio());
         doctor.setGender(info.getGender());
         doctor.setSpeciality(specialityService.findSpecialityBySpecialityName(info.getSpeciality()).get());
+        System.out.println(doctor);
         
         return doctor;
     }

@@ -49,7 +49,7 @@ public class AuthService {
 
     @Transactional
     public RegisterResponse validateRegistration(RegisterRequest registerRequest) {
-        if (registerRequest.getFirstName().length() == 0 || registerRequest.getLastName().length() == 0 || registerRequest.getEmail().length() == 0 || registerRequest.getPassword().length() == 0 || registerRequest.getPrivilegeId() == null) {
+        if (registerRequest.getFirstName().isEmpty() || registerRequest.getLastName().isEmpty() || registerRequest.getEmail().isEmpty() || registerRequest.getPassword().isEmpty() || registerRequest.getPrivilegeId() == null) {
             throw new RuntimeException("Error: one or more required fields are empty");
         }
         Optional<User> optionalUser = userService.findUserByEmail(registerRequest.getEmail());
@@ -69,7 +69,7 @@ public class AuthService {
             patient.setUser(newUser);
             patientService.save(patient);
         }
-        if (registerRequest.getPrivilegeId() == 2) {
+        else if (registerRequest.getPrivilegeId() == 2) {
             Doctor doctor = new Doctor();
             doctor.setUser(newUser);
             doctorService.save(doctor);

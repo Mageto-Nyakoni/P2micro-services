@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { User, Privilege, CreateUserPayload } from './types';
+import { RegisterResponse, Privilege as FullPrivilege } from '../public/register/types';
 //import { mockUsers } from '../data/mockUsers';
 import { UserTable } from '../../components/UserTable';
 import { CreateUserDropdown } from '../../components/CreateUserDropdown';
 import { UserModal } from '../../components/UserModal';
 import { DeleteConfirmModal } from '../../components/DeleteConfirmModal';
-import { getUsersForTable } from '@/services/superService';
+import { deleteUser, getUsersForTable, patchDoctor, patchUser, registerUser } from '@/services/superService';
 import { ShieldCheckIcon } from '@heroicons/react/24/solid';
 
 const SuperHome: React.FC = () => {
@@ -52,34 +53,73 @@ const SuperHome: React.FC = () => {
         setIsDeleteModalOpen(true);
     };
 
-    const handleUserSubmit = (data: CreateUserPayload) => {
-        if (selectedUser) {
-            // Edit existing user
-            setUsers((prev) =>
-                prev.map((u) =>
-                    u.id === selectedUser.id
-                    ? { ...u, ...data }
-                    : u
-                )
-            );
-        } else {
-            // Create new user
-            const newUser: User = {
-                id: Date.now(),
-                ...data,
-            };
-            setUsers((prev) => [...prev, newUser]);
+    const handleUserSubmit = async (data: CreateUserPayload) => {
+        try {
+            if (selectedUser) {
+                // Edit existing user
+                let updatedUser: User | undefined = undefined;
+
+                updatedUser = await patchUser(selectedUser.userId, data);
+
+                if (selectedUser.privilege === "Doctor") {
+                    await patchDoctor(selectedUser.userId, data);
+                    updatedUser = { ...selectedUser, ...data };
+                }
+
+                setUsers((prev) =>
+                    prev.map((u) => (u.userId === selectedUser.userId ? { ...u, ...data } : u ))
+                );
+            } else {
+                // Create new user
+                const created: RegisterResponse = await registerUser(data);
+
+                if (data.privilege === "Doctor") {
+                    const doctorUpdate = await patchDoctor(created.userId, data);
+                    
+                    const newUser: User = {
+                        userId: created.userId,
+                        firstName: data.firstName,
+                        lastName: data.lastName,
+                        email: created.email,
+                        privilege: data.privilege,
+                        speciality: doctorUpdate.speciality.specialityName,
+                        gender: doctorUpdate.gender,
+                        experience: doctorUpdate.experience,
+                        bio: doctorUpdate.bio
+                    };
+
+                    setUsers((prev) => [...prev, newUser]);
+                } else {
+                    const newUser: User = {
+                        userId: created.userId, 
+                        firstName: data.firstName, 
+                        lastName: data.lastName, 
+                        email: created.email, 
+                        privilege: data.privilege
+                    }
+                    setUsers((prev) => [...prev, newUser]);
+                }
+            }
+
+            setIsUserModalOpen(false);
+            setSelectedUser(null);
+        } catch (err) {
+            console.error(err);
         }
-        setIsUserModalOpen(false);
-        setSelectedUser(null);
     };
 
-    const handleDeleteConfirm = () => {
-        if (selectedUser) {
-            setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
+    const handleDeleteConfirm = async () => {
+        try {
+            if (selectedUser) {
+                await deleteUser(selectedUser.userId);
+                setUsers((prev) => prev.filter((u) => u.userId !== selectedUser.userId));
+            }
+        
+            setIsDeleteModalOpen(false);
+            setSelectedUser(null);
+        } catch (err) {
+            console.error(err)
         }
-        setIsDeleteModalOpen(false);
-        setSelectedUser(null);
     };
 
     return (

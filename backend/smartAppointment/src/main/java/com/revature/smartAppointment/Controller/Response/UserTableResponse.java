@@ -12,4 +12,7 @@ public class UserTableResponse {
     private String email;
     private String privilege;
     private String speciality;
+    private Integer experience;
+    private String gender;
+    private String bio;
 }

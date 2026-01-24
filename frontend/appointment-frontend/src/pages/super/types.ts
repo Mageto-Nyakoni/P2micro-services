@@ -6,7 +6,7 @@ export type Speciality = {
 }
 
 export interface User {
-    id: number;
+    userId: number;
     firstName: string;
     lastName: string;
     email: string;
@@ -31,5 +31,8 @@ export interface CreateUserPayload {
 }
 
 export interface PatchDoctorResponse {
-
+    speciality?: string;
+    experience?: number;
+    gender?: "male" | "female" | "other";
+    bio?: string;
 }

@@ -15,18 +15,18 @@ public class Doctor {
     @Column(name = "doctor_id")
     private Integer doctorId;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true, nullable = false)
     private User user;
 
-    @Column(name = "experience_years", nullable = false)
+    @Column(name = "experience_years")
     private Integer experienceYears;
 
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     private String gender;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "speciality_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "speciality_id")
     private Speciality speciality;
 
     @Column(name = "bio", length = 1000)
