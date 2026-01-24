@@ -1,4 +1,4 @@
-import { BloodType } from "@/types/types";
+import { BloodType } from "@/types/patientTypes";
 import { http } from "./http";
 
 export async function getBloodType(): Promise<BloodType[]> {

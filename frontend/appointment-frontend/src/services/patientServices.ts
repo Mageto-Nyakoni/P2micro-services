@@ -1,5 +1,5 @@
 
-import { PatchPatientRequest, PatchPatientResponse, Patient } from "@/types/types";
+import { PatchPatientRequest, PatchPatientResponse, Patient } from "@/types/patientTypes";
 import { http } from "./http";
 
 export async function patchPatient(userID: number, payload: PatchPatientRequest) : Promise<PatchPatientResponse> {

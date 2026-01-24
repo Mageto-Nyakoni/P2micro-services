@@ -1,41 +1,4 @@
-
-//Reference Tables
-export type Privilege = {
-    privilegeId: number;
-    roleName: string;
-}
-
-export type BloodType = {
-    bloodTypeId: number;
-    name: string;
-};
-
-export type Allergy = {
-    allergyId: number;
-    name: string;
-};
-
-export type Speciality = {
-    description: string | null;
-    specialityName: string | null;
-    specialityId: number;
-    appointmentTypes: AppointmentType[];
-}
-
-export type AppointmentType = {
-    typeId: number;
-    name: string | null;
-    estimatedTime: number | null;
-    description: string | null;
-}
-
-export type User = {
-    userId: number;
-    email: string;
-    firstName: string;
-    lastName: string;
-    privilege?: Privilege;
-}
+import { Privilege, User } from "./userTypes";
 
 export type Patient = {
     patientId: number;
@@ -49,33 +12,16 @@ export type Patient = {
     user: User;
 }
 
-export type Doctor = {
-    doctorId: number;
-    bio: string | null;
-    experienceYears: number | null;
-    gender: string | null;
-    speciality: Speciality | null;
-    user: User;
-}
-
-//Create a User on Step 1 of Registration. (POST /auth/register)
-export type RegisterUserRequest = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    privilegeId: number;
+export type BloodType = {
+    bloodTypeId: number;
+    name: string;
 };
 
-export type RegisterResponse = {
-    userId: number
-  email: string
-  privilege: number
+export type Allergy = {
+    allergyId: number;
+    name: string;
 };
 
-
-
-//Create a Patient on Step 2 of Registration (PATCH /patients/{patientID})
 export type PatchPatientRequest = {
     address: string;
     age: number;
@@ -103,14 +49,6 @@ export type PatchPatientResponse = {
         privilege: Privilege;
         password?: string;
     };
-};
-
-//UI Forms
-export type RegisterUserForm = {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
 };
 
 export type PatientDetailsForm = {

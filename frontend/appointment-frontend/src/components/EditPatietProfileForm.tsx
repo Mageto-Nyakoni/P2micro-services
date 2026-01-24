@@ -1,4 +1,4 @@
-import { Allergy, BloodType, PatientEditForm } from "@/types/types";
+import { Allergy, BloodType, PatientEditForm } from "@/types/patientTypes";
 import { formatPhoneNumber, getAgeFromDOB } from "@/utils/validators";
 
 type Props = {

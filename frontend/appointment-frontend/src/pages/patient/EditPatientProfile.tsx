@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { formatPhoneNumber, getAgeFromDOB } from "@/utils/validators";
-import { Allergy, BloodType, PatchPatientRequest, Patient, PatientEditForm } from "@/types/types";
 import { getMyPatient, patchPatient } from "@/services/patientServices";
 import { getAllergies } from "@/services/allergyService";
 import { getBloodType } from "@/services/bloodTypeService";
 import EditPatietProfileForm from "@/components/EditPatietProfileForm";
+import { Allergy, BloodType, PatchPatientRequest, Patient, PatientEditForm } from "@/types/patientTypes";
 
 const emptyForm: PatientEditForm = {
   patientId: 0,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyPatient } from "@/services/patientServices";
-import { Patient } from "@/types/types";
+import { Patient } from "@/types/patientTypes";
 
 type Appointment = {
   id: number;

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Allergy, BloodType, PatientDetailsForm } from "../types/types"
 import { formatPhoneNumber, getAgeFromDOB } from "@/utils/validators";
+import { Allergy, BloodType, PatientDetailsForm } from "@/types/patientTypes";
 
 type Props = {
     value: PatientDetailsForm;

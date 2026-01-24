@@ -1,6 +1,6 @@
 import { AuthContext } from "@/auth/AuthContext";
 import { getMyDoctor } from "@/services/doctorServices";
-import { Doctor } from "@/types/types";
+import { Doctor } from "@/types/doctorTypes";
 import { use, useContext, useEffect, useState } from "react";
 import { FaHospital } from "react-icons/fa6";
 

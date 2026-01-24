@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import RegisterForm1 from "../../components/RegisterForm1";
 import RegisterForm2 from "../../components/RegisterForm2";
-import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm, RegisterUserForm } from "../../types/types";
 import { register, login } from "../../services/authService";
 import { patchPatient } from "@/services/patientServices";
 import { setTokenGetter } from "@/services/http";
 import { getAllergies } from "@/services/allergyService";
 import { getBloodType } from "@/services/bloodTypeService";
+import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm } from "@/types/patientTypes";
+import { RegisterUserForm } from "@/types/userTypes";
 
 
 
