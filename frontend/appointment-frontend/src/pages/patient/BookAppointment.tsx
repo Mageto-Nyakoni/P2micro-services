@@ -1,7 +1,7 @@
 import DoctorBrowseFilters from "@/components/doctor/DoctorBrowseFilters";
 import { useDoctorsBrowse } from "@/services/useDoctorBrowse";
 import { AppointmentType, Doctor } from "@/types/doctorTypes";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function BookAppointment() {
@@ -9,7 +9,7 @@ export default function BookAppointment() {
 	const location = useLocation();
 
 	const prefillQuery: string | undefined = location.state?.prefillQuery;
-
+	const didPrefillRef = useRef(false);
 
   	const preselectedDoctorId: number | undefined =
 		location.state?.doctorId ??
@@ -41,16 +41,17 @@ export default function BookAppointment() {
 
 	useEffect(() => {
 		// Prefill search bar
-		if (prefillQuery) {
+		if (!didPrefillRef.current && prefillQuery) {
 			setQuery(prefillQuery);
+			didPrefillRef.current = true;
 		}
 
 		// Auto-select doctor
 		if (preselectedDoctorId && filteredDoctors.length > 0) {
 			const found = filteredDoctors.find((d) => d.doctorId === preselectedDoctorId);
 			if (found) {
-			setSelectedDoctor(found);
-			setSelectedAppointment(null);
+				setSelectedDoctor(found);
+				setSelectedAppointment(null);
 			}
 		}
 	}, [prefillQuery, preselectedDoctorId, filteredDoctors, setQuery]);
