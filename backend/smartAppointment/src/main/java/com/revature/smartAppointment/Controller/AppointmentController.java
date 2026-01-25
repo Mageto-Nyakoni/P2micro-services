@@ -1,10 +1,13 @@
 package com.revature.smartAppointment.Controller;
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.AppointmentType;
+import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.dto.AppointmentDto;
 import com.revature.smartAppointment.dto.BookAppointmentRequestDto;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 import com.revature.smartAppointment.Service.AppointmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,10 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentTypeRepository appointmentTypeRepository;
+     
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
 
     @Autowired
     public AppointmentController(AppointmentService appointmentService) {
@@ -50,13 +57,18 @@ public class AppointmentController {
     }
 
     // Get patient appointments
-    @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<AppointmentDto>> getPatientAppointments(
-            @PathVariable Integer patientId) {
+ @GetMapping("/patients/{patientId}/appointments")
+public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patientId) {
+    List<Appointment> appointments = appointmentRepository.findByPatientPatientId(patientId);
 
-        List<AppointmentDto> appointments =
-                appointmentService.getAppointmentsForPatient(patientId);
-
-        return ResponseEntity.ok(appointments);
-    }
+    return appointments.stream()
+            .map(app -> new AppointmentDto(
+                    app.getAppointmentId(),
+                    app.getDoctor().getUser().getFirstName() + " " + app.getDoctor().getUser().getLastName(),
+                    app.getAppointmentType().getName(),
+                    app.getDateTimeScheduled(),
+                    app.getStatus()
+            ))
+            .collect(Collectors.toList());
+}
 }
