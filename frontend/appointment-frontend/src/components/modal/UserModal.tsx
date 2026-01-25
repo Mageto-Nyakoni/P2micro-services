@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Privilege, Speciality, CreateUserPayload } from "@/pages/super/types";
+import { User, Privilege, Speciality, CreateUserPayload } from "@/types/superTypes";
 import { getSpecialities } from "@/services/superService";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 

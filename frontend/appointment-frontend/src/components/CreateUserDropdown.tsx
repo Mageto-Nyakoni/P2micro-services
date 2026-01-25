@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Privilege } from "@/pages/super/types";
+import { Privilege } from "@/types/superTypes";
 import { PlusIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 
 interface CreateUserDropdownProps {

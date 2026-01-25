@@ -1,6 +1,6 @@
 import { http } from "./http";
-import { Speciality, User, CreateUserPayload, PatchDoctorResponse} from "@/pages/super/types";
-import { RegisterUserRequest, RegisterResponse } from "@/pages/public/register/types";
+import { Speciality, User, CreateUserPayload, PatchDoctorResponse} from "@/types/superTypes";
+import { RegisterUserRequest, RegisterResponse } from "@/types/userTypes";
 
 export async function getSpecialities(): Promise<Speciality[]> {
     const {data} = await http.get<Speciality[]>("/specialities");

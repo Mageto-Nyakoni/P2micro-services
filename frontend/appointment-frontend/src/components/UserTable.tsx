@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "@/pages/super/types";
+import { User } from "@/types/superTypes";
 import { PrivilegeBadge } from "./PrivilegeBadge";
 import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 

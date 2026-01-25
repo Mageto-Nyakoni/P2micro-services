@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { User, Privilege, CreateUserPayload } from './types';
-import { RegisterResponse, Privilege as FullPrivilege } from '../public/register/types';
-//import { mockUsers } from '../data/mockUsers';
+import { User, Privilege, CreateUserPayload } from '../../types/superTypes';
+import { RegisterResponse, Privilege as FullPrivilege } from '../../types/userTypes';
 import { UserTable } from '../../components/UserTable';
 import { CreateUserDropdown } from '../../components/CreateUserDropdown';
-import { UserModal } from '../../components/UserModal';
-import { DeleteConfirmModal } from '../../components/DeleteConfirmModal';
+import { UserModal } from '../../components/modal/UserModal';
+import { DeleteConfirmModal } from '../../components/modal/DeleteConfirmModal';
 import { deleteUser, getUsersForTable, patchDoctor, patchUser, registerUser } from '@/services/superService';
 import { ShieldCheckIcon } from '@heroicons/react/24/solid';
 

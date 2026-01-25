@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "@/pages/super/types";
+import { User } from "@/types/superTypes";
 import { ExclamationTriangleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 interface DeleteConfirmModalProps {

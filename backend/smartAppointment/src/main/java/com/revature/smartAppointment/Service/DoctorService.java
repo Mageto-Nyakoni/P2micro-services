@@ -55,10 +55,6 @@ public class DoctorService implements ServiceInterface<Doctor> {
         return doctorRepository.findById(id);
     }
 
-    public Optional<Doctor> findByUserId(int user_id) {
-        return doctorRepository.findDoctorByUser_UserId(user_id);
-    }
-
     @Override
     public List<Doctor> findAll() {
         return doctorRepository.findAll();

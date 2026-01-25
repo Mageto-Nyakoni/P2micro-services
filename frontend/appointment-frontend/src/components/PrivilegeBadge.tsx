@@ -1,5 +1,5 @@
 import React from "react";
-import { Privilege } from "@/pages/super/types";
+import { Privilege } from "@/types/superTypes";
 
 interface PrivilegeBadgeProps {
     privilege: Privilege;
