@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
+import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Model.Appointment;
 
 import java.time.LocalDateTime;
@@ -22,5 +22,7 @@ public interface AppointmentRepository extends JpaRepository< Appointment, Integ
             LocalDateTime start,
             LocalDateTime end
     );
+       List<Appointment> findByPatientPatientId(Integer patientId);
+      List<Appointment> findByPatientPatientIdAndStatus(Integer patientId, AppointmentStatus status);
 
 }

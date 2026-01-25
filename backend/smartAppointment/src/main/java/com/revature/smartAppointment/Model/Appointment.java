@@ -9,10 +9,12 @@ import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 
 @Entity
 @Table(name = "appointment")
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
