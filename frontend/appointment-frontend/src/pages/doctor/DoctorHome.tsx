@@ -2,7 +2,7 @@ import { AuthContext } from "@/auth/AuthContext";
 import { getMyDoctor } from "@/services/doctorServices";
 import { Doctor } from "@/types/doctorTypes";
 import { use, useContext, useEffect, useState } from "react";
-import { FaHospital } from "react-icons/fa6";
+import { FaBriefcase, FaClock, FaHospital } from "react-icons/fa6";
 
 export default function DoctorHome({
 
@@ -58,34 +58,43 @@ export default function DoctorHome({
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Doctor Profile Section */}
         <div className="rounded-2xl p-8 mb-8 shadow-sm bg-white">
-          <div className="flex gap-8 items-start flex-wrap">
+          <div className="flex gap-6 items-start">
             {/* Hospital Icon */}
-            <div className="flex items-center justify-center w-32 h-32 bg-purple-100 rounded-full">
-              <FaHospital className="text-9xl"/>
+            <div className="p-4 bg-indigo-100 rounded-xl shrink-0">
+              <FaHospital className="text-5xl text-indigo-600"/>
             </div>
 
             {/* Doctor Info */}
-            <div className="flex-1 min-w-[300px]">
-              <h1 className="m-0 mb-2 font-bold leading-tight text-slate-800 text-3xl">
-                Dr. {doctor.user.firstName} {doctor.user.lastName}
-              </h1>
-              <p className="m-0 mb-6 font-medium text-slate-500 text-lg">
-                {doctor.speciality ? doctor.speciality.specialityName : "—"}
-              </p>
+            <div className="flex-1">
+              <div className="mb-6">
+                <h1 className="m-0 mb-1 font-bold text-2xl text-slate-800">
+                  Dr. {doctor.user.firstName} {doctor.user.lastName}
+                </h1>
+                <p className="m-0 font-medium text-indigo-600 text-base">
+                  {doctor.speciality ? doctor.speciality.specialityName : "—"}
+                </p>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-[1fr_4fr] gap-4">
-                <div>
-                  <p className="m-0 mb-1 font-semibold uppercase tracking-wide text-slate-500 text-sm">
-                    Experience
-                  </p>
-                  <p className="m-0 text-slate-800">{doctor.experienceYears} years</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                  <div className="p-2 bg-indigo-100 rounded-full">
+                    <FaBriefcase className="text-indigo-600 text-sm" />
+                  </div>
+                  <div>
+                    <p className="m-0 text-xs font-medium text-slate-500 uppercase tracking-wide">
+                      Experience
+                    </p>
+                    <p className="m-0 text-slate-800 font-semibold">
+                      {doctor.experienceYears} years
+                    </p>
+                  </div>
                 </div>
 
-                <div>
-                  <p className="m-0 mb-1 font-semibold uppercase tracking-wide text-slate-500 text-sm">
+                <div className="p-3 bg-slate-50 rounded-lg sm:col-span-2">
+                  <p className="m-0 mb-2 text-xs font-medium text-slate-500 uppercase tracking-wide">
                     About
                   </p>
-                  <p className="m-0 text-slate-800">{doctor.bio}</p>
+                  <p className="m-0 text-slate-700 leading-relaxed">{doctor.bio}</p>
                 </div>
               </div>
             </div>
