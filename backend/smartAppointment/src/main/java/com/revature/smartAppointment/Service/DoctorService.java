@@ -162,9 +162,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         // Proposal: doctor can view time slot details, but cannot create/delete/modify
         // :contentReference[oaicite:9]{index=9}
 
-        // Requires repo method:
-        // List<TimeSlot> findByDoctorDoctorId(Integer doctorId);
-        List<TimeSlot> slots = timeSlotRepository.findByDoctorDoctorId(doctorId);
+        List<TimeSlot> slots = timeSlotRepository.findByDoctor_DoctorIdOrderByDateAvailableAscStartTimeAsc(doctorId);
 
         return slots.stream()
                 .map(s -> new DoctorTimeSlotView(

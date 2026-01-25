@@ -33,6 +33,12 @@ public class AdminAppointmentService {
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
         appt.setStatus(status);
+        if (status == AppointmentStatus.CANCELLED || status == AppointmentStatus.DENIED) {
+            TimeSlot slot = appt.getSlot();
+            if (slot != null) {
+                timeSlotRepository.freeSlotIfBooked(slot.getSlotId());
+            }
+        }
         return appointmentRepository.save(appt);
     }
 
