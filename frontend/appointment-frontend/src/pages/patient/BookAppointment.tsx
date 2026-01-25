@@ -3,6 +3,7 @@ import { useDoctorsBrowse } from "@/services/useDoctorBrowse";
 import { AppointmentType, Doctor } from "@/types/doctorTypes";
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/auth/useAuth";
 
 export default function BookAppointment() {
 	const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function BookAppointment() {
 		location.state?.doctor?.doctorId ??
 		location.state?.doctor?.id;
 
-	const role = location.state?.role ?? "guest";
+  const { isAuthenticated, user } = useAuth();
 
 	const {
 		filteredDoctors, 
@@ -71,8 +72,8 @@ export default function BookAppointment() {
 	const handleSubmit = () => {
 		if (!selectedDoctor) return;
 
-		if (role === "guest") {
-			navigate("/login");
+		if (!isAuthenticated || !user || user.role !== "Patient") {
+			navigate("/login", { replace: true });
 			return;
 		}
 
@@ -84,6 +85,8 @@ export default function BookAppointment() {
 			Date: ${date}
 			Time: ${time}`
 		);
+
+    navigate("/patient/home", { replace: true });
 	};
 
 
