@@ -99,7 +99,7 @@ public class AppointmentService implements ServiceInterface<Appointment> {
         entity.setSlot(slot);
         entity.setDateTimeScheduled(LocalDateTime.of(slot.getDateAvailable(), slot.getStartTime()));
         if (entity.getStatus() == null) {
-            entity.setStatus(AppointmentStatus.REQUESTED);
+            entity.setStatus(AppointmentStatus.CONFIRMED);
         }
 
         return appointmentRepository.save(entity);
@@ -136,7 +136,7 @@ public class AppointmentService implements ServiceInterface<Appointment> {
         appointment.setPatient(patient);
         appointment.setAppointmentType(appointmentType);
         appointment.setDateTimeScheduled(scheduled);
-        appointment.setStatus(AppointmentStatus.REQUESTED);
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
 
         Appointment saved = appointmentRepository.save(appointment);
 
