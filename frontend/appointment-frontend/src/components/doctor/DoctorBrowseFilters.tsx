@@ -9,7 +9,7 @@ type Props = {
     onGenderChange: (newGender: string) => void;
 
     specialityOptions: string[];
-    genderOptions: string[];
+    genderOptions: readonly string[];
     disabled?: boolean;
 }
 

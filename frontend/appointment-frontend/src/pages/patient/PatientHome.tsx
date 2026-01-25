@@ -69,12 +69,21 @@ const PatientHome: React.FC = () => {
           professionals.
         </p>
 
-        <button
-          onClick={() => navigate("/doctors")}
-          className="border-2 border-indigo-600 text-indigo-600 px-8 py-3 rounded-xl text-lg font-semibold hover:bg-indigo-600 hover:text-white transition"
-        >
-          Find Doctors
-        </button>
+        <div className="flex gap-4">
+          <button
+            onClick={() => navigate("/patient/book")}
+            className="border-2 border-indigo-600 text-indigo-600 px-8 py-3 rounded-xl text-lg font-semibold hover:bg-indigo-600 hover:text-white transition"
+          >
+            Book an Appointment
+          </button>
+
+          <button
+            onClick={() => navigate("/doctors")}
+            className="border-2 border-indigo-600 text-indigo-600 px-8 py-3 rounded-xl text-lg font-semibold hover:bg-indigo-600 hover:text-white transition"
+          >
+            Find Doctors
+          </button>
+        </div>
       </section>
 
       {/* CALENDAR + AVAILABILITY */}

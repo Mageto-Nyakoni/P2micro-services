@@ -4,79 +4,41 @@ import { Doctor } from "@/types/doctorTypes";
 import { getAllDoctors } from "@/services/doctorServices";
 import DoctorList from "@/components/doctor/DoctorList";
 import DoctorBrowseFilters from "@/components/doctor/DoctorBrowseFilters";
+import { useDoctorsBrowse } from "@/services/useDoctorBrowse";
 
 export default function DoctorsBrowse() {
     const navigate = useNavigate();
 
-    // Data
-    const [doctors, setDoctors] = useState<Doctor[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string>("");
-
-    // UI
+	// UI
     const [expandedId, setExpandedId] = useState<number | null>(null);
 
-    // Filter
-    const [query, setQuery] = useState<string>("");
-    const [speciality, setSpeciality] = useState<string>("");
-    const [gender, setGender] = useState<string>("");
-
-  	useEffect(() => {
-		//using AbortController to cancel fetch if component unmounts
-		//used because of doctors is a large payload of data
-
-		const controller = new AbortController();
-		setLoading(true);
-		setError("");
-    
-		// Fetch doctors from API
-		getAllDoctors(controller.signal)
-			.then ((data: Doctor[]) => setDoctors(data))
-			.catch ((err: any) => {
-				if (err?.name === "AbortError") return;
-				if (err?.name === "CanceledError" || err?.code === "ERR_CANCELED") return;
-
-				setError(err?.message ?? "Failed to load doctors.");
-			})
-			.finally(() => setLoading(false));
-
-		return () => controller.abort();
-	}, [])
-
-	const specialityOptions = useMemo(() => {
-		const names = doctors
-			.map((doc) => doc.speciality?.specialityName)
-			.filter((name): name is string => Boolean(name && name.trim()));
-         
-  		return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
-	}, [doctors])
-
-	const genderOptions = ["Male", "Female"];
-
-	const filteredDoctors = useMemo(() => {
-		const q = query.toLowerCase().trim();
-
-		return doctors.filter((doc) => {
-			const name = `${doc.user.firstName} ${doc.user.lastName}`.toLowerCase();
-			const spec = doc.speciality?.specialityName?.toLowerCase();
-			
-			const matchesQuery = q === "" || name.includes(q) || spec?.includes(q);
-
-			const matchesSpeciality = speciality === "" || spec === speciality.toLowerCase();
-
-			const matchesGender = gender === "" || doc.gender === gender.toLowerCase();
-
-			return matchesQuery && matchesSpeciality && matchesGender;
-		});
-	}, [doctors, query, speciality, gender]);
-  
+    const {
+		filteredDoctors, 
+		loading, 
+		error, 
+		query, 
+		setQuery, 
+		speciality, 
+		setSpeciality, 
+		gender, 
+		setGender, 
+		specialityOptions, 
+		genderOptions
+	} = useDoctorsBrowse();
 
 	const toggleExpand = (id: number) => {
 		setExpandedId((prev) => (prev === id ? null : id));
 	};
 
 	const handleBook = (doctorId: number) => {
-		navigate("/patient/book", {state: { doctorId }});
+		const doc = filteredDoctors.find((d) => d.doctorId === doctorId);
+		const doctorName = doc ? `${doc.user.firstName} ${doc.user.lastName}` : "";
+		navigate("/patient/book", {
+			state: {
+			doctorId,
+			prefillQuery: doctorName
+			}
+		});
 	};
 
 	return (
