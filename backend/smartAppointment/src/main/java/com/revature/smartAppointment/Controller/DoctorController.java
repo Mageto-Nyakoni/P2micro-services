@@ -1,6 +1,7 @@
 
 package com.revature.smartAppointment.Controller;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.smartAppointment.Controller.Request.DoctorInfoRequest;
@@ -139,11 +141,29 @@ public class DoctorController {
     // Dashboard: appointments today/week
     // -----------------------------
 
+@GetMapping("/{doctorId}/appointments/all")
+public ResponseEntity<List<DoctorService.DoctorAppointmentView>> getAllAppointments(@PathVariable Integer doctorId) {
+    return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
+}
+
+     /*  // GET /doctors/{doctorId}/appointments
+@GetMapping("/{doctorId}/appointments")
+public ResponseEntity<List<DoctorAppointmentView>> getAllAppointments(@PathVariable Integer doctorId) {
+    // This should return all appointments for the doctor (past + upcoming)
+    return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
+}*/
+
+
     // GET /doctors/{doctorId}/appointments/today
-    @GetMapping("/{doctorId}/appointments/today")
-    public ResponseEntity<List<DoctorAppointmentView>> getTodaysAppointments(@PathVariable Integer doctorId) {
-        return ResponseEntity.ok(doctorService.getTodaysAppointments(doctorId));
-    }
+    @GetMapping("/{doctorId}/appointments/by-date")
+   public ResponseEntity<List<DoctorAppointmentView>> getAppointmentsByDate(
+        @PathVariable Integer doctorId,
+        @RequestParam LocalDate date) {
+
+    return ResponseEntity.ok(
+        doctorService.getAppointmentsForDoctorByDate(doctorId, date)
+    );
+}
 
     // GET /doctors/{doctorId}/appointments/week
     @GetMapping("/{doctorId}/appointments/week")
