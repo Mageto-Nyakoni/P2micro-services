@@ -27,6 +27,7 @@ import com.revature.smartAppointment.Service.DoctorService.DoctorAppointmentView
 import com.revature.smartAppointment.Service.DoctorService.DoctorTimeSlotView;
 import com.revature.smartAppointment.Util.JwtUtil;
 
+import io.jsonwebtoken.Jwt;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -138,6 +139,41 @@ public class DoctorController {
     // -----------------------------
     // Dashboard: appointments today/week
     // -----------------------------
+
+
+// GET /doctors/me/appointments/today
+@GetMapping("/me/appointments/today")
+public ResponseEntity<List<DoctorAppointmentView>> getMyTodaysAppointments(
+        @RequestHeader("Authorization") String authHeader) {
+
+    String token = authHeader.substring(7);
+
+    if (!jwtUtil.validateToken(token)) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    if (!jwtUtil.extractPrivilege(token).equals("Doctor")) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    int userId = jwtUtil.extractId(token);
+    int doctorId = doctorService.findByUserId(userId)
+            .orElseThrow()
+            .getDoctorId();
+
+    return ResponseEntity.ok(
+        doctorService.getTodaysAppointments(doctorId)
+    );
+}
+    
+   @GetMapping("/{doctorId}/appointments/upcoming")
+public List<DoctorService.DoctorAppointmentView> getUpcomingAppointments(
+        @PathVariable Integer doctorId) {
+
+    return doctorService.getUpcomingAppointments(doctorId);
+}
+
+
 
     // GET /doctors/{doctorId}/appointments/today
     @GetMapping("/{doctorId}/appointments/today")

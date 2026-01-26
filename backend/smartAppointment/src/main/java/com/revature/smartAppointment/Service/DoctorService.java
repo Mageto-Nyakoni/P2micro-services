@@ -87,10 +87,26 @@ public class DoctorService implements ServiceInterface<Doctor> {
     public Optional<Doctor> findByUserId(int user_id) {
         return doctorRepository.findDoctorByUser_UserId(user_id);
     }
+       
+    public List<DoctorAppointmentView> getUpcomingAppointments(Integer doctorId) {
+    ensureDoctorExists(doctorId);
+
+    LocalDateTime now = LocalDateTime.now();
+
+    List<Appointment> appts =
+            appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledAfter(doctorId, now);
+
+    return appts.stream()
+            .map(DoctorService::toDoctorAppointmentView)
+            .toList();
+}
+
+
+
+
 
     public List<DoctorAppointmentView> getTodaysAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
-
         LocalDate today = LocalDate.now();
         LocalDateTime start = today.atStartOfDay();
         LocalDateTime end = today.atTime(LocalTime.MAX);
@@ -199,14 +215,29 @@ public class DoctorService implements ServiceInterface<Doctor> {
 }
 
     private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
-        return new DoctorAppointmentView(
-                a.getAppointmentId(),
-                null, // patientFirstName (not ready with Appointment model currently, wip)
-                null, // patientLastName (not ready with Appointment model currently, wip)
-                null, // appointmentType (not ready with Appointment model currently, wip)
-                a.getDateTimeScheduled(),
-                null, // estimatedDurationMinutes (not ready with Appointment model currently, wip)
-                a.getStatus());
+             String patientFirstName = null;
+             String patientLastName = null;
+              if (a.getPatient() != null && a.getPatient().getUser() != null) {
+        patientFirstName = a.getPatient().getUser().getFirstName();
+        patientLastName = a.getPatient().getUser().getLastName();
+    }
+  // Calculate duration from slot start/end time if slot exists
+    Integer estimatedDurationMinutes = null;
+    if (a.getSlot() != null && a.getSlot().getStartTime() != null && a.getSlot().getEndTime() != null) {
+        estimatedDurationMinutes = (int) java.time.Duration
+                .between(a.getSlot().getStartTime(), a.getSlot().getEndTime())
+                .toMinutes();
+    }
+
+    return new DoctorAppointmentView(
+            a.getAppointmentId(),
+            patientFirstName,
+            patientLastName,
+            "—", // placeholder for appointment type
+            a.getDateTimeScheduled(),
+            estimatedDurationMinutes,
+            a.getStatus()
+    );
     }
 
     // Lightweight response DTOs
