@@ -1,5 +1,6 @@
 package com.revature.smartAppointment.Controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,60 @@ public class PatientAppointmentController {
     return ResponseEntity.ok(dtos);
 }
 
+
+    @GetMapping("/current")
+    public ResponseEntity<List<Map<String, Object>>> getCurrentAppointments(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token;
+        try {
+            token = authHeader.substring(7);
+            if (!jwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String privilege = jwtUtil.extractPrivilege(token);
+        if (!"Patient".equals(privilege)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        int userId = jwtUtil.extractId(token);
+        Patient patient = patientService.findByUserId(userId)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
+
+        List<Map<String, Object>> appointments = appointmentService.getCurrentAppointmentsForPatient(patient.getPatientId());
+        return ResponseEntity.ok(appointments);
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<Map<String, Object>>> getAppointmentHistory(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        String token;
+        try {
+            token = authHeader.substring(7);
+            if (!jwtUtil.validateToken(token)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String privilege = jwtUtil.extractPrivilege(token);
+        if (!"Patient".equals(privilege)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        int userId = jwtUtil.extractId(token);
+        Patient patient = patientService.findByUserId(userId)
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(HttpStatus.NOT_FOUND, "Patient not found"));
+
+        List<Map<String, Object>> appointments = appointmentService.getAppointmentHistoryForPatient(patient.getPatientId());
+        return ResponseEntity.ok(appointments);
+    }
 
     @DeleteMapping("/{appointmentId}")
     public ResponseEntity<Void> cancelAppointment(
