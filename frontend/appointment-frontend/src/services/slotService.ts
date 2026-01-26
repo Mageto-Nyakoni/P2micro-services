@@ -1,17 +1,8 @@
 // src/services/slotService.ts
+import { http } from "@/services/http";
 import type { TimeSlot } from "@/types/slotTypes";
 
-export async function fetchDoctorSlots(
-  doctorId: number,
-  date: string
-): Promise<TimeSlot[]> {
-  const res = await fetch(
-    `http://localhost:8080/smart-appointment/api/slots/doctor/${doctorId}?date=${date}`
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch slots");
-  }
-
-  return res.json();
+export async function fetchDoctorSlots(doctorId: number,date: string): Promise<TimeSlot[]> {
+    const { data } = await http.get<TimeSlot[]>(`/slots/doctor/${doctorId}`,{params: { date },});
+    return data;
 }
