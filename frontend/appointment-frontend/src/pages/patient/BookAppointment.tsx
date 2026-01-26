@@ -1,112 +1,133 @@
 import DoctorBrowseFilters from "@/components/doctor/DoctorBrowseFilters";
 import { useDoctorsBrowse } from "@/services/useDoctorBrowse";
 import { AppointmentType, Doctor } from "@/types/doctorTypes";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-<<<<<<< HEAD
-import { useAuth } from "@/auth/useAuth";
-=======
 import { useParams } from "react-router-dom";
-/* ================= TYPES ================= */
-
-type Doctor = {
-  id: number;
-  name: string;
-  speciality: string;
-  services: string[];
-};
+import { AuthContext, AuthContextType } from "@/auth/AuthContext"; 
 
 /* ================= COMPONENT ================= */
->>>>>>> patients-appointment
 
 export default function BookAppointment() {
-	const navigate = useNavigate();
-	const location = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-	const prefillQuery: string | undefined = location.state?.prefillQuery;
-	const didPrefillRef = useRef(false);
+  /* ================= AUTH ================= */
 
-  	const preselectedDoctorId: number | undefined =
-		location.state?.doctorId ??
-		location.state?.doctor?.doctorId ??
-		location.state?.doctor?.id;
+  const auth = useContext<AuthContextType | null>(AuthContext);
+  const isAuthenticated = auth?.isAuthenticated ?? false;
+  const user = auth?.user ?? null;
 
-  const { isAuthenticated, user } = useAuth();
+  /* ================= PREFILL ================= */
 
-	const {
-		filteredDoctors, 
-		loading, 
-		error, 
-		query, 
-		setQuery, 
-		speciality, 
-		setSpeciality, 
-		gender, 
-		setGender, 
-		specialityOptions, 
-		genderOptions
-	} = useDoctorsBrowse();
+  const prefillQuery: string | undefined = location.state?.prefillQuery;
+  const preselectedDoctorId: number | undefined =
+    location.state?.doctorId ??
+    location.state?.doctor?.doctorId ??
+    location.state?.doctor?.id;
 
+  const didPrefillRef = useRef(false);
 
-    const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-    const [selectedAppointment, setSelectedAppointment] = useState<AppointmentType | null>(null);
-    const [date, setDate] = useState<string>("");
-    const [time, setTime] = useState<string>("");
+  /* ================= DATA ================= */
 
+  const {
+    filteredDoctors = [],
+    loading,
+    error,
+    query,
+    setQuery,
+    speciality,
+    setSpeciality,
+    gender,
+    setGender,
+    specialityOptions = [],
+    genderOptions = [],
+  } = useDoctorsBrowse();
 
-	useEffect(() => {
-		// Prefill search bar
-		if (!didPrefillRef.current && prefillQuery) {
-			setQuery(prefillQuery);
-			didPrefillRef.current = true;
-		}
+  /* ================= STATE ================= */
 
-		// Auto-select doctor
-		if (preselectedDoctorId && filteredDoctors.length > 0) {
-			const found = filteredDoctors.find((d) => d.doctorId === preselectedDoctorId);
-			if (found) {
-				setSelectedDoctor(found);
-				setSelectedAppointment(null);
-			}
-		}
-	}, [prefillQuery, preselectedDoctorId, filteredDoctors, setQuery]);
+  const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
+  const [selectedAppointment, setSelectedAppointment] =
+    useState<AppointmentType | null>(null);
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  /* ================= EFFECTS ================= */
+
+  useEffect(() => {
+    if (!didPrefillRef.current && prefillQuery) {
+      setQuery(prefillQuery);
+      didPrefillRef.current = true;
+    }
+
+    if (preselectedDoctorId && filteredDoctors.length > 0) {
+      const found = filteredDoctors.find(
+        (d) => d.doctorId === preselectedDoctorId
+      );
+      if (found) {
+        setSelectedDoctor(found);
+        setSelectedAppointment(null);
+      }
+    }
+  }, [prefillQuery, preselectedDoctorId, filteredDoctors, setQuery]);
+
+  /* ================= GUARDS ================= */
+
+  if (loading) {
+    return (
+      <div className="p-10 text-center text-gray-600">
+        Loading doctors...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-10 text-center text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   /* ================= TIME SLOTS ================= */
 
-	const availableTimes = [
-		"09:00 AM",
-		"10:00 AM",
-		"11:00 AM",
-		"02:00 PM",
-		"03:00 PM",
-	];
+  const availableTimes = [
+    "09:00 AM",
+    "10:00 AM",
+    "11:00 AM",
+    "02:00 PM",
+    "03:00 PM",
+  ];
 
   /* ================= SUBMIT ================= */
 
-	const handleSubmit = () => {
-		if (!selectedDoctor) return;
+  const handleSubmit = () => {
+    if (!selectedDoctor || !selectedAppointment || !date || !time) return;
 
-		if (!isAuthenticated || !user || user.role !== "Patient") {
-			navigate("/login", { replace: true });
-			return;
-		}
+    if (!isAuthenticated || !user || user.role !== "Patient") {
+      navigate("/login", { replace: true });
+      return;
+    }
 
-		// ++++ TODO: POST APPOINTMENT TO BACKEND ++++	
-		alert(
-			`Appointment Booked!
-			Doctor: Dr. ${selectedDoctor.user.firstName} ${selectedDoctor.user.lastName}
-			Appointment Type: ${selectedAppointment?.name ?? ""}
-			Date: ${date}
-			Time: ${time}`
-		);
+    alert(
+      `Appointment Booked!
+Doctor: Dr. ${selectedDoctor.user?.firstName ?? ""} ${
+        selectedDoctor.user?.lastName ?? ""
+      }
+Type: ${selectedAppointment.name}
+Date: ${date}
+Time: ${time}`
+    );
 
     navigate("/patient/home", { replace: true });
-	};
+  };
 
+  /* ================= RENDER ================= */
 
   return (
     <div className="min-h-screen bg-purple-50 px-6 py-10">
       <div className="max-w-4xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+
         <button
           onClick={() => navigate(-1)}
           className="mb-4 text-indigo-600 hover:underline"
@@ -122,22 +143,20 @@ export default function BookAppointment() {
           Choose doctor, service, date and time
         </p>
 
-        {/* STEP 1: DOCTOR */}
-        <h2 className="font-semibold mb-3">
-          1. Select Doctor
-        </h2>
+        {/* STEP 1 */}
+        <h2 className="font-semibold mb-3">1. Select Doctor</h2>
 
-		<DoctorBrowseFilters
-			query={query}
-			onQueryChange={setQuery}
-			speciality={speciality}
-			onSpecialityChange={setSpeciality}
-			gender={gender}
-			onGenderChange={setGender}
-			specialityOptions={specialityOptions}
-			genderOptions={genderOptions}
-			disabled={loading}
-		/>
+        <DoctorBrowseFilters
+          query={query}
+          onQueryChange={setQuery}
+          speciality={speciality}
+          onSpecialityChange={setSpeciality}
+          gender={gender}
+          onGenderChange={setGender}
+          specialityOptions={specialityOptions}
+          genderOptions={genderOptions}
+          disabled={loading}
+        />
 
         <div className="space-y-4 mb-8">
           {filteredDoctors.map((doctor) => (
@@ -147,78 +166,66 @@ export default function BookAppointment() {
                 setSelectedDoctor(doctor);
                 setSelectedAppointment(null);
               }}
-              className={`border rounded-xl p-4 cursor-pointer flex justify-between
-                ${
-                  selectedDoctor?.doctorId === doctor.doctorId
-                    ? "border-purple-600 bg-purple-50"
-                    : "hover:border-gray-400"
-                }`}
+              className={`border rounded-xl p-4 cursor-pointer ${
+                selectedDoctor?.doctorId === doctor.doctorId
+                  ? "border-purple-600 bg-purple-50"
+                  : "hover:border-gray-400"
+              }`}
             >
-              <div>
-                <p className="font-medium">
-                  Dr. {doctor.user.firstName} {doctor.user.lastName}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {doctor.speciality?.specialityName ?? "General"}
-                </p>
-              </div>
+              <p className="font-medium">
+                Dr. {doctor.user?.firstName} {doctor.user?.lastName}
+              </p>
+              <p className="text-sm text-gray-500">
+                {doctor.speciality?.specialityName ?? "General"}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* STEP 2: SERVICE */}
-        {selectedDoctor && (
+        {/* STEP 2 */}
+        {selectedDoctor?.speciality?.appointmentTypes?.length ? (
           <>
             <h2 className="font-semibold mb-3">
               2. Select Appointment Type
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              {selectedDoctor.speciality?.appointmentTypes.map((appointmentType) => (
+              {selectedDoctor.speciality.appointmentTypes.map((type) => (
                 <button
-                  key={appointmentType.typeId}
-                  onClick={() => setSelectedAppointment(appointmentType)}
-                  className={`border rounded-lg p-3 text-left
-                    ${
-                      selectedAppointment === appointmentType
-                        ? "border-purple-600 bg-purple-50"
-                        : "hover:border-gray-400"
-                    }`}
+                  key={type.typeId}
+                  onClick={() => setSelectedAppointment(type)}
+                  className={`border rounded-lg p-3 text-left ${
+                    selectedAppointment?.typeId === type.typeId
+                      ? "border-purple-600 bg-purple-50"
+                      : "hover:border-gray-400"
+                  }`}
                 >
-                  {appointmentType.name}
+                  {type.name}
                 </button>
               ))}
             </div>
           </>
-        )}
+        ) : null}
 
-        {/* STEP 3: DATE & TIME */}
+        {/* STEP 3 */}
         {selectedAppointment && (
           <>
-            <h2 className="font-semibold mb-3">
-              3. Select Date & Time
-            </h2>
+            <h2 className="font-semibold mb-3">3. Select Date & Time</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
               <input
                 type="date"
                 value={date}
-                onChange={(e) =>
-                  setDate(e.target.value)
-                }
+                onChange={(e) => setDate(e.target.value)}
                 className="border rounded-lg px-4 py-2"
               />
 
               <select
                 value={time}
-                onChange={(e) =>
-                  setTime(e.target.value)
-                }
+                onChange={(e) => setTime(e.target.value)}
                 className="border rounded-lg px-4 py-2"
               >
-                <option value="">
-                  Select Time
-                </option>
+                <option value="">Select Time</option>
                 {availableTimes.map((t) => (
                   <option key={t} value={t}>
                     {t}
@@ -229,21 +236,16 @@ export default function BookAppointment() {
           </>
         )}
 
-        {/* SUBMIT */}
         <div className="text-center">
           <button
-            disabled={
-              !selectedDoctor ||
-              !selectedAppointment ||
-              !date ||
-              !time
-            }
+            disabled={!selectedDoctor || !selectedAppointment || !date || !time}
             onClick={handleSubmit}
             className="bg-purple-600 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold"
           >
             Confirm Appointment
           </button>
         </div>
+
       </div>
     </div>
   );

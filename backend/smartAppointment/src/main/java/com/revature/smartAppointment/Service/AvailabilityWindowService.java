@@ -2,12 +2,8 @@ package com.revature.smartAppointment.Service;
 
 import com.revature.smartAppointment.Model.*;
 import com.revature.smartAppointment.Repository.*;
-<<<<<<< HEAD
-import java.util.List;
-=======
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 
->>>>>>> patients-appointment
 import java.util.stream.Collectors;
 import com.revature.smartAppointment.dto.AvailabilityWindowDTO;
 import jakarta.transaction.Transactional;
@@ -76,7 +72,7 @@ public List<AvailabilityWindowDTO> getWindowsForDoctor(Integer doctorId) {
 public Map<String, List<DoctorAvailabilityDto>> getAvailabilityByDate() {
 
     // Fetch all available slots
-    List<TimeSlot> slots = timeSlotRepository.findByStatus(TimeSlotStatus.AVAILABLE);
+    List<TimeSlot> slots = timeSlotService.getAvailableSlots();
 
     Map<String, List<DoctorAvailabilityDto>> result = new HashMap<>();
 

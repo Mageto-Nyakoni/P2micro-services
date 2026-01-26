@@ -1,5 +1,6 @@
 package com.revature.smartAppointment.Service;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -12,35 +13,21 @@ import org.springframework.http.HttpStatus;
 
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.AppointmentType;
-<<<<<<< HEAD
-=======
 import com.revature.smartAppointment.Model.Patient;
->>>>>>> patients-appointment
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
+import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
-<<<<<<< HEAD
 import com.revature.smartAppointment.Repository.AppointmentTypeRepository;
-import com.revature.smartAppointment.Repository.TimeSlotRepository;
-import com.revature.smartAppointment.Model.Patient;
-
-@Service
-public class AppointmentService implements ServiceInterface<Appointment> {
-   
-      private final AppointmentRepository appointmentRepository;
-      private final TimeSlotRepository timeSlotRepository;
-      private final AppointmentTypeRepository appointmentTypeRepository;
-=======
 import com.revature.smartAppointment.Repository.PatientRepository;
 import com.revature.smartAppointment.Repository.TimeSlotRepository;
 import com.revature.smartAppointment.dto.AppointmentDto;
 
 @Service
 public class AppointmentService implements ServiceInterface<Appointment> {
-
+    private final AppointmentTypeRepository appointmentTypeRepository;
     private final AppointmentRepository appointmentRepository;
     private final TimeSlotRepository timeSlotRepository;
->>>>>>> patients-appointment
 
     @Autowired
     public AppointmentService(AppointmentRepository appointmentRepository, TimeSlotRepository timeSlotRepository, AppointmentTypeRepository appointmentTypeRepository) {
@@ -52,7 +39,7 @@ public class AppointmentService implements ServiceInterface<Appointment> {
     @Override
     @Transactional
     public Appointment save(Appointment entity) {
-        return createAppointment(entity);
+        return appointmentRepository.save(entity);
     }
 
     @Override
@@ -88,111 +75,6 @@ public class AppointmentService implements ServiceInterface<Appointment> {
         return null;
     }
 
-<<<<<<< HEAD
-    @Transactional
-    public Appointment createAppointment(Appointment entity) {
-        if (entity.getSlot() == null || entity.getSlot().getSlotId() == null) {
-            throw new RuntimeException("Slot is required");
-        }
-        if (entity.getDoctor() == null || entity.getDoctor().getDoctorId() == null) {
-            throw new RuntimeException("Doctor is required");
-        }
-
-        TimeSlot slot = timeSlotRepository.findById(entity.getSlot().getSlotId())
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
-
-        if (slot.getDoctor() == null || !slot.getDoctor().getDoctorId().equals(entity.getDoctor().getDoctorId())) {
-            throw new RuntimeException("Slot does not belong to doctor");
-        }
-
-        int booked = timeSlotRepository.bookSlotIfAvailable(slot.getSlotId());
-        if (booked == 0) {
-            throw new RuntimeException("Slot is not available");
-        }
-
-        entity.setSlot(slot);
-        entity.setDateTimeScheduled(LocalDateTime.of(slot.getDateAvailable(), slot.getStartTime()));
-        if (entity.getStatus() == null) {
-            entity.setStatus(AppointmentStatus.CONFIRMED);
-        }
-
-        return appointmentRepository.save(entity);
-    }
-
-    @Transactional
-    public java.util.Map<String, Object> createAppointmentFromSlot(Patient patient, Integer slotId, Integer appointmentTypeId) {
-        if (patient == null || patient.getPatientId() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Patient is required");
-        }
-        if (slotId == null || appointmentTypeId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Slot and appointment type are required");
-        }
-
-        TimeSlot slot = timeSlotRepository.findById(slotId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Slot not found"));
-
-        LocalDateTime scheduled = LocalDateTime.of(slot.getDateAvailable(), slot.getStartTime());
-        if (!scheduled.isAfter(LocalDateTime.now())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Slot must be in the future");
-        }
-
-        AppointmentType appointmentType = appointmentTypeRepository.findById(appointmentTypeId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment type not found"));
-
-        int booked = timeSlotRepository.bookSlotIfAvailable(slot.getSlotId());
-        if (booked == 0) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Slot is not available");
-        }
-
-        Appointment appointment = new Appointment();
-        appointment.setDoctor(slot.getDoctor());
-        appointment.setSlot(slot);
-        appointment.setPatient(patient);
-        appointment.setAppointmentType(appointmentType);
-        appointment.setDateTimeScheduled(scheduled);
-        appointment.setStatus(AppointmentStatus.CONFIRMED);
-
-        Appointment saved = appointmentRepository.save(appointment);
-
-        java.util.Map<String, Object> response = new java.util.HashMap<>();
-        response.put("appointmentId", saved.getAppointmentId());
-        response.put("status", saved.getStatus());
-        response.put("doctorId", slot.getDoctor() != null ? slot.getDoctor().getDoctorId() : null);
-        if (slot.getDoctor() != null && slot.getDoctor().getUser() != null) {
-            String name = slot.getDoctor().getUser().getFirstName() + " " + slot.getDoctor().getUser().getLastName();
-            response.put("doctorName", name);
-        } else {
-            response.put("doctorName", null);
-        }
-        response.put("patientId", patient.getPatientId());
-        response.put("slotId", slot.getSlotId());
-        response.put("dateAvailable", slot.getDateAvailable());
-        response.put("startTime", slot.getStartTime());
-        response.put("endTime", slot.getEndTime());
-        response.put("appointmentTypeId", appointmentType.getTypeId());
-        response.put("createdAt", saved.getCreatedAt());
-        return response;
-    }
-
-    @Transactional
-    public void cancelAppointmentForPatient(Integer patientId, Integer appointmentId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
-
-        if (appointment.getPatient() == null || !appointment.getPatient().getPatientId().equals(patientId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Appointment does not belong to patient");
-        }
-
-        TimeSlot slot = appointment.getSlot();
-        if (slot != null) {
-            timeSlotRepository.freeSlotIfBooked(slot.getSlotId());
-        }
-
-        appointment.setStatus(AppointmentStatus.CANCELLED);
-        appointmentRepository.save(appointment);
-    }
-=======
->>>>>>> patients-appointment
     @Transactional
     public void cancelAppointment(int appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
@@ -201,15 +83,14 @@ public class AppointmentService implements ServiceInterface<Appointment> {
         // Free the slot
         TimeSlot slot = appointment.getSlot();
         if (slot != null) {
-            timeSlotRepository.freeSlotIfBooked(slot.getSlotId());
+            slot.setStatus(TimeSlotStatus.AVAILABLE);
+            timeSlotRepository.save(slot);
         }
 
         // Cancel the appointment
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
     }
-<<<<<<< HEAD
-=======
 
     // Get all appointments for a patient
     public List<AppointmentDto> getAppointmentsForPatient(Integer patientId) {
@@ -254,5 +135,38 @@ Patient patient = patientRepository.findById(patientId)
     return appointmentRepository.save(appointment);
 }
 
->>>>>>> patients-appointment
+@Transactional
+public Appointment createAppointment(Appointment appointment) {
+    if (appointment.getStatus() == null) {
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+    }
+    return appointmentRepository.save(appointment);
+}
+
+ @Transactional
+    public Map<String, Object> createAppointmentFromSlot(Patient patient, Integer slotId, Integer appointmentTypeId) {
+        AppointmentType type = appointmentTypeRepository.findById(appointmentTypeId)
+                .orElseThrow(() -> new RuntimeException("AppointmentType not found"));
+
+        Appointment appointment = bookAppointment(slotId, patient.getPatientId(), type);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("appointmentId", appointment.getAppointmentId());
+        result.put("slotId", appointment.getSlot().getSlotId());
+        result.put("status", appointment.getStatus());
+        return result;
+    }
+
+ // --- Cancel appointment specifically for a patient ---
+    @Transactional
+    public void cancelAppointmentForPatient(Integer patientId, Integer appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        if (!appointment.getPatient().getPatientId().equals(patientId)) {
+            throw new RuntimeException("Patient does not own this appointment");
+        }
+
+        cancelAppointment(appointmentId);
+    }
 }
