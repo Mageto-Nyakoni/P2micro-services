@@ -7,3 +7,13 @@ export interface AppointmentDto {
   endTime: string;   // Backend sends ISO string
   status: string;    // "CONFIRMED", "CANCELLED", etc.
 }
+
+export type Appointment = {
+  appointmentId: number,
+  doctorName: string,
+  appointmentType: string,
+  startTime: string,
+  endTime: string,
+  status: string
+};
+

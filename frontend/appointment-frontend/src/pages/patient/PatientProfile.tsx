@@ -2,15 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMyPatient } from "@/services/patientServices";
 import { Patient } from "@/types/patientTypes";
-
-type Appointment = {
-  id: number;
-  date: string;
-  doctorId: number; 
-  doctor: string;
-  department: string;
-  canRebook: boolean;
-};
+import { fetchAppointmentsForPatient } from "@/services/appointmentService";
+import { Appointment } from "@/types/appointmentTypes";
 
 
 function PatientProfile() {
@@ -18,6 +11,7 @@ function PatientProfile() {
 
   const [patient, setPatient] = useState <Patient | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,6 +19,7 @@ function PatientProfile() {
     (async () => {
       try{
         const data = await getMyPatient();
+
         if (!cancelled) {
           setPatient(data);
         }
@@ -41,35 +36,38 @@ function PatientProfile() {
     }
   }, []);
 
+
+  useEffect(() => {
+    if (!patient) return;
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const allAppointments = await fetchAppointmentsForPatient(patient.patientId);
+
+        if (cancelled) return;
+
+        const completedAppointments = allAppointments.filter(
+          (appt) => appt.status === "COMPLETED"
+        );
+
+        setAppointments(completedAppointments);
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) {
+          setError("Failed to load appointment history");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [patient]);
+
   if (error) return <p className="text-red-600">{error}</p>;
   if (!patient) return <p>Loading profile...</p>;
-
-  const appointments: Appointment[] = [
-  {
-    id: 1,
-    date: "12 Jan 2026",
-    doctorId: 1,
-    doctor: "Dr. Ben Martinez",
-    department: "Cardiology",
-    canRebook: true
-  },
-  {
-    id: 2,
-    date: "28 Dec 2025",
-    doctorId: 2,    
-    doctor: "Dr. Samuel Chen",
-    department: "General Medicine",
-    canRebook: true
-  },
-  {
-    id: 3,
-    date: "05 Dec 2025",
-    doctorId: 3,
-    doctor: "Dr. Leya Al-Sayed",
-    department: "Pediatrics",
-    canRebook: true
-  }
-];
 
   return (
     <div className="min-h-screen bg-purple-50 p-6">
@@ -131,54 +129,50 @@ function PatientProfile() {
 
         </div>
 
-{/* Appointment History */}
-<div className="mt-10">
-  <h3 className="text-xl font-bold text-purple-700 mb-4">
-    Previous Appointments
-  </h3>
+        {/* Appointment History */}
+        <div className="mt-10">
+          <h3 className="text-xl font-bold text-purple-700 mb-4">
+            Previous Appointments
+          </h3>
 
-  <div className="space-y-4">
-    {appointments.map((appt) => (
-      <div
-        key={appt.id}
-        className="flex flex-col md:flex-row justify-between items-start md:items-center bg-purple-50 rounded-xl p-4"
-      >
-        <div>
-          <p className="font-semibold text-gray-800">
-            {appt.department}
-          </p>
-          <p className="text-sm text-gray-600">
-            {appt.doctor}
-          </p>
-          <p className="text-sm text-gray-500">
-            {appt.date}
-          </p>
+          {appointments.length === 0 ? (
+            <div className="bg-purple-50 rounded-xl p-4 text-gray-600">
+              No completed appointments yet.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {appointments.map((appt) => (
+                <div
+                  key={appt.appointmentId}
+                  className="flex flex-col md:flex-row justify-between items-start md:items-center bg-purple-50 rounded-xl p-4"
+                >
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold text-gray-800">{appt.doctorName}</p>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">Type:</span> {appt.appointmentType}
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      <span className="font-medium">Date:</span>{" "}
+                      {new Date(appt.startTime).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      <span className="font-medium">Time:</span>{" "}
+                      {new Date(appt.startTime).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-
-        <button
-          disabled={!appt.canRebook}
-           onClick={() =>
-                    navigate("/patient/book", {
-                      state: {
-                        doctorId: appt.doctorId, // KEY LINE
-                      },
-                    })
-                  }
-          className={`mt-3 md:mt-0 px-5 py-2 rounded-lg font-medium transition
-            ${
-              appt.canRebook
-                ? "bg-purple-600 text-white hover:bg-purple-700"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }
-          `}
-        >
-          Rebook
-        </button>
-      </div>
-    ))}
-  </div>
-</div>
-
       </div>
     </div>
   );
