@@ -173,24 +173,97 @@ public class TimeSlotService {
 
         List<PublicTimeSlotView> results = new ArrayList<>();
         for (TimeSlot slot : slots) {
-            Integer doctorIdValue = slot.getDoctor() != null ? slot.getDoctor().getDoctorId() : null;
-            String doctorName = null;
-            if (slot.getDoctor() != null && slot.getDoctor().getUser() != null) {
-                String name = slot.getDoctor().getUser().getFirstName() + " " + slot.getDoctor().getUser().getLastName();
-                doctorName = name;
-            }
-            results.add(new PublicTimeSlotView(
-                    slot.getSlotId(),
-                    doctorIdValue,
-                    doctorName,
-                    slot.getDateAvailable(),
-                    slot.getStartTime(),
-                    slot.getEndTime(),
-                    slot.getStatus()
-            ));
+            results.add(toPublicTimeSlotView(slot));
         }
 
         return results;
+    }
+
+    @Transactional(readOnly = true)
+    public List<PublicTimeSlotView> getSlotsForDoctorRange(Integer doctorId, LocalDate from, LocalDate to) {
+        if (doctorId == null) {
+            throw new IllegalArgumentException("doctorId is required");
+        }
+        LocalDate start = from != null ? from : LocalDate.now();
+        LocalDate end = to != null ? to : start;
+        if (start.isAfter(end)) {
+            LocalDate tmp = start;
+            start = end;
+            end = tmp;
+        }
+        List<TimeSlot> slots = timeSlotRepository
+                .findByDoctor_DoctorIdAndDateAvailableBetweenOrderByDateAvailableAscStartTimeAsc(doctorId, start, end);
+        List<PublicTimeSlotView> results = new ArrayList<>();
+        for (TimeSlot slot : slots) {
+            results.add(toPublicTimeSlotView(slot));
+        }
+        return results;
+    }
+
+    @Transactional(readOnly = true)
+    public List<PublicTimeSlotView> getAdminTimeSlots(Integer doctorId, LocalDate from, LocalDate to, TimeSlotStatus status) {
+        LocalDate start = from != null ? from : to;
+        LocalDate end = to != null ? to : from;
+        if (start != null && end != null && start.isAfter(end)) {
+            LocalDate tmp = start;
+            start = end;
+            end = tmp;
+        }
+
+        List<TimeSlot> slots;
+        if (doctorId != null) {
+            if (start != null || end != null) {
+                if (status != null) {
+                    slots = timeSlotRepository.findByDoctor_DoctorIdAndDateAvailableBetweenAndStatusOrderByDateAvailableAscStartTimeAsc(
+                            doctorId, start, end, status
+                    );
+                } else {
+                    slots = timeSlotRepository.findByDoctor_DoctorIdAndDateAvailableBetweenOrderByDateAvailableAscStartTimeAsc(
+                            doctorId, start, end
+                    );
+                }
+            } else if (status != null) {
+                slots = timeSlotRepository.findByDoctor_DoctorIdAndStatusOrderByDateAvailableAscStartTimeAsc(doctorId, status);
+            } else {
+                slots = timeSlotRepository.findByDoctor_DoctorIdOrderByDateAvailableAscStartTimeAsc(doctorId);
+            }
+        } else {
+            if (start != null || end != null) {
+                if (status != null) {
+                    slots = timeSlotRepository.findByDateAvailableBetweenAndStatusOrderByDateAvailableAscStartTimeAsc(start, end, status);
+                } else {
+                    slots = timeSlotRepository.findByDateAvailableBetweenOrderByDateAvailableAscStartTimeAsc(start, end);
+                }
+            } else if (status != null) {
+                slots = timeSlotRepository.findByStatusOrderByDateAvailableAscStartTimeAsc(status);
+            } else {
+                slots = timeSlotRepository.findAllByOrderByDateAvailableAscStartTimeAsc();
+            }
+        }
+
+        List<PublicTimeSlotView> results = new ArrayList<>();
+        for (TimeSlot slot : slots) {
+            results.add(toPublicTimeSlotView(slot));
+        }
+        return results;
+    }
+
+    private PublicTimeSlotView toPublicTimeSlotView(TimeSlot slot) {
+        Integer doctorIdValue = slot.getDoctor() != null ? slot.getDoctor().getDoctorId() : null;
+        String doctorName = null;
+        if (slot.getDoctor() != null && slot.getDoctor().getUser() != null) {
+            String name = slot.getDoctor().getUser().getFirstName() + " " + slot.getDoctor().getUser().getLastName();
+            doctorName = name;
+        }
+        return new PublicTimeSlotView(
+                slot.getSlotId(),
+                doctorIdValue,
+                doctorName,
+                slot.getDateAvailable(),
+                slot.getStartTime(),
+                slot.getEndTime(),
+                slot.getStatus()
+        );
     }
 
     public static class PublicTimeSlotView {

@@ -39,6 +39,10 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
 
     List<TimeSlot> findByStatusOrderByDateAvailableAscStartTimeAsc(TimeSlotStatus status);
 
+    List<TimeSlot> findByDateAvailableBetweenOrderByDateAvailableAscStartTimeAsc(LocalDate start, LocalDate end);
+
+    List<TimeSlot> findAllByOrderByDateAvailableAscStartTimeAsc();
+
     long countByStatus(TimeSlotStatus status);
 
     long countByDoctor_DoctorIdAndStatus(Integer doctorId, TimeSlotStatus status);

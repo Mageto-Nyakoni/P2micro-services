@@ -3,6 +3,7 @@ package com.revature.smartAppointment.Service;
 import com.revature.smartAppointment.Model.*;
 import com.revature.smartAppointment.Repository.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import com.revature.smartAppointment.dto.AvailabilityWindowDTO;
 import jakarta.transaction.Transactional;
@@ -43,6 +44,23 @@ public class AvailabilityWindowService {
         timeSlotService.generateSlotsForWindow(window);
 
         return window;
+    }
+
+    @Transactional
+    public Map<String, Object> deactivateWindow(Integer windowId) {
+        AvailabilityWindow window = windowRepository.findById(windowId)
+                .orElseThrow(() -> new RuntimeException("Availability window not found"));
+        if (window.isActive()) {
+            window.setActive(false);
+            windowRepository.save(window);
+        }
+
+        return timeSlotService.blockBreakPeriod(
+                window.getDoctor().getDoctorId(),
+                window.getDate(),
+                window.getStartTime(),
+                window.getEndTime()
+        );
     }
 
   /* public List<AvailabilityWindow> getWindowsForDoctor(Integer doctorId) {
