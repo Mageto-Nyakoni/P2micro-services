@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-
+import { useParams } from "react-router-dom";
 /* ================= TYPES ================= */
 
 type Doctor = {

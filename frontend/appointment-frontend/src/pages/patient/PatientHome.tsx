@@ -39,14 +39,23 @@ const PatientHome: React.FC = () => {
 
   // FETCH patient appointments
   const fetchAppointments = () => {
-    if (!auth || !auth.user) return;
-    fetch(
-      `http://localhost:8080/smart-appointment/api/patients/${auth.user.id}/appointments`
-    )
-      .then((res) => res.json())
-      .then((data) => setAppointments(data))
-      .catch((err) => console.error(err));
-  };
+  if (!auth || !auth.user) return;
+  fetch(`http://localhost:8080/smart-appointment/api/patients/${auth.user.id}/appointments`)
+    .then((res) => res.json())
+    .then((data) => {
+      // Map backend DTO to your Appointment type
+      const mapped = data.map((app: any) => ({
+        appointmentId: app.appointmentId,
+        doctorName: app.doctorName,
+        date: app.dateTimeScheduled.split("T")[0],
+        startTime: app.dateTimeScheduled.split("T")[1].slice(0,5), // HH:mm
+        endTime: "", // optional, you can extend backend to return slot end time
+      }));
+      setAppointments(mapped);
+    })
+    .catch((err) => console.error(err));
+};
+
 
   // INITIAL DATA FETCH
   useEffect(() => {
@@ -55,7 +64,7 @@ const PatientHome: React.FC = () => {
   }, [auth]);
 
   // BOOKING handler
-  const handleBookSlot = (doctorId: number, slotId: string) => {
+  const handleBookSlot = (doctorId: number, slotId: number) => {
     if (!auth || !auth.user) return;
     fetch("http://localhost:8080/smart-appointment/api/book", {
       method: "POST",
@@ -106,7 +115,10 @@ const PatientHome: React.FC = () => {
         ) : (
           <CalendarAvail
   availabilityByDate={availabilityByDate}
-  onBook={(doctor, date) => handleBookSlot(doctor.id, date.toISOString())}
+  onBook={(doctor, slot) =>
+  handleBookSlot(doctor.doctorId, slot.slotId)
+}
+
 />
         )}
       </section>

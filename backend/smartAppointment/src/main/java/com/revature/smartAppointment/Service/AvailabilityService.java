@@ -46,8 +46,9 @@ public class AvailabilityService {
           
             SlotDto slotDto = new SlotDto();
             slotDto.setSlotId(slot.getSlotId());
-            slotDto.setTime(slot.getStartTime().toString());
-            slotDto.setAvailable(true);
+            slotDto.setStartTime(slot.getStartTime().toString());
+            slotDto.setEndTime(slot.getEndTime().toString());
+            slotDto.setAvailable(slot.getStatus() == TimeSlotStatus.AVAILABLE);
 
             doctorDto.getSlots().add(slotDto);
         }

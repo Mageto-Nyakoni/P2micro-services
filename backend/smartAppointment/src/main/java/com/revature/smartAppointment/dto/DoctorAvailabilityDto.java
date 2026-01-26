@@ -1,54 +1,26 @@
 package com.revature.smartAppointment.dto;
 
 import java.util.List;
-
-import lombok.Data;
-
-
 import java.util.ArrayList;
-
+import lombok.Data;
 
 @Data
 public class DoctorAvailabilityDto {
-   private Integer doctorId;
+    private Integer doctorId;
     private String doctorName;
     private String specialization;
     private List<SlotDto> slots;
 
- // NO-ARG constructor (required for your current service code)
+    // NO-ARG constructor
     public DoctorAvailabilityDto() {
         this.slots = new ArrayList<>();
     }
 
-     // All-args constructor
-    public DoctorAvailabilityDto(Integer doctorId, String doctorName, List<SlotDto> slots) {
+    // ALL-ARGS constructor
+    public DoctorAvailabilityDto(Integer doctorId, String doctorName, String specialization, List<SlotDto> slots) {
         this.doctorId = doctorId;
         this.doctorName = doctorName;
+        this.specialization = specialization;
         this.slots = slots;
     }
-    // getters + setters
- public Integer getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(Integer doctorId) {
-        this.doctorId = doctorId;
-    }
-
-    public String getDoctorName() {
-        return doctorName;
-    }
-
-    public void setDoctorName(String doctorName) {
-        this.doctorName = doctorName;
-    }
-
-    public List<SlotDto> getSlots() {
-        return slots;
-    }
-
-    public void setSlots(List<SlotDto> slots) {
-        this.slots = slots;
-    }
-
 }
