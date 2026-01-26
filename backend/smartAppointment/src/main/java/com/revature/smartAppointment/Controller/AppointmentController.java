@@ -2,6 +2,7 @@ package com.revature.smartAppointment.Controller;
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.AppointmentType;
 import com.revature.smartAppointment.Model.Doctor;
+import com.revature.smartAppointment.Model.Patient;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 import com.revature.smartAppointment.dto.AppointmentDto;
@@ -10,13 +11,15 @@ import com.revature.smartAppointment.dto.DoctorAvailabilityDto;
 import com.revature.smartAppointment.dto.SlotDto;
 
 import java.util.Map;
-
+import java.util.Optional;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.revature.smartAppointment.Service.AppointmentService;
+import com.revature.smartAppointment.Service.PatientService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,59 +39,67 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentTypeRepository appointmentTypeRepository;
-     
     @Autowired
     private AppointmentRepository appointmentRepository;
-     @Autowired
-      private DoctorRepository doctorRepository;
-
-      @Autowired
-       private TimeSlotRepository timeSlotRepository;
+    @Autowired
+    private DoctorRepository doctorRepository;
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
+    
+    private PatientService patientService;
 
 
     @Autowired
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, PatientService patientSerivice) {
         this.appointmentService = appointmentService;
+        this.patientService = patientSerivice;
     }
 
     // Book an appointment
     @PostMapping("/book")
-    public ResponseEntity<AppointmentDto> bookAppointment(
-             @RequestBody BookAppointmentRequestDto request)
-             {
+    public ResponseEntity<AppointmentDto> bookAppointment(@RequestBody BookAppointmentRequestDto request) {
         AppointmentType type = appointmentTypeRepository.findById(request.typeId())
-                .orElseThrow(() -> new RuntimeException("AppointmentType not found"));
-
-        Appointment appointment = appointmentService.bookAppointment(request.slotId(), request.patientId(), type);
-        AppointmentDto response = new AppointmentDto(
-                    appointment.getAppointmentId(),
-                    "Dr. " + appointment.getDoctor().getDoctorId(),
-                    appointment.getAppointmentType().getName(),
-                    appointment.getDateTimeScheduled(),
-                    appointment.getDateTimeScheduled().plusMinutes(30),
-                    appointment.getStatus()
+            .orElseThrow(() -> new RuntimeException("AppointmentType not found"));
+        
+        Optional<Patient> optionalPatient = patientService.findByUserId(request.patientId());
+        if (optionalPatient.isPresent()) {
+            Appointment appointment = appointmentService.bookAppointment(request.slotId(), optionalPatient.get().getPatientId(), type);
+            AppointmentDto response = new AppointmentDto(
+                appointment.getAppointmentId(),
+                "Dr. " + appointment.getDoctor().getDoctorId(),
+                appointment.getAppointmentType().getName(),
+                appointment.getDateTimeScheduled(),
+                appointment.getDateTimeScheduled().plusMinutes(30),
+                appointment.getStatus()
             );
-         
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     // Get patient appointments
- @GetMapping("/patient/{patientId}")
-public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patientId) {
-    List<Appointment> appointments = appointmentRepository.findByPatient_PatientId(patientId);
+    @GetMapping("/patient/{patientId}")
+    public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patientId) {
+        Optional<Patient> optionalPatient = patientService.findByUserId(patientId);
 
-    return appointments.stream()
+        if (optionalPatient.isEmpty()) {
+            return new ArrayList<AppointmentDto>();
+        }
+        List<Appointment> appointments = appointmentRepository.findByPatient_PatientId(optionalPatient.get().getPatientId());
+
+        return appointments.stream()
             .map(app -> new AppointmentDto(
-                    app.getAppointmentId(),
-                    app.getDoctor().getUser().getFirstName() + " " + app.getDoctor().getUser().getLastName(),
-                    app.getAppointmentType().getName(),
-                    app.getDateTimeScheduled(),
-                    app.getDateTimeScheduled().plusMinutes(30),
-                    app.getStatus()
+                app.getAppointmentId(),
+                app.getDoctor().getUser().getFirstName() + " " + app.getDoctor().getUser().getLastName(),
+                app.getAppointmentType().getName(),
+                app.getDateTimeScheduled(),
+                app.getDateTimeScheduled().plusMinutes(30),
+                app.getStatus()
             ))
             .collect(Collectors.toList());
-}
-// ================= Get doctor availability =================
+    }
+
+    // ================= Get doctor availability =================
     @GetMapping("/availability")
     public Map<String, List<DoctorAvailabilityDto>> getAvailability() {
         

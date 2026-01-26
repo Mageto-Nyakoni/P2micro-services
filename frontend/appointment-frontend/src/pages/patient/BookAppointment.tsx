@@ -113,7 +113,7 @@ export default function BookAppointment() {
       const data = await res.json();
       console.log("Appointment booked:", data);
 
-         navigate("/patient", {
+         navigate("/patient/home", {
       state: { successMessage: "Appointment booked successfully!" }
     });
     } catch (err) {
