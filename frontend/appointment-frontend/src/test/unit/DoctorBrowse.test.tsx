@@ -1,36 +1,35 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, test, vi } from "vitest";
-import { DoctorsBrowse } from "@/pages";
-
+import DoctorsBrowse from "@/pages/public/DoctorsBrowse";
 
 // --------------------
 // Mocks
 // --------------------
 
 // Mock useNavigate from react-router-dom
-const mockNavigate = vi.fn();
+const mockNavigate = jest.fn();
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom"
-  );
-  return {
-    ...actual,
-    useNavigate: () => mockNavigate,
-  };
-});
+jest.mock("react-router-dom", () => ({
+  __esModule: true,
+  useNavigate: () => mockNavigate,
+}));
+
+jest.mock("react-calendar", () => ({
+  __esModule: true,
+  default: () => <div data-testid="react-calendar-mock" />,
+}));
 
 // Mock the data hook
-const mockUseDoctorsBrowse = vi.fn();
+const mockUseDoctorsBrowse = jest.fn();
 
-vi.mock("@/services/useDoctorBrowse", () => ({
+jest.mock("@/services/useDoctorBrowse", () => ({
   useDoctorsBrowse: () => mockUseDoctorsBrowse(),
 }));
 
 // Mock DoctorBrowseFilters (pure presentational in this test)
-vi.mock("@/components/doctor/DoctorBrowseFilters", () => ({
+jest.mock("@/components/doctor/DoctorBrowseFilters", () => ({
+  __esModule: true,
   default: (props: any) => (
     <div data-testid="filters">
       <div>Filters mounted</div>
@@ -43,7 +42,8 @@ vi.mock("@/components/doctor/DoctorBrowseFilters", () => ({
 }));
 
 // Mock DoctorList to expose onToggle/onBook and expandedDoctorId
-vi.mock("@/components/doctor/DoctorList", () => ({
+jest.mock("@/components/doctor/DoctorList", () => ({
+  __esModule: true,
   default: (props: any) => (
     <div data-testid="doctor-list">
       <div data-testid="doctor-count">{props.doctors.length}</div>
@@ -89,11 +89,11 @@ function mockHookReturn(overrides?: Partial<any>) {
     loading: false,
     error: "",
     query: "",
-    setQuery: vi.fn(),
+    setQuery: jest.fn(),
     speciality: "",
-    setSpeciality: vi.fn(),
+    setSpeciality: jest.fn(),
     gender: "",
-    setGender: vi.fn(),
+    setGender: jest.fn(),
     specialityOptions: [],
     genderOptions: ["Male", "Female"],
     ...overrides,
@@ -106,7 +106,7 @@ function mockHookReturn(overrides?: Partial<any>) {
 
 describe("DoctorsBrowse", () => {
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
   });
 
   test("renders header and loading text when loading=true", () => {
@@ -159,9 +159,7 @@ describe("DoctorsBrowse", () => {
 
     render(<DoctorsBrowse />);
 
-    expect(
-      screen.getByText("No doctors match your filters.")
-    ).toBeInTheDocument();
+    expect(screen.getByText("No doctors match your filters.")).toBeInTheDocument();
   });
 
   test("clicking Back calls navigate(-1)", async () => {
