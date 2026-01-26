@@ -83,8 +83,7 @@ export function getNavItems(
     case "Admin":
       return [
         ...common,
-        { kind: "link", label: "Schedules", to: "/admin/home" },
-        { kind: "link", label: "Staff List", to: "/admin/staff" },
+        { kind: "link", label: "Dashboard", to: "/admin/home" },
         { kind: "button", label: "Logout", onClick: actions.logout },
       ];
 
