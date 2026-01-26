@@ -25,7 +25,6 @@ import lombok.Data;
 
 @Entity
 @Table(name = "appointment")
-@Data
 @Getter
 @Setter
 @NoArgsConstructor

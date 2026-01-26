@@ -34,8 +34,8 @@ public class Doctor {
     private String bio;
 
       //  Add this for slots
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TimeSlot> slots = new ArrayList<>();
+   /*  @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TimeSlot> slots = new ArrayList<>();*/
 
     public Doctor (User user, Integer experienceYears, String gender, Speciality speciality, String bio){
         this.user = user;
