@@ -18,7 +18,12 @@ import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
 
     List<TimeSlot> findByDoctorDoctorId(Integer doctorId);
-    
+
+    boolean existsByDoctor_DoctorIdAndDateAvailableAndStartTime(
+            Integer doctorId,
+            LocalDate dateAvailable,
+            LocalTime startTime
+    );
     
 
     List<TimeSlot> findByDoctor_DoctorIdAndDateAvailableOrderByStartTimeAsc(Integer doctorId, LocalDate dateAvailable);
@@ -82,9 +87,19 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
         TimeSlotStatus status
            );*/
 
-            /* ================= NEW METHOD ================= */
+    /* ================= NEW METHOD ================= */
     @Transactional
     @Modifying
     @Query("UPDATE TimeSlot t SET t.status = 'AVAILABLE' WHERE t.slotId = :slotId AND t.status = 'BOOKED'")
     int freeSlotIfBooked(Integer slotId);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE TimeSlot t SET t.status = 'BOOKED' WHERE t.slotId = :slotId AND t.status = 'AVAILABLE'")
+    int bookSlotIfAvailable(Integer slotId);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE TimeSlot t SET t.status = 'BLOCKED' WHERE t.slotId IN :slotIds AND t.status <> 'BOOKED'")
+    int blockSlotsIfNotBooked(@Param("slotIds") List<Integer> slotIds);
 }

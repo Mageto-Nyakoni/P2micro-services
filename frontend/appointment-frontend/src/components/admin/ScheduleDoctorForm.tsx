@@ -14,6 +14,7 @@ interface ScheduleDoctorFormProps {
 export default function ScheduleDoctorForm({
   doctors,
   onSubmit,
+  onDoctorChange,
 }: ScheduleDoctorFormProps) {
   const [selectedDoctor, setSelectedDoctor] = useState<number | "">("");
   const [date, setDate] = useState("");

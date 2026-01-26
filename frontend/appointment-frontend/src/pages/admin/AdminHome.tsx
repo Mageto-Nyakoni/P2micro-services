@@ -46,15 +46,32 @@ export default function AdminHome() {
     const controller = new AbortController();
     getAllDoctors(controller.signal)
       .then(setDoctors)
-      .catch(() => {});
+      .catch((error) => {
+        console.error("AdminHome: failed to load doctors", error);
+      });
     fetchAdminAppointments("ALL")
       .then(setAppointments)
-      .catch(() => {});
+      .catch((error) => {
+        console.error("AdminHome: failed to load appointments", error);
+      });
     fetchAdminTimeSlots()
       .then(setSlots)
-      .catch(() => {});
+      .catch((error) => {
+        console.error("AdminHome: failed to load time slots", error);
+      });
     return () => controller.abort();
   }, []);
+
+  useEffect(() => {
+    if (selectedDoctorId !== null || doctors.length === 0) return;
+    const firstDoctorId = doctors[0].doctorId;
+    setSelectedDoctorId(firstDoctorId);
+    fetchAvailabilityWindows(firstDoctorId)
+      .then(setAvailabilityWindows)
+      .catch((error) => {
+        console.error("AdminHome: failed to load availability windows", error);
+      });
+  }, [doctors, selectedDoctorId]);
 
   const handleScheduleSubmit = (
     doctorId: number,
@@ -65,14 +82,16 @@ export default function AdminHome() {
     createAvailabilityWindow(doctorId, { date, startTime, endTime })
       .then(() => Promise.all([
         fetchAvailabilityWindows(doctorId),
-        fetchAdminTimeSlots({ doctorId, from: date, to: date }),
+        fetchAdminTimeSlots(),
       ]))
       .then(([windows, timeSlots]) => {
         setAvailabilityWindows(windows);
         setSlots(timeSlots);
         setSelectedDoctorId(doctorId);
       })
-      .catch(() => {});
+      .catch((error) => {
+        console.error("AdminHome: failed to create availability window", error);
+      });
   };
 
   const handleDeleteWindow = (windowId: number) => {
@@ -81,7 +100,7 @@ export default function AdminHome() {
         if (!selectedDoctorId) return;
         return Promise.all([
           fetchAvailabilityWindows(selectedDoctorId),
-          fetchAdminTimeSlots({ doctorId: selectedDoctorId }),
+          fetchAdminTimeSlots(),
         ]);
       })
       .then((result) => {
@@ -90,27 +109,33 @@ export default function AdminHome() {
         setAvailabilityWindows(windows);
         setSlots(timeSlots);
       })
-      .catch(() => {});
+      .catch((error) => {
+        console.error("AdminHome: failed to delete availability window", error);
+      });
   };
 
   const handleDoctorChange = (doctorId: number) => {
     setSelectedDoctorId(doctorId);
     Promise.all([
       fetchAvailabilityWindows(doctorId),
-      fetchAdminTimeSlots({ doctorId }),
+      fetchAdminTimeSlots(),
     ])
       .then(([windows, timeSlots]) => {
         setAvailabilityWindows(windows);
         setSlots(timeSlots);
       })
-      .catch(() => {});
+      .catch((error) => {
+        console.error("AdminHome: failed to update doctor view", error);
+      });
   };
 
   const handleDenyAppointment = (appointmentId: number) => {
     denyAppointment(appointmentId)
       .then(() => fetchAdminAppointments("ALL"))
       .then(setAppointments)
-      .catch(() => {});
+      .catch((error) => {
+        console.error("AdminHome: failed to deny appointment", error);
+      });
   };
 
   return (
@@ -191,7 +216,7 @@ export default function AdminHome() {
             Time Slots
           </h2>
           {slots.length === 0 ? (
-            <p className="text-slate-500">No slots found for the selected doctor.</p>
+            <p className="text-slate-500">No time slots found.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {slots.map((slot) => (
@@ -233,11 +258,21 @@ export default function AdminHome() {
                     <tr key={appt.appointmentId} className="border-t border-slate-100">
                       <td className="px-4 py-3">{appt.patientName ?? "—"}</td>
                       <td className="px-4 py-3">{appt.doctorName ?? "—"}</td>
-                      <td className="px-4 py-3">{appt.dateAvailable ?? "—"}</td>
                       <td className="px-4 py-3">
-                        {appt.startTime && appt.endTime ? `${appt.startTime} - ${appt.endTime}` : "—"}
+                        {appt.dateAvailable ?? appt.scheduledDateTime?.split("T")[0] ?? "—"}
                       </td>
-                      <td className="px-4 py-3">{appt.appointmentType ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        {appt.startTime && appt.endTime
+                          ? `${appt.startTime} - ${appt.endTime}`
+                          : appt.scheduledDateTime
+                            ? appt.scheduledDateTime.split("T")[1]?.slice(0, 5) ?? "—"
+                            : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {typeof appt.appointmentType === "string"
+                          ? appt.appointmentType
+                          : appt.appointmentType?.name ?? "—"}
+                      </td>
                       <td className="px-4 py-3">{appt.status}</td>
                       <td className="px-4 py-3">
                         <button
