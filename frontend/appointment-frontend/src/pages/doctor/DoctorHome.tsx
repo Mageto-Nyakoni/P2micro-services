@@ -1,77 +1,68 @@
-import { AuthContext } from "@/auth/AuthContext";
-import { getMyDoctor } from "@/services/doctorServices";
+/*import { getMyDoctor } from "@/services/doctorServices";
+import { getMyAppointments } from "@/services/appointmentServices";
 import { Doctor } from "@/types/doctorTypes";
-import { use, useContext, useEffect, useState } from "react";
-import { FaBriefcase, FaClock, FaHospital } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { FaBriefcase, FaHospital } from "react-icons/fa6";
+import { useAuth } from "@/auth/useAuth";
 
-export default function DoctorHome({
-
-    // Sample data for demonstration purposes. Will connect to backend later.
-  // doctor = {
-  //   name: "Dr. Ben Martinez",
-  //   speciality: "Cardiology",
-  //   experience: "15 years",
-  //   education: "MD, Harvard Medical School",
-  //   contact: "ben.martinez@hospital.com",
-  // },
-  sectionTitle = "Today's Appointments",
-  appointments = [
-    { id: 1, patientName: "Michael Chen", age: 54, date: "Dec 18, 2024", time: "9:00 AM", type: "Follow-up" },
-    { id: 2, patientName: "Emily Rodriguez", age: 42, date: "Dec 18, 2024", time: "10:30 AM", type: "Consultation" },
-    { id: 3, patientName: "James Thompson", age: 67, date: "Dec 18, 2024", time: "1:00 PM", type: "Annual Checkup" },
-    { id: 4, patientName: "Sophia Patel", age: 39, date: "Dec 18, 2024", time: "2:30 PM", type: "New Patient" },
-    { id: 5, patientName: "David Kim", age: 58, date: "Dec 18, 2024", time: "4:00 PM", type: "Follow-up" },
-  ],
-}) {
-
-  const [doctor, setDoctor] = useState <Doctor | null>(null);
+export default function DoctorHome() {
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const { token, loading } = useAuth();
+
   useEffect(() => {
+    if (!token || loading) return; // wait until token is available
+
     let cancelled = false;
 
-    (async () => {
-      try{
-        const data = await getMyDoctor();
-        if (!cancelled) {
-          setDoctor(data);
-        }
+    const fetchData = async () => {
+      try {
+        const doctorData = await getMyDoctor(token);
+        if (!cancelled) setDoctor(doctorData);
       } catch (err) {
-        console.error(err);
-        if (!cancelled) {
-          setError("Failed to load Profile");
-        }
+        console.error("Failed to load doctor profile:", err);
+        if (!cancelled) setError("Failed to load doctor profile");
       }
-    })();
+
+      try {
+        const appointmentsData = await getMyAppointments(token);
+        if (!cancelled) setAppointments(appointmentsData);
+      } catch (err) {
+        console.error("Failed to load appointments:", err);
+        if (!cancelled) setAppointments([]);
+      }
+    };
+
+    fetchData();
 
     return () => {
       cancelled = true;
     };
-  }, []);    
-  
-  if (error) return <p className="text-red-600">{error}</p>;
-  if (!doctor) return <p>Loading profile...</p>;
+  }, [token, loading]);
 
+  if (loading) return <p>Loading...</p>;
+  if (!doctor) return <p>Loading profile...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
 
   return (
     <div className="w-full min-h-screen bg-slate-50">
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* Doctor Profile Section */}
+        {/* Doctor Profile Section 
         <div className="rounded-2xl p-8 mb-8 shadow-sm bg-white">
           <div className="flex gap-6 items-start">
-            {/* Hospital Icon */}
             <div className="p-4 bg-indigo-100 rounded-xl shrink-0">
-              <FaHospital className="text-5xl text-indigo-600"/>
+              <FaHospital className="text-5xl text-indigo-600" />
             </div>
 
-            {/* Doctor Info */}
             <div className="flex-1">
               <div className="mb-6">
                 <h1 className="m-0 mb-1 font-bold text-2xl text-slate-800">
                   Dr. {doctor.user.firstName} {doctor.user.lastName}
                 </h1>
                 <p className="m-0 font-medium text-indigo-600 text-base">
-                  {doctor.speciality ? doctor.speciality.specialityName : "—"}
+                  {doctor.speciality?.specialityName ?? "—"}
                 </p>
               </div>
 
@@ -85,7 +76,7 @@ export default function DoctorHome({
                       Experience
                     </p>
                     <p className="m-0 text-slate-800 font-semibold">
-                      {doctor.experienceYears} years
+                      {doctor.experienceYears ?? 0} years
                     </p>
                   </div>
                 </div>
@@ -101,40 +92,234 @@ export default function DoctorHome({
           </div>
         </div>
 
-        {/* Appointments Section */}
+        {/* Appointments 
         <div>
-          <h2 className="m-0 mb-6 font-bold text-slate-800 text-2xl">{sectionTitle}</h2>
+          <h2 className="text-2xl font-bold mb-4">Today's Appointments</h2>
 
-          <div className="grid gap-4">
-            {appointments.map((apt) => (
-              <div
-                key={apt.id}
-                className="rounded-xl p-5 shadow-sm bg-white transition-transform duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md"
-              >
-                <div className="flex justify-between items-start flex-wrap gap-4">
-                  <div className="flex-1 min-w-[200px]">
-                    <h3 className="m-0 mb-3 font-semibold text-slate-800 text-lg">
-                      {apt.patientName}
-                    </h3>
+          {appointments.length === 0 && <p>No appointments for today.</p>}
 
-                    <div className="flex flex-wrap gap-4 text-slate-500 text-sm">
-                      <span>Age: {apt.age}</span>
-                      <span aria-label="Date">📅 {apt.date}</span>
-                      <span aria-label="Time">🕐 {apt.time}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="inline-block px-4 py-1.5 rounded-full font-medium text-white bg-blue-500 text-xs">
-                      {apt.type}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {appointments.map((apt) => (
+            <div key={apt.appointmentId} className="p-4 mb-3 bg-white shadow rounded-lg">
+              <p><strong>Patient:</strong> {apt.patientFirstName} {apt.patientLastName}</p>
+              <p><strong>Date & Time:</strong> {new Date(apt.scheduledDateTime).toLocaleString()}</p>
+              <p><strong>Type:</strong> {apt.appointmentType ?? "—"}</p>
+              <p><strong>Status:</strong> {apt.status}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
+*/
+
+import { getMyDoctor } from "@/services/doctorServices";
+import { getMyAppointments } from "@/services/appointmentServices";
+// import { updateAppointmentStatus } from "@/services/appointmentServices"; // uncomment when backend ready
+import { Doctor } from "@/types/doctorTypes";
+import { useEffect, useState } from "react";
+import { FaBriefcase, FaHospital } from "react-icons/fa6";
+import { useAuth } from "@/auth/useAuth";
+
+export default function DoctorHome() {
+  const [doctor, setDoctor] = useState<Doctor | null>(null);
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const { token, loading } = useAuth();
+
+  useEffect(() => {
+    if (!token || loading) return;
+
+    let cancelled = false;
+
+    const fetchData = async () => {
+      try {
+        const doctorData = await getMyDoctor(token);
+        if (!cancelled) setDoctor(doctorData);
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setError("Failed to load doctor profile");
+      }
+
+      try {
+        const appointmentsData = await getMyAppointments(token);
+        if (!cancelled) setAppointments(appointmentsData);
+      } catch (err) {
+        console.error(err);
+        if (!cancelled) setAppointments([]);
+      }
+    };
+
+    fetchData();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, loading]);
+
+  // ✅ Only show CONFIRMED appointments
+  const confirmedAppointments = appointments.filter(
+    (apt) => apt.status === "CONFIRMED"
+  );
+
+  const handleStatusChange = async (
+    appointmentId: number,
+    status: "COMPLETED" | "CANCELLED" | "NO_SHOW"
+  ) => {
+    try {
+      // 🔥 Call backend when ready
+      // await updateAppointmentStatus(appointmentId, status, token);
+
+      // 🔥 Instantly remove from UI
+      setAppointments((prev) =>
+        prev.filter((apt) => apt.appointmentId !== appointmentId)
+      );
+
+      setExpandedId(null);
+    } catch (err) {
+      console.error("Status update failed", err);
+      alert("Failed to update appointment status");
+    }
+  };
+
+  if (loading) return <p>Loading...</p>;
+  if (!doctor) return <p>Loading profile...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
+
+  return (
+    <div className="w-full min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto px-6 py-12">
+
+        {/* Doctor Profile */}
+        <div className="rounded-2xl p-8 mb-8 shadow-sm bg-white">
+          <div className="flex gap-6 items-start">
+            <div className="p-4 bg-indigo-100 rounded-xl">
+              <FaHospital className="text-5xl text-indigo-600" />
+            </div>
+
+            <div className="flex-1">
+              <h1 className="text-2xl font-bold text-slate-800">
+                Dr. {doctor.user.firstName} {doctor.user.lastName}
+              </h1>
+
+              <p className="text-indigo-600 font-medium">
+                {doctor.speciality?.specialityName ?? "—"}
+              </p>
+
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                  <div className="p-2 bg-indigo-100 rounded-full">
+                    <FaBriefcase className="text-indigo-600 text-sm" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 uppercase">
+                      Experience
+                    </p>
+                    <p className="font-semibold">
+                      {doctor.experienceYears ?? 0} years
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-lg sm:col-span-2">
+                  <p className="text-xs text-slate-500 uppercase mb-1">
+                    About
+                  </p>
+                  <p className="text-slate-700">{doctor.bio}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Appointments */}
+        <h2 className="text-2xl font-bold mb-4">
+          Today&apos;s Appointments
+        </h2>
+
+        {confirmedAppointments.length === 0 && (
+          <p>No confirmed appointments.</p>
+        )}
+
+       {confirmedAppointments.map((apt) => {
+  const isExpanded = expandedId === apt.appointmentId;
+
+  return (
+    <div
+      key={apt.appointmentId}
+      className="mb-4 bg-white rounded-2xl shadow-sm border border-violet-100 hover:shadow-md transition-all"
+    >
+      {/* HEADER */}
+      <div
+        onClick={() =>
+          setExpandedId(isExpanded ? null : apt.appointmentId)
+        }
+        className="p-5 cursor-pointer flex justify-between items-start"
+      >
+        <div className="space-y-1">
+          <p className="text-slate-800 font-semibold">
+            {apt.patientFirstName} {apt.patientLastName}
+          </p>
+
+          <p className="text-sm text-slate-500">
+            {new Date(apt.scheduledDateTime).toLocaleString()}
+          </p>
+
+          <p className="text-sm text-slate-500">
+            Type: {apt.appointmentType ?? "—"}
+          </p>
+        </div>
+
+        {/* STATUS BADGE */}
+        <span className="px-3 py-1 text-xs font-semibold rounded-full bg-violet-100 text-violet-700">
+          {apt.status}
+        </span>
+      </div>
+
+      {/* EXPANDED ACTIONS */}
+      {isExpanded && (
+        <div className="px-5 pb-5 pt-3 border-t border-violet-100 bg-violet-50 rounded-b-2xl">
+          <p className="text-sm text-slate-600 mb-3">
+            Update appointment status
+          </p>
+
+          <div className="flex gap-3 flex-wrap">
+            <button
+              onClick={() =>
+                handleStatusChange(apt.appointmentId, "COMPLETED")
+              }
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-emerald-500 text-white hover:bg-emerald-600 transition"
+            >
+              Completed
+            </button>
+
+            <button
+              onClick={() =>
+                handleStatusChange(apt.appointmentId, "CANCELLED")
+              }
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-rose-500 text-white hover:bg-rose-600 transition"
+            >
+              Cancelled
+            </button>
+
+            <button
+              onClick={() =>
+                handleStatusChange(apt.appointmentId, "NO_SHOW")
+              }
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-amber-400 text-white hover:bg-amber-500 transition"
+            >
+              No Show
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+})}
+
+      </div>
+    </div>
+  );
+}
+
