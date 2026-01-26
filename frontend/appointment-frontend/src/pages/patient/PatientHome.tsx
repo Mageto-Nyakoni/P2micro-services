@@ -5,6 +5,8 @@ import CalendarAvail from "@/components/availability/CalendarAvail";
 import type { DoctorAvailability } from "@/components/availability/types";
 import { useLocation } from "react-router-dom";
 import { AppointmentDto } from "@/types/appointmentTypes";
+import { fetchAvailability } from "@/services/availabilityService";
+import { fetchAppointmentsForPatient } from "@/services/appointmentService";
 
 /*interface Appointment {
   appointmentId: number;
@@ -17,12 +19,12 @@ import { AppointmentDto } from "@/types/appointmentTypes";
 const PatientHome: React.FC = () => {
   const navigate = useNavigate();
   const auth = useContext(AuthContext);
-const location = useLocation();
-{location.state?.successMessage && (
-  <div className="bg-green-100 text-green-700 p-3 rounded mb-4">
-    {location.state.successMessage}
-  </div>
-)}
+  const location = useLocation();
+  {location.state?.successMessage && (
+    <div className="bg-green-100 text-green-700 p-3 rounded mb-4">
+      {location.state.successMessage}
+    </div>
+  )}
   // STATE
   const [appointments, setAppointments] = useState<AppointmentDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -31,47 +33,41 @@ const location = useLocation();
   //const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   // FETCH availability from backend
-  const fetchAvailability = () => {
-    fetch("http://localhost:8080/smart-appointment/api/availability")
-      .then((res) => res.json())
-      .then((data) => {
-        setAvailabilityByDate(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
+  //FETCH FIX
+  const fetchAvailabilityData = async () => {
+    try {
+      const data = await fetchAvailability();
+      setAvailabilityByDate(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // FETCH patient appointments
-  const fetchAppointments = () => {
-    if (!auth || !auth.user) return;
-    fetch(`http://localhost:8080/smart-appointment/api/appointments/patient/${auth.user.id}`)
-      .then((res) => res.json())
-      .then((data) => {
-       const mapped: AppointmentDto[] = data.map((app: any) => ({
-        appointmentId: app.appointmentId,
-        doctorName: app.doctorName,
-        appointmentType: app.appointmentType,
-        startTime: app.startTime,  // backend ISO string
-        endTime: app.endTime,      // backend ISO string
-        status: app.status,
-      }));
-      setAppointments(mapped);
-      })
-      .catch((err) => console.error(err));
+  //FETCH FIX
+  const fetchAppointmentsData = async () => {
+    if (!auth?.user) return;
+
+    try {
+      const appointments = await fetchAppointmentsForPatient(auth.user.id);
+      setAppointments(appointments);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // INITIAL DATA FETCH
   useEffect(() => {
-    fetchAvailability();
-    fetchAppointments();
+    fetchAvailabilityData();
+    fetchAppointmentsData();
   }, [auth]);
 
   // BOOKING handler
   const handleBookSlot = (doctorId: number, slotId: number) => {
     if (!auth || !auth.user) return;
+    //FETCH FIX
     fetch("http://localhost:8080/smart-appointment/api/book", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
