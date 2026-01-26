@@ -1,7 +1,6 @@
 
 package com.revature.smartAppointment.Controller;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.smartAppointment.Controller.Request.DoctorInfoRequest;
@@ -29,6 +27,7 @@ import com.revature.smartAppointment.Service.DoctorService.DoctorAppointmentView
 import com.revature.smartAppointment.Service.DoctorService.DoctorTimeSlotView;
 import com.revature.smartAppointment.Util.JwtUtil;
 
+import io.jsonwebtoken.Jwt;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -141,29 +140,46 @@ public class DoctorController {
     // Dashboard: appointments today/week
     // -----------------------------
 
-@GetMapping("/{doctorId}/appointments/all")
-public ResponseEntity<List<DoctorService.DoctorAppointmentView>> getAllAppointments(@PathVariable Integer doctorId) {
-    return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
+
+// GET /doctors/me/appointments/today
+@GetMapping("/me/appointments/today")
+public ResponseEntity<List<DoctorAppointmentView>> getMyTodaysAppointments(
+        @RequestHeader("Authorization") String authHeader) {
+
+    String token = authHeader.substring(7);
+
+    if (!jwtUtil.validateToken(token)) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    if (!jwtUtil.extractPrivilege(token).equals("Doctor")) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    int userId = jwtUtil.extractId(token);
+    int doctorId = doctorService.findByUserId(userId)
+            .orElseThrow()
+            .getDoctorId();
+
+    return ResponseEntity.ok(
+        doctorService.getTodaysAppointments(doctorId)
+    );
+}
+    
+   @GetMapping("/{doctorId}/appointments/upcoming")
+public List<DoctorService.DoctorAppointmentView> getUpcomingAppointments(
+        @PathVariable Integer doctorId) {
+
+    return doctorService.getUpcomingAppointments(doctorId);
 }
 
-     /*  // GET /doctors/{doctorId}/appointments
-@GetMapping("/{doctorId}/appointments")
-public ResponseEntity<List<DoctorAppointmentView>> getAllAppointments(@PathVariable Integer doctorId) {
-    // This should return all appointments for the doctor (past + upcoming)
-    return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
-}*/
 
 
     // GET /doctors/{doctorId}/appointments/today
-    @GetMapping("/{doctorId}/appointments/by-date")
-   public ResponseEntity<List<DoctorAppointmentView>> getAppointmentsByDate(
-        @PathVariable Integer doctorId,
-        @RequestParam LocalDate date) {
-
-    return ResponseEntity.ok(
-        doctorService.getAppointmentsForDoctorByDate(doctorId, date)
-    );
-}
+    @GetMapping("/{doctorId}/appointments/today")
+    public ResponseEntity<List<DoctorAppointmentView>> getTodaysAppointments(@PathVariable Integer doctorId) {
+        return ResponseEntity.ok(doctorService.getTodaysAppointments(doctorId));
+    }
 
     // GET /doctors/{doctorId}/appointments/week
     @GetMapping("/{doctorId}/appointments/week")

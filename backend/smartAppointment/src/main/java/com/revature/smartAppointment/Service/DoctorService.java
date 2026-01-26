@@ -25,7 +25,6 @@ import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Repository.DoctorRepository;
 import com.revature.smartAppointment.Repository.TimeSlotRepository;
-import com.revature.smartAppointment.Service.DoctorService.DoctorTimeSlotView;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -64,7 +63,9 @@ public class DoctorService implements ServiceInterface<Doctor> {
     @Override
     public Optional<Doctor> deleteById(int id) {
         Optional<Doctor> optionalDoctor = doctorRepository.findById(id);
-        optionalDoctor.ifPresent(d -> doctorRepository.deleteById(id));
+        if (optionalDoctor.isPresent()) {
+            doctorRepository.deleteById(id);
+        }
         return optionalDoctor;
     }
 
@@ -86,25 +87,26 @@ public class DoctorService implements ServiceInterface<Doctor> {
     public Optional<Doctor> findByUserId(int user_id) {
         return doctorRepository.findDoctorByUser_UserId(user_id);
     }
-  // -----------------------------
-    // Doctor Appointment Methods
-    // -----------------------------
-     
+       
+    public List<DoctorAppointmentView> getUpcomingAppointments(Integer doctorId) {
+    ensureDoctorExists(doctorId);
 
-    public List<DoctorAppointmentView> getAppointmentsForDoctorByDate(
-            Integer doctorId,
-            LocalDate date) {
+    LocalDateTime now = LocalDateTime.now();
 
-        return appointmentRepository
-                .findAppointmentsForDoctorByDate(doctorId, date);
-    }
+    List<Appointment> appts =
+            appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledAfter(doctorId, now);
+
+    return appts.stream()
+            .map(DoctorService::toDoctorAppointmentView)
+            .toList();
+}
+
 
 
 
 
     public List<DoctorAppointmentView> getTodaysAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
-
         LocalDate today = LocalDate.now();
         LocalDateTime start = today.atStartOfDay();
         LocalDateTime end = today.atTime(LocalTime.MAX);
@@ -140,20 +142,8 @@ public class DoctorService implements ServiceInterface<Doctor> {
         enforceOwnership(doctorId, appt);
         return toDoctorAppointmentView(appt);
     }
-      
-      public List<DoctorAppointmentView> getAllAppointmentsForDoctor(Integer doctorId) {
-        ensureDoctorExists(doctorId);
-        List<Appointment> appointments =
-                appointmentRepository.findBySlotDoctorDoctorIdOrderByDateTimeScheduledAsc(doctorId);
-        return appointments.stream()
-                .map(DoctorService::toDoctorAppointmentViewWithPatient)
-                .toList();
-    }
 
-
-   // -----------------------------
-    // Appointment Status Management
-    // -----------------------------
+    // Doctor Actions: Status Management
 
     @Transactional
     public DoctorAppointmentView updateAppointmentStatus(Integer doctorId, Integer appointmentId,
@@ -198,10 +188,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
                 .toList();
     }
 
-    // -----------------------------
-    // Helper Methods
-    // -----------------------------
-
+    // Helpers / DTO mapping
 
     private void ensureDoctorExists(Integer doctorId) {
         doctorRepository.findById(doctorId)
@@ -226,79 +213,37 @@ public class DoctorService implements ServiceInterface<Doctor> {
         );
     }
 }
-     
-private static DoctorAppointmentView toDoctorAppointmentViewWithPatient(Appointment a) {
-    String firstName = null;
-    String lastName = null;
-    String appointmentType = null;
 
-    if (a.getPatient() != null && a.getPatient().getUser() != null) {
-        firstName = a.getPatient().getUser().getFirstName();
-        lastName = a.getPatient().getUser().getLastName();
+    private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
+             String patientFirstName = null;
+             String patientLastName = null;
+              if (a.getPatient() != null && a.getPatient().getUser() != null) {
+        patientFirstName = a.getPatient().getUser().getFirstName();
+        patientLastName = a.getPatient().getUser().getLastName();
     }
-
-    if (a.getAppointmentType() != null) {
-        appointmentType = a.getAppointmentType().getName(); // if enum
+  // Calculate duration from slot start/end time if slot exists
+    Integer estimatedDurationMinutes = null;
+    if (a.getSlot() != null && a.getSlot().getStartTime() != null && a.getSlot().getEndTime() != null) {
+        estimatedDurationMinutes = (int) java.time.Duration
+                .between(a.getSlot().getStartTime(), a.getSlot().getEndTime())
+                .toMinutes();
     }
 
     return new DoctorAppointmentView(
             a.getAppointmentId(),
-            firstName,
-            lastName,
-            appointmentType,
+            patientFirstName,
+            patientLastName,
+            "—", // placeholder for appointment type
             a.getDateTimeScheduled(),
+            estimatedDurationMinutes,
             a.getStatus()
     );
-}
-
-
-
-
-
-
-
-    private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
-            String firstName = null;
-            String lastName = null;
-            String appointmentType = null;
-            //Integer duration = null;
-
-                if (a.getPatient() != null && a.getPatient().getUser() != null) {
-            firstName = a.getPatient().getUser().getFirstName();
-            lastName = a.getPatient().getUser().getLastName();
-        }
-
-        if (a.getAppointmentType() != null) {
-            appointmentType = a.getAppointmentType().getName();
-        }
-
-        /*if (a.getEstimatedDurationMinutes() != null) {
-            duration = a.getEstimatedDurationMinutes();
-        }*/
-            return new DoctorAppointmentView(
-                a.getAppointmentId(),
-                firstName,
-                lastName,
-                appointmentType,
-                a.getDateTimeScheduled(),
-                a.getStatus()
-        );
     }
-
-
-       /*  return new DoctorAppointmentView(
-                a.getAppointmentId(),
-                null, // patientFirstName (not ready with Appointment model currently, wip)
-                null, // patientLastName (not ready with Appointment model currently, wip)
-                null, // appointmentType (not ready with Appointment model currently, wip)
-                a.getDateTimeScheduled(),
-                null, // estimatedDurationMinutes (not ready with Appointment model currently, wip)
-                a.getStatus());
-    }*/
 
     // Lightweight response DTOs
 
-   
+    @Data
+    @AllArgsConstructor
     public static class DoctorAppointmentView {
         private Integer appointmentId;
 
@@ -310,60 +255,16 @@ private static DoctorAppointmentView toDoctorAppointmentViewWithPatient(Appointm
         private Integer estimatedDurationMinutes;
 
         private AppointmentStatus status;
-
-
-          public DoctorAppointmentView(Integer appointmentId, String patientFirstName, String patientLastName,
-                                     String appointmentType, LocalDateTime scheduledDateTime,
-                                     AppointmentStatus status) {
-            this.appointmentId = appointmentId;
-            this.patientFirstName = patientFirstName;
-            this.patientLastName = patientLastName;
-            this.appointmentType = appointmentType;
-            this.scheduledDateTime = scheduledDateTime;
-            this.status = status;
-                                     }
-      // Getters and setters
-        public Integer getAppointmentId() { return appointmentId; }
-        public void setAppointmentId(Integer appointmentId) { this.appointmentId = appointmentId; }
-
-        public String getPatientFirstName() { return patientFirstName; }
-        public void setPatientFirstName(String patientFirstName) { this.patientFirstName = patientFirstName; }
-
-        public String getPatientLastName() { return patientLastName; }
-        public void setPatientLastName(String patientLastName) { this.patientLastName = patientLastName; }
-
-        public String getAppointmentType() { return appointmentType; }
-        public void setAppointmentType(String appointmentType) { this.appointmentType = appointmentType; }
-
-        public LocalDateTime getScheduledDateTime() { return scheduledDateTime; }
-        public void setScheduledDateTime(LocalDateTime scheduledDateTime) { this.scheduledDateTime = scheduledDateTime; }
-
-        public AppointmentStatus getStatus() { return status; }
-        public void setStatus(AppointmentStatus status) { this.status = status; }
     }
 
-    
+    @Data
+    @AllArgsConstructor
     public static class DoctorTimeSlotView {
         private Integer slotId;
         private LocalTime startTime;
         private LocalTime endTime;
-
-       public DoctorTimeSlotView(Integer slotId, LocalTime startTime, LocalTime endTime) {
-        this.slotId = slotId;
-        this.startTime = startTime;
-        this.endTime = endTime;
-
-
     }
-      public Integer getSlotId() { return slotId; }
-        public void setSlotId(Integer slotId) { this.slotId = slotId; }
 
-        public LocalTime getStartTime() { return startTime; }
-        public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
-
-        public LocalTime getEndTime() { return endTime; }
-        public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
-    }
     public Doctor convertRequestToObject(DoctorInfoRequest info) {
         Doctor doctor = new Doctor();
 
@@ -375,14 +276,4 @@ private static DoctorAppointmentView toDoctorAppointmentViewWithPatient(Appointm
         
         return doctor;
     }
-
 }
-
-
-
-
-
-
-
-
-
