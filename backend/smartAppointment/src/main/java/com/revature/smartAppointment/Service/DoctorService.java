@@ -215,29 +215,29 @@ public class DoctorService implements ServiceInterface<Doctor> {
 }
 
     private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
-             String patientFirstName = null;
-             String patientLastName = null;
-              if (a.getPatient() != null && a.getPatient().getUser() != null) {
-        patientFirstName = a.getPatient().getUser().getFirstName();
-        patientLastName = a.getPatient().getUser().getLastName();
-    }
-  // Calculate duration from slot start/end time if slot exists
-    Integer estimatedDurationMinutes = null;
-    if (a.getSlot() != null && a.getSlot().getStartTime() != null && a.getSlot().getEndTime() != null) {
-        estimatedDurationMinutes = (int) java.time.Duration
+        String patientFirstName = null;
+        String patientLastName = null;
+        if (a.getPatient() != null && a.getPatient().getUser() != null) {
+            patientFirstName = a.getPatient().getUser().getFirstName();
+            patientLastName = a.getPatient().getUser().getLastName();
+        }
+        // Calculate duration from slot start/end time if slot exists
+        Integer estimatedDurationMinutes = null;
+        if (a.getSlot() != null && a.getSlot().getStartTime() != null && a.getSlot().getEndTime() != null) {
+            estimatedDurationMinutes = (int) java.time.Duration
                 .between(a.getSlot().getStartTime(), a.getSlot().getEndTime())
                 .toMinutes();
-    }
+        }
 
-    return new DoctorAppointmentView(
+        return new DoctorAppointmentView(
             a.getAppointmentId(),
             patientFirstName,
             patientLastName,
-            "—", // placeholder for appointment type
+            a.getAppointmentType().getName(), // placeholder for appointment type
             a.getDateTimeScheduled(),
             estimatedDurationMinutes,
             a.getStatus()
-    );
+        );
     }
 
     // Lightweight response DTOs
