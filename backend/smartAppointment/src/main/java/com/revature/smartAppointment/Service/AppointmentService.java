@@ -4,13 +4,14 @@ import java.util.Map;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
-
+import com.revature.smartAppointment.Controller.PatientAppointmentController;
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.AppointmentType;
 import com.revature.smartAppointment.Model.Patient;
@@ -94,44 +95,68 @@ public class AppointmentService implements ServiceInterface<Appointment> {
 
     // Get all appointments for a patient
     public List<AppointmentDto> getAppointmentsForPatient(Integer patientId) {
-        List<Appointment> appointments = appointmentRepository.findByPatientPatientId(patientId);
+    List<Appointment> appointments = appointmentRepository.findByPatient_PatientId(patientId);
 
-        return appointments.stream()
-                .map(appt -> new AppointmentDto(
-                        appt.getAppointmentId(),
-                        "Dr. " + appt.getDoctor().getDoctorId(),     // temporary doctor name
-                        appt.getAppointmentType().getName(),         // AppointmentType name
-                        LocalDateTime.of(appt.getSlot().getDateAvailable(), appt.getSlot().getStartTime()),
-                        appt.getStatus()
-                ))
-                .toList();
+    return appointments.stream()
+            .map(appt -> new AppointmentDto(
+                    appt.getAppointmentId(),
+                    "Dr. " + appt.getDoctor().getDoctorId(), // ideally use getDoctor().getUser().getFirstName() + getLastName()
+                    appt.getAppointmentType().getName(),
+                    LocalDateTime.of(appt.getSlot().getDateAvailable(), appt.getSlot().getStartTime()),
+                    appt.getStatus()
+            ))
+            .collect(Collectors.toList()); // <-- changed here
+}
+
+ // New method: get only CONFIRMED appointments
+    public List<Appointment> getConfirmedAppointmentsForPatient(Integer patientId) {
+        return appointmentRepository.findByPatient_PatientIdAndStatus(patientId, AppointmentStatus.CONFIRMED);
     }
+
 
     @Autowired
 private PatientRepository patientRepository;
     @Transactional
-     public Appointment bookAppointment(Integer slotId, Integer patientId, AppointmentType appointmentType) {
+public Appointment bookAppointment(Integer slotId, Integer patientId, AppointmentType appointmentType) {
+    // Fetch the slot
     TimeSlot slot = timeSlotRepository.findById(slotId)
             .orElseThrow(() -> new RuntimeException("TimeSlot not found"));
 
+    // Check if slot is available
     if (slot.getStatus() != TimeSlotStatus.AVAILABLE) {
         throw new RuntimeException("TimeSlot is not available");
     }
-Patient patient = patientRepository.findById(patientId)
+
+    // Fetch the patient
+    Patient patient = patientRepository.findById(patientId)
             .orElseThrow(() -> new RuntimeException("Patient not found"));
-    // Create new Appointment
-    Appointment appointment = new Appointment();
+
+    // Create the appointment
+    /*Appointment appointment = new Appointment();
     appointment.setSlot(slot);
     appointment.setDoctor(slot.getDoctor());
     appointment.setPatient(patient);
     appointment.setAppointmentType(appointmentType);
     appointment.setDateTimeScheduled(java.time.LocalDateTime.of(slot.getDateAvailable(), slot.getStartTime()));
     appointment.setStatus(AppointmentStatus.CONFIRMED);
+    appointment.setCreatedAt(java.time.LocalDateTime.now());*/
 
-    // Mark slot as booked
+
+   Appointment appointment = Appointment.builder()
+           .doctor(slot.getDoctor())
+            .slot(slot)
+            .appointmentType(appointmentType)
+            .patient(patient)
+            .dateTimeScheduled(LocalDateTime.of(slot.getDateAvailable(), slot.getStartTime()))
+            .status(AppointmentStatus.CONFIRMED)
+            .build();
+            
+    // Mark the slot as booked **after creating the appointment**
     slot.setStatus(TimeSlotStatus.BOOKED);
-    timeSlotRepository.save(slot);
+    
 
+    // Save and return the appointment
+    timeSlotRepository.save(slot);
     return appointmentRepository.save(appointment);
 }
 

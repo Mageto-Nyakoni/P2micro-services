@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Repository.AppointmentTypeRepository;
 import com.revature.smartAppointment.Repository.DoctorRepository;
+import com.revature.smartAppointment.Repository.TimeSlotRepository;
 
 
 @RestController
@@ -40,6 +41,9 @@ public class AppointmentController {
     private AppointmentRepository appointmentRepository;
      @Autowired
       private DoctorRepository doctorRepository;
+
+      @Autowired
+       private TimeSlotRepository timeSlotRepository;
 
 
     @Autowired
@@ -68,9 +72,9 @@ public class AppointmentController {
     }
 
     // Get patient appointments
- @GetMapping("/patients/{patientId}/appointments")
+ @GetMapping("/patient/{patientId}")
 public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patientId) {
-    List<Appointment> appointments = appointmentRepository.findByPatientPatientId(patientId);
+    List<Appointment> appointments = appointmentRepository.findByPatient_PatientId(patientId);
 
     return appointments.stream()
             .map(app -> new AppointmentDto(
@@ -92,12 +96,14 @@ public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patient
 
         for (Doctor doctor : doctors) {
 
-             Map<String, List<SlotDto>> slotsByDate = new HashMap<>();
-            
+             // Fetch only available slots for this doctor
+        List<TimeSlot> slots = timeSlotRepository.findByDoctor_DoctorIdAndStatusOrderByDateAvailableAscStartTimeAsc(
+                doctor.getDoctorId(), TimeSlotStatus.AVAILABLE
+        );
 
-            for (TimeSlot slot : doctor.getSlots()) {
-            if (slot.getStatus() != TimeSlotStatus.AVAILABLE) continue;
-
+        // Group slots by date
+        Map<String, List<SlotDto>> slotsByDate = new HashMap<>();
+        for (TimeSlot slot : slots) {
             String dateKey = slot.getDateAvailable().toString();
 
             SlotDto slotDto = new SlotDto();
@@ -108,22 +114,21 @@ public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patient
 
             slotsByDate.computeIfAbsent(dateKey, k -> new ArrayList<>()).add(slotDto);
         }
-
-        // Now add doctor per date
-        for (Map.Entry<String, List<SlotDto>> entry : slotsByDate.entrySet()) {
+         for (Map.Entry<String, List<SlotDto>> entry : slotsByDate.entrySet()) {
             String dateKey = entry.getKey();
-            List<SlotDto> slots = entry.getValue();
+            List<SlotDto> doctorSlots = entry.getValue();
 
             DoctorAvailabilityDto doctorDto = new DoctorAvailabilityDto();
             doctorDto.setDoctorId(doctor.getDoctorId());
-            doctorDto.setDoctorName(doctor.getUser().getFirstName() + " " + doctor.getUser().getLastName());
+            doctorDto.setDoctorName(
+                doctor.getUser().getFirstName() + " " + doctor.getUser().getLastName()
+            );
             doctorDto.setSpecialization(doctor.getSpeciality().getSpecialityName());
-            doctorDto.setSlots(slots);
+            doctorDto.setSlots(doctorSlots);
 
             availabilityByDate.computeIfAbsent(dateKey, k -> new ArrayList<>()).add(doctorDto);
         }
     }
-
     return availabilityByDate;
 }
 }

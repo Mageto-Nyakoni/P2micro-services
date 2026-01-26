@@ -2,9 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/auth/AuthContext";
 import CalendarAvail from "@/components/availability/CalendarAvail";
-import type { DoctorAvailability, TimeSlot } from "@/components/availability/types";
-
-
+import type { DoctorAvailability } from "@/components/availability/types";
+import { useLocation } from "react-router-dom";
 interface Appointment {
   appointmentId: number;
   doctorName: string;
@@ -16,7 +15,12 @@ interface Appointment {
 const PatientHome: React.FC = () => {
   const navigate = useNavigate();
   const auth = useContext(AuthContext);
-
+const location = useLocation();
+{location.state?.successMessage && (
+  <div className="bg-green-100 text-green-700 p-3 rounded mb-4">
+    {location.state.successMessage}
+  </div>
+)}
   // STATE
   const [loading, setLoading] = useState<boolean>(true);
   const [availabilityByDate, setAvailabilityByDate] =
@@ -25,37 +29,35 @@ const PatientHome: React.FC = () => {
 
   // FETCH availability from backend
   const fetchAvailability = () => {
-  fetch("http://localhost:8080/smart-appointment/api/availability")
-    .then((res) => res.json())
-    .then((data) => {
-      setAvailabilityByDate(data);
-      setLoading(false); // <-- move inside .then
-    })
-    .catch((err) => {
-      console.error(err);
-      setLoading(false);
-    });
-};
+    fetch("http://localhost:8080/smart-appointment/api/availability")
+      .then((res) => res.json())
+      .then((data) => {
+        setAvailabilityByDate(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setLoading(false);
+      });
+  };
 
   // FETCH patient appointments
   const fetchAppointments = () => {
-  if (!auth || !auth.user) return;
-  fetch(`http://localhost:8080/smart-appointment/api/patients/${auth.user.id}/appointments`)
-    .then((res) => res.json())
-    .then((data) => {
-      // Map backend DTO to your Appointment type
-      const mapped = data.map((app: any) => ({
-        appointmentId: app.appointmentId,
-        doctorName: app.doctorName,
-        date: app.dateTimeScheduled.split("T")[0],
-        startTime: app.dateTimeScheduled.split("T")[1].slice(0,5), // HH:mm
-        endTime: "", // optional, you can extend backend to return slot end time
-      }));
-      setAppointments(mapped);
-    })
-    .catch((err) => console.error(err));
-};
-
+    if (!auth || !auth.user) return;
+    fetch(`http://localhost:8080/smart-appointment/api/appointments/patient/${auth.user.id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const mapped = data.map((app: any) => ({
+          appointmentId: app.appointmentId,
+          doctorName: app.doctorName,
+          date: app.dateTimeScheduled.split("T")[0],
+          startTime: app.dateTimeScheduled.split("T")[1].slice(0, 5),
+          endTime: "", // optional
+        }));
+        setAppointments(mapped);
+      })
+      .catch((err) => console.error(err));
+  };
 
   // INITIAL DATA FETCH
   useEffect(() => {
@@ -72,10 +74,25 @@ const PatientHome: React.FC = () => {
       body: JSON.stringify({ patientId: auth.user.id, doctorId, slotId }),
     })
       .then((res) => res.json())
-      .then(() => {
+      .then((newAppointment) => {
         alert("Slot booked successfully!");
+
+        // Map backend response to your Appointment type
+        const mappedAppointment: Appointment = {
+          appointmentId: newAppointment.appointmentId,
+          doctorName: newAppointment.doctorName,
+          date: newAppointment.dateTimeScheduled.split("T")[0],
+          startTime: newAppointment.dateTimeScheduled.split("T")[1].slice(0, 5),
+          endTime: "", // optional
+        };
+
+        // Append new appointment to state immediately
+        setAppointments((prev) => [...prev, mappedAppointment]);
+
+        // Update availability if needed
         fetchAvailability();
-        fetchAppointments();
+         alert("Slot booked successfully!");
+
       })
       .catch((err) => console.error(err));
   };
@@ -97,8 +114,7 @@ const PatientHome: React.FC = () => {
           Welcome {firstName}!
         </h1>
         <p className="text-xl text-gray-600 max-w-2xl mb-10">
-          Book your appointment with ease and connect with the best healthcare
-          professionals.
+          Book your appointment with ease and connect with the best healthcare professionals.
         </p>
         <button
           onClick={() => navigate("/doctors")}
@@ -108,17 +124,14 @@ const PatientHome: React.FC = () => {
         </button>
       </section>
 
-       {/* CALENDAR + AVAILABILITY (like guest page) */}
+      {/* CALENDAR + AVAILABILITY */}
       <section className="pb-20 px-6 min-h-[400px]">
         {loading ? (
           <p className="text-center text-gray-500">Loading availability...</p>
         ) : (
           <CalendarAvail
   availabilityByDate={availabilityByDate}
-  onBook={(doctor, slot) =>
-  handleBookSlot(doctor.doctorId, slot.slotId)
-}
-
+  onBook={(doctor, slot) => handleBookSlot(doctor.doctorId, slot.slotId)}
 />
         )}
       </section>
@@ -131,7 +144,7 @@ const PatientHome: React.FC = () => {
         ) : (
           appointments.map((app) => (
             <div
-              key={app.appointmentId}
+                key={app.appointmentId} 
               className="border p-4 mb-2 rounded shadow-sm bg-white"
             >
               <p>

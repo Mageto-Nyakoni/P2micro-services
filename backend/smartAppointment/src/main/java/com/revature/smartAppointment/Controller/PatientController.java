@@ -41,9 +41,9 @@ public class PatientController {
         this.jwtUtil = jwtUtil;
     }
      
-    @GetMapping("/appointments/patient/{patientId}")
+    @GetMapping("{patientId}/appointments")
 public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patientId) {
-    List<Appointment> appointments = appointmentRepository.findByPatientPatientIdAndStatus(patientId, AppointmentStatus.REQUESTED);
+    List<Appointment> appointments = appointmentRepository.findByPatient_PatientIdAndStatus(patientId, AppointmentStatus.REQUESTED);
 
     return appointments.stream().map(appt -> new AppointmentDto(
             appt.getAppointmentId(),

@@ -3,7 +3,7 @@ package com.revature.smartAppointment.Repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -52,4 +52,10 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
         Integer patientId,
         TimeSlotStatus status
            );*/
+
+            /* ================= NEW METHOD ================= */
+    @Transactional
+    @Modifying
+    @Query("UPDATE TimeSlot t SET t.status = 'AVAILABLE' WHERE t.slotId = :slotId AND t.status = 'BOOKED'")
+    int freeSlotIfBooked(Integer slotId);
 }

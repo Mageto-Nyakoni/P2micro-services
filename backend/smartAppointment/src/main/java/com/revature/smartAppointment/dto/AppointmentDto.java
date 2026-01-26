@@ -9,4 +9,9 @@ public record AppointmentDto(
     String appointmentType,
     LocalDateTime dateTimeScheduled,
     AppointmentStatus status
-) {}
+) {
+
+
+
+    
+}

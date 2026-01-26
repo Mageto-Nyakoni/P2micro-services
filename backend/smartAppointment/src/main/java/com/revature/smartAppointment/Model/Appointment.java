@@ -59,7 +59,7 @@ public class Appointment {
     private LocalDateTime dateTimeScheduled;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private AppointmentStatus status;
 
     @PrePersist

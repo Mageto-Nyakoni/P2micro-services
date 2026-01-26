@@ -22,7 +22,7 @@ public interface AppointmentRepository extends JpaRepository< Appointment, Integ
             LocalDateTime start,
             LocalDateTime end
     );
-       List<Appointment> findByPatientPatientId(Integer patientId);
-      List<Appointment> findByPatientPatientIdAndStatus(Integer patientId, AppointmentStatus status);
+       List<Appointment> findByPatient_PatientId(Integer patientId);
+      List<Appointment> findByPatient_PatientIdAndStatus(Integer patientId, AppointmentStatus status);
 
 }
