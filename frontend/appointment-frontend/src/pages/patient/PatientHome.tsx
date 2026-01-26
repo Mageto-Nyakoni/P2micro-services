@@ -4,13 +4,15 @@ import { AuthContext } from "@/auth/AuthContext";
 import CalendarAvail from "@/components/availability/CalendarAvail";
 import type { DoctorAvailability } from "@/components/availability/types";
 import { useLocation } from "react-router-dom";
-interface Appointment {
+import { AppointmentDto } from "@/types/appointmentTypes";
+
+/*interface Appointment {
   appointmentId: number;
   doctorName: string;
   date: string;
   startTime: string;
   endTime: string;
-}
+}*/
 
 const PatientHome: React.FC = () => {
   const navigate = useNavigate();
@@ -22,10 +24,11 @@ const location = useLocation();
   </div>
 )}
   // STATE
+  const [appointments, setAppointments] = useState<AppointmentDto[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [availabilityByDate, setAvailabilityByDate] =
     useState<Record<string, DoctorAvailability[]>>({});
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  //const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   // FETCH availability from backend
   const fetchAvailability = () => {
@@ -47,14 +50,15 @@ const location = useLocation();
     fetch(`http://localhost:8080/smart-appointment/api/appointments/patient/${auth.user.id}`)
       .then((res) => res.json())
       .then((data) => {
-        const mapped = data.map((app: any) => ({
-          appointmentId: app.appointmentId,
-          doctorName: app.doctorName,
-          date: app.dateTimeScheduled.split("T")[0],
-          startTime: app.dateTimeScheduled.split("T")[1].slice(0, 5),
-          endTime: "", // optional
-        }));
-        setAppointments(mapped);
+       const mapped: AppointmentDto[] = data.map((app: any) => ({
+        appointmentId: app.appointmentId,
+        doctorName: app.doctorName,
+        appointmentType: app.appointmentType,
+        startTime: app.startTime,  // backend ISO string
+        endTime: app.endTime,      // backend ISO string
+        status: app.status,
+      }));
+      setAppointments(mapped);
       })
       .catch((err) => console.error(err));
   };
@@ -78,12 +82,13 @@ const location = useLocation();
         alert("Slot booked successfully!");
 
         // Map backend response to your Appointment type
-        const mappedAppointment: Appointment = {
+        const mappedAppointment: AppointmentDto = {
           appointmentId: newAppointment.appointmentId,
           doctorName: newAppointment.doctorName,
-          date: newAppointment.dateTimeScheduled.split("T")[0],
-          startTime: newAppointment.dateTimeScheduled.split("T")[1].slice(0, 5),
-          endTime: "", // optional
+          appointmentType: newAppointment.appointmentType,
+          startTime: newAppointment.startTime,  // backend ISO string
+          endTime: newAppointment.endTime,      // backend ISO string
+          status: newAppointment.status,
         };
 
         // Append new appointment to state immediately
@@ -150,12 +155,17 @@ const location = useLocation();
               <p>
                 <strong>Doctor:</strong> {app.doctorName}
               </p>
-              <p>
-                <strong>Date:</strong> {app.date}
-              </p>
-              <p>
-                <strong>Time:</strong> {app.startTime} - {app.endTime}
-              </p>
+             <p>
+  <strong>Date:</strong> {new Date(app.startTime).toLocaleDateString()}
+</p>
+<p>
+  <strong>Time:</strong> {new Date(app.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+  {" - "} 
+  {new Date(app.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+</p>
+<p>
+  <strong>Status:</strong> {app.status}
+</p>
             </div>
           ))
         )}

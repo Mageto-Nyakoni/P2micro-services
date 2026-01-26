@@ -83,6 +83,7 @@ public class PatientAppointmentController {
                              + " " + appointment.getDoctor().getUser().getLastName(),
                     appointment.getAppointmentType().getName(),
                     appointment.getDateTimeScheduled(),
+                    appointment.getDateTimeScheduled().plusMinutes(30),
                     appointment.getStatus() // AppointmentStatus enum
             ))
             .toList();

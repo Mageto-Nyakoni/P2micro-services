@@ -102,7 +102,8 @@ public class AppointmentService implements ServiceInterface<Appointment> {
                     appt.getAppointmentId(),
                     "Dr. " + appt.getDoctor().getDoctorId(), // ideally use getDoctor().getUser().getFirstName() + getLastName()
                     appt.getAppointmentType().getName(),
-                    LocalDateTime.of(appt.getSlot().getDateAvailable(), appt.getSlot().getStartTime()),
+                      appt.getDateTimeScheduled(),                       // startTime
+                      appt.getDateTimeScheduled().plusMinutes(30),   
                     appt.getStatus()
             ))
             .collect(Collectors.toList()); // <-- changed here
@@ -128,9 +129,13 @@ public Appointment bookAppointment(Integer slotId, Integer patientId, Appointmen
     }
 
     // Fetch the patient
-    Patient patient = patientRepository.findById(patientId)
-            .orElseThrow(() -> new RuntimeException("Patient not found"));
-
+   Patient patient = patientRepository.findById(patientId)
+        .orElseGet(() -> {
+            Patient newPatient = new Patient();
+            newPatient.setPatientId(patientId); // matches user.id
+            // optionally set name/email if you have access to it
+            return patientRepository.save(newPatient);
+        });
     // Create the appointment
     /*Appointment appointment = new Appointment();
     appointment.setSlot(slot);

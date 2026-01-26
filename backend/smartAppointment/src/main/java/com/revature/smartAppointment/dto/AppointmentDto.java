@@ -7,7 +7,9 @@ public record AppointmentDto(
     Integer appointmentId,
     String doctorName,
     String appointmentType,
-    LocalDateTime dateTimeScheduled,
+    //LocalDateTime dateTimeScheduled,
+    LocalDateTime startTime,
+    LocalDateTime endTime,
     AppointmentStatus status
 ) {
 

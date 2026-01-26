@@ -50,6 +50,7 @@ public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patient
             appt.getDoctor().getUser().getFirstName() + " " + appt.getDoctor().getUser().getLastName(),
             appt.getAppointmentType().getName(),
             appt.getDateTimeScheduled(),
+            appt.getDateTimeScheduled().plusMinutes(30),
             appt.getStatus()
     )).collect(Collectors.toList());
 }

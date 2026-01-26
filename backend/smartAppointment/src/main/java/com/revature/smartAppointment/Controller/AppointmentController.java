@@ -65,6 +65,7 @@ public class AppointmentController {
                     "Dr. " + appointment.getDoctor().getDoctorId(),
                     appointment.getAppointmentType().getName(),
                     appointment.getDateTimeScheduled(),
+                    appointment.getDateTimeScheduled().plusMinutes(30),
                     appointment.getStatus()
             );
          
@@ -82,6 +83,7 @@ public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patient
                     app.getDoctor().getUser().getFirstName() + " " + app.getDoctor().getUser().getLastName(),
                     app.getAppointmentType().getName(),
                     app.getDateTimeScheduled(),
+                    app.getDateTimeScheduled().plusMinutes(30),
                     app.getStatus()
             ))
             .collect(Collectors.toList());
