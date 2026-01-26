@@ -1,7 +1,10 @@
 package com.revature.smartAppointment.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,5 +194,76 @@ public class AppointmentService implements ServiceInterface<Appointment> {
         // Mark appointment as cancelled
         appointment.setStatus(AppointmentStatus.CANCELLED); // make sure Appointment has boolean 'cancelled'
         appointmentRepository.save(appointment);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getCurrentAppointmentsForPatient(Integer patientId) {
+        if (patientId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Patient ID is required");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        List<Appointment> appointments = appointmentRepository
+                .findCurrentForPatientWithDetails(
+                        patientId,
+                        now,
+                        List.of(AppointmentStatus.CANCELLED, AppointmentStatus.DENIED, AppointmentStatus.COMPLETED)
+                );
+        return toPatientAppointmentViews(appointments);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAppointmentHistoryForPatient(Integer patientId) {
+        if (patientId == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Patient ID is required");
+        }
+        LocalDateTime now = LocalDateTime.now();
+        List<Appointment> appointments = appointmentRepository
+                .findHistoryForPatientWithDetails(
+                        patientId,
+                        now,
+                        List.of(AppointmentStatus.CANCELLED, AppointmentStatus.DENIED, AppointmentStatus.COMPLETED)
+                );
+        return toPatientAppointmentViews(appointments);
+    }
+
+    private List<Map<String, Object>> toPatientAppointmentViews(List<Appointment> appointments) {
+        List<Map<String, Object>> results = new ArrayList<>();
+        for (Appointment appointment : appointments) {
+            results.add(toPatientAppointmentView(appointment));
+        }
+        return results;
+    }
+
+    private Map<String, Object> toPatientAppointmentView(Appointment appointment) {
+        Map<String, Object> view = new HashMap<>();
+        view.put("appointmentId", appointment.getAppointmentId());
+        view.put("status", appointment.getStatus());
+
+        TimeSlot slot = appointment.getSlot();
+        view.put("slotId", slot != null ? slot.getSlotId() : null);
+        view.put("dateAvailable", slot != null ? slot.getDateAvailable() : null);
+        view.put("startTime", slot != null ? slot.getStartTime() : null);
+        view.put("endTime", slot != null ? slot.getEndTime() : null);
+
+        if (slot != null && slot.getDoctor() != null) {
+            view.put("doctorId", slot.getDoctor().getDoctorId());
+            if (slot.getDoctor().getUser() != null) {
+                String name = slot.getDoctor().getUser().getFirstName() + " " + slot.getDoctor().getUser().getLastName();
+                view.put("doctorName", name);
+            } else {
+                view.put("doctorName", null);
+            }
+        } else {
+            view.put("doctorId", null);
+            view.put("doctorName", null);
+        }
+
+        AppointmentType appointmentType = appointment.getAppointmentType();
+        view.put("appointmentTypeId", appointmentType != null ? appointmentType.getTypeId() : null);
+        view.put("appointmentType", appointmentType != null ? appointmentType.getName() : null);
+        view.put("scheduledDateTime", appointment.getDateTimeScheduled());
+        view.put("createdAt", appointment.getCreatedAt());
+
+        return view;
     }
 }

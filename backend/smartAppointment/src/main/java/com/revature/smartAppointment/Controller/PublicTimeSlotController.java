@@ -2,7 +2,6 @@ package com.revature.smartAppointment.Controller;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,13 +24,13 @@ public class PublicTimeSlotController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getAvailableSlots(
+    public ResponseEntity<List<TimeSlotService.PublicTimeSlotView>> getAvailableSlots(
             @RequestParam(required = false) Integer doctorId,
             @RequestParam(required = false) LocalDate date,
             @RequestParam(required = false) LocalDate from,
             @RequestParam(required = false) LocalDate to
     ) {
-        List<Map<String, Object>> slots = timeSlotService.getAvailableSlotsPublic(doctorId, date, from, to);
+        List<TimeSlotService.PublicTimeSlotView> slots = timeSlotService.getAvailableSlotsPublic(doctorId, date, from, to);
         return ResponseEntity.ok(slots);
     }
 }

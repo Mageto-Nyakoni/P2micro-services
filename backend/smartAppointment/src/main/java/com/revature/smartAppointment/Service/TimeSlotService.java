@@ -15,9 +15,13 @@ import com.revature.smartAppointment.Model.AvailabilityWindow;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 import com.revature.smartAppointment.Repository.TimeSlotRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class TimeSlotService {
+
+    private static final Logger log = LoggerFactory.getLogger(TimeSlotService.class);
 
     private final TimeSlotRepository timeSlotRepository;
 
@@ -89,7 +93,7 @@ public class TimeSlotService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getAvailableSlotsPublic(Integer doctorId, LocalDate date, LocalDate from, LocalDate to) {
+    public List<PublicTimeSlotView> getAvailableSlotsPublic(Integer doctorId, LocalDate date, LocalDate from, LocalDate to) {
         List<TimeSlot> slots;
 
         if (date != null) {
@@ -105,6 +109,11 @@ public class TimeSlotService {
         } else if (from != null || to != null) {
             LocalDate start = from != null ? from : to;
             LocalDate end = to != null ? to : from;
+            if (start != null && end != null && start.isAfter(end)) {
+                LocalDate tmp = start;
+                start = end;
+                end = tmp;
+            }
             if (doctorId != null) {
                 slots = timeSlotRepository.findByDoctor_DoctorIdAndDateAvailableBetweenAndStatusOrderByDateAvailableAscStartTimeAsc(
                         doctorId, start, end, TimeSlotStatus.AVAILABLE
@@ -122,25 +131,102 @@ public class TimeSlotService {
             slots = timeSlotRepository.findByStatusOrderByDateAvailableAscStartTimeAsc(TimeSlotStatus.AVAILABLE);
         }
 
-        List<Map<String, Object>> results = new ArrayList<>();
+        if (log.isDebugEnabled()) {
+            long total = timeSlotRepository.count();
+            long available = timeSlotRepository.countByStatus(TimeSlotStatus.AVAILABLE);
+            Long filteredAvailable = null;
+            if (date != null) {
+                if (doctorId != null) {
+                    filteredAvailable = timeSlotRepository.countByDoctor_DoctorIdAndDateAvailableAndStatus(
+                            doctorId, date, TimeSlotStatus.AVAILABLE
+                    );
+                } else {
+                    filteredAvailable = timeSlotRepository.countByDateAvailableAndStatus(date, TimeSlotStatus.AVAILABLE);
+                }
+            } else if (from != null || to != null) {
+                LocalDate start = from != null ? from : to;
+                LocalDate end = to != null ? to : from;
+                if (start != null && end != null && start.isAfter(end)) {
+                    LocalDate tmp = start;
+                    start = end;
+                    end = tmp;
+                }
+                if (doctorId != null) {
+                    filteredAvailable = timeSlotRepository.countByDoctor_DoctorIdAndDateAvailableBetweenAndStatus(
+                            doctorId, start, end, TimeSlotStatus.AVAILABLE
+                    );
+                } else {
+                    filteredAvailable = timeSlotRepository.countByDateAvailableBetweenAndStatus(
+                            start, end, TimeSlotStatus.AVAILABLE
+                    );
+                }
+            } else if (doctorId != null) {
+                filteredAvailable = timeSlotRepository.countByDoctor_DoctorIdAndStatus(
+                        doctorId, TimeSlotStatus.AVAILABLE
+                );
+            }
+            log.debug(
+                    "Public time-slots query counts: total={}, available={}, filteredAvailable={}, doctorId={}, date={}, from={}, to={}",
+                    total, available, filteredAvailable, doctorId, date, from, to
+            );
+        }
+
+        List<PublicTimeSlotView> results = new ArrayList<>();
         for (TimeSlot slot : slots) {
-            Map<String, Object> item = new HashMap<>();
-            item.put("slotId", slot.getSlotId());
-            item.put("doctorId", slot.getDoctor() != null ? slot.getDoctor().getDoctorId() : null);
+            Integer doctorIdValue = slot.getDoctor() != null ? slot.getDoctor().getDoctorId() : null;
+            String doctorName = null;
             if (slot.getDoctor() != null && slot.getDoctor().getUser() != null) {
                 String name = slot.getDoctor().getUser().getFirstName() + " " + slot.getDoctor().getUser().getLastName();
-                item.put("doctorName", name);
-            } else {
-                item.put("doctorName", null);
+                doctorName = name;
             }
-            item.put("dateAvailable", slot.getDateAvailable());
-            item.put("startTime", slot.getStartTime());
-            item.put("endTime", slot.getEndTime());
-            item.put("status", slot.getStatus());
-            results.add(item);
+            results.add(new PublicTimeSlotView(
+                    slot.getSlotId(),
+                    doctorIdValue,
+                    doctorName,
+                    slot.getDateAvailable(),
+                    slot.getStartTime(),
+                    slot.getEndTime(),
+                    slot.getStatus()
+            ));
         }
 
         return results;
+    }
+
+    public static class PublicTimeSlotView {
+        private Integer slotId;
+        private Integer doctorId;
+        private String doctorName;
+        private LocalDate dateAvailable;
+        private LocalTime startTime;
+        private LocalTime endTime;
+        private TimeSlotStatus status;
+
+        public PublicTimeSlotView(
+                Integer slotId,
+                Integer doctorId,
+                String doctorName,
+                LocalDate dateAvailable,
+                LocalTime startTime,
+                LocalTime endTime,
+                TimeSlotStatus status
+        ) {
+            this.slotId = slotId;
+            this.doctorId = doctorId;
+            this.doctorName = doctorName;
+            this.dateAvailable = dateAvailable;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.status = status;
+        }
+
+        public Integer getSlotId() { return slotId; }
+        public Integer getDoctorId() { return doctorId; }
+        public String getDoctorName() { return doctorName; }
+        public LocalDate getDateAvailable() { return dateAvailable; }
+        public LocalTime getStartTime() { return startTime; }
+        public LocalTime getEndTime() { return endTime; }
+        public TimeSlotStatus getStatus() { return status; }
     }
 
     /**
