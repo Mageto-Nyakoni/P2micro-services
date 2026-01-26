@@ -12,6 +12,8 @@ public class AvailabilityWindowDTO {
     private int doctorId;
     private String doctorName; // optional
 
+    public AvailabilityWindowDTO() {}
+
     public AvailabilityWindowDTO(int windowId, LocalDate date, LocalTime startTime, LocalTime endTime, boolean active, int doctorId, String doctorName) {
         this.windowId = windowId;
         this.date = date;
@@ -29,6 +31,14 @@ public class AvailabilityWindowDTO {
     public boolean isActive() { return active; }
     public int getDoctorId() { return doctorId; }
     public String getDoctorName() { return doctorName; }
+
+    public void setWindowId(int windowId) { this.windowId = windowId; }
+    public void setDate(LocalDate date) { this.date = date; }
+    public void setStartTime(LocalTime startTime) { this.startTime = startTime; }
+    public void setEndTime(LocalTime endTime) { this.endTime = endTime; }
+    public void setActive(boolean active) { this.active = active; }
+    public void setDoctorId(int doctorId) { this.doctorId = doctorId; }
+    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
 }
 // DTO (Data Transfer Object) used to send only the fields the frontend needs
 // This avoids lazy-loading errors and prevents exposing full Hibernate entities

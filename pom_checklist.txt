@@ -18,5 +18,6 @@ Dependencies:
   JWT Api 0.13.0
   JWT Impl 0.13.0
   JWT Jackson 0.13.0
+  Jackson Datatypes
 Plugins:
   Make sure lombok stuff is here

@@ -45,28 +45,23 @@ public class UserController {
         if (optionalUser.isPresent()) {
             return ResponseEntity.status(200).body(optionalUser.get());
         }
-        return ResponseEntity.status(400).build();
+        return ResponseEntity.status(404).build();
     }
 
     @GetMapping("/table")
     public ResponseEntity<?> getUsersForTable(@RequestHeader("Authorization") String authHeader) {
-        try {
-            String token = authHeader.substring(7);
+        String token = authHeader.substring(7);
 
-            if (!jwtUtil.validateToken(token)) {
-                throw new RuntimeException("Invalid token");
-            }
-
-            String privilege = jwtUtil.extractPrivilege(token);
-            if (privilege.equals("Super")) {
-                return ResponseEntity.ok(userService.getUsersForTable());
-            } else {
-                throw new RuntimeException("Unauthorized access");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        if (!jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(401).build();  
         }
-        
+
+        String privilege = jwtUtil.extractPrivilege(token);
+        if (privilege.equals("Super")) {
+            return ResponseEntity.ok(userService.getUsersForTable());
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();  
+        }
     }
 
     @PatchMapping("/{user_id}")
@@ -76,12 +71,15 @@ public class UserController {
             User updatedUser = userService.updateById(user_id, userInfo);
             return ResponseEntity.status(200).body(updatedUser);
         }
-        return ResponseEntity.status(400).build();
+        return ResponseEntity.status(404).build();
     }
 
     @DeleteMapping("/{user_id}")
     public ResponseEntity<Void> deleteUser(@PathVariable int user_id) {
-        userService.deleteById(user_id);
-        return ResponseEntity.ok().build();
+        Optional<User> optionalUser = userService.deleteById(user_id);
+        if (optionalUser.isPresent()) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.status(404).build();
     }
 }

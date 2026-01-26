@@ -28,6 +28,7 @@ import com.revature.smartAppointment.Repository.TimeSlotRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Service
 public class DoctorService implements ServiceInterface<Doctor> {
@@ -215,6 +216,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class DoctorAppointmentView {
         private Integer appointmentId;
 
@@ -230,6 +232,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class DoctorTimeSlotView {
         private Integer slotId;
         private LocalTime startTime;

@@ -48,7 +48,7 @@ public class UserService implements ServiceInterface<User> {
                 doctorService.deleteById(doctor.getDoctorId());
             });
             patientService.findByUserId(id).ifPresent(patient -> {
-                doctorService.deleteById(patient.getPatientId());
+                patientService.deleteById(patient.getPatientId());
             });
             userRepository.deleteById(id);
         }

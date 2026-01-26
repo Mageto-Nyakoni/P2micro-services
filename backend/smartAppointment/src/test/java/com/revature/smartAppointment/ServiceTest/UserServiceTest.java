@@ -1,150 +1,243 @@
-// package com.revature.smartAppointment.ServiceTest;
+package com.revature.smartAppointment.ServiceTest;
 
-// import com.revature.smartAppointment.Model.Privilege;
-// import com.revature.smartAppointment.Model.User;
-// import com.revature.smartAppointment.Repository.PrivilegeRepository;
-// import com.revature.smartAppointment.Repository.UserRepository;
-// import com.revature.smartAppointment.Service.UserService;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// import java.util.Arrays;
-// import java.util.List;
-// import java.util.Optional;
+import java.util.List;
+import java.util.Optional;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// @ExtendWith(MockitoExtension.class)
-// public class UserServiceTest {
+import com.revature.smartAppointment.Controller.Response.UserTableResponse;
+import com.revature.smartAppointment.Model.Doctor;
+import com.revature.smartAppointment.Model.Patient;
+import com.revature.smartAppointment.Model.User;
+import com.revature.smartAppointment.Repository.UserRepository;
+import com.revature.smartAppointment.Service.DoctorService;
+import com.revature.smartAppointment.Service.PatientService;
+import com.revature.smartAppointment.Service.UserService;
 
-//     @Mock
-//     private UserRepository userRepository;
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
 
-//     @Mock
-//     private PrivilegeRepository privilegeRepository;
+    @Mock
+    private UserRepository userRepository;
 
-//     @InjectMocks
-//     private UserService userService;
+    @Mock
+    private PatientService patientService;
 
-//     @Test
-//     void testSaveUser() {
-//         Privilege privilege = new Privilege(1, "ADMIN");
-//         User user = new User(null, "email@test.com", "pass", "John", "Doe", privilege);
-//         User savedUser = new User(1, "email@test.com", "pass", "John", "Doe", privilege);
+    @Mock
+    private DoctorService doctorService;
 
-//         when(userRepository.save(user)).thenReturn(savedUser);
+    @InjectMocks
+    private UserService userService;
 
-//         User result = userService.save(user);
+    // =====================
+    // save
+    // =====================
 
-//         assertEquals(savedUser, result);
-//         verify(userRepository, times(1)).save(user);
-//     }
+    @Test
+    void save_success() {
+        User user = new User();
+        user.setEmail("test@email.com");
 
-//     @Test
-//     void testFindByIdFound() {
-//         User user = new User(1, "email@test.com", "pass", "John", "Doe", null);
-//         when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        when(userRepository.save(user)).thenReturn(user);
 
-//         Optional<User> result = userService.findById(1);
+        User saved = userService.save(user);
 
-//         assertTrue(result.isPresent());
-//         assertEquals(user, result.get());
-//     }
+        assertEquals("test@email.com", saved.getEmail());
+        verify(userRepository).save(user);
+    }
 
-//     @Test
-//     void testFindByIdNotFound() {
-//         when(userRepository.findById(1)).thenReturn(Optional.empty());
+    // =====================
+    // findById
+    // =====================
 
-//         Optional<User> result = userService.findById(1);
+    @Test
+    void findById_found() {
+        User user = new User();
+        user.setUserId(1);
 
-//         assertFalse(result.isPresent());
-//     }
+        when(userRepository.findById(1))
+            .thenReturn(Optional.of(user));
 
-//     @Test
-//     void testFindAll() {
-//         User user1 = new User(1, "a@test.com", "pass", "John", "Doe", null);
-//         User user2 = new User(2, "b@test.com", "pass", "Jane", "Smith", null);
-//         List<User> users = Arrays.asList(user1, user2);
+        Optional<User> result = userService.findById(1);
 
-//         when(userRepository.findAll()).thenReturn(users);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.get().getUserId());
+    }
 
-//         List<User> result = userService.findAll();
+    @Test
+    void findById_notFound() {
+        when(userRepository.findById(1))
+            .thenReturn(Optional.empty());
 
-//         assertEquals(2, result.size());
-//         assertEquals(users, result);
-//     }
+        Optional<User> result = userService.findById(1);
 
-//     @Test
-//     void testDeleteByIdExists() {
-//         User user = new User(1, "email@test.com", "pass", "John", "Doe", null);
-//         when(userRepository.findById(1)).thenReturn(Optional.of(user));
+        assertTrue(result.isEmpty());
+    }
 
-//         Optional<User> result = userService.deleteById(1);
+    // =====================
+    // findAll
+    // =====================
 
-//         assertTrue(result.isPresent());
-//         verify(userRepository, times(1)).deleteById(1);
-//     }
+    @Test
+    void findAll_success() {
+        when(userRepository.findAll())
+            .thenReturn(List.of(new User(), new User()));
 
-//     @Test
-//     void testDeleteByIdNotExists() {
-//         when(userRepository.findById(1)).thenReturn(Optional.empty());
+        List<User> users = userService.findAll();
 
-//         Optional<User> result = userService.deleteById(1);
+        assertEquals(2, users.size());
+    }
 
-//         assertFalse(result.isPresent());
-//         verify(userRepository, never()).deleteById(anyInt());
-//     }
+    // =====================
+    // deleteById
+    // =====================
 
-//     @Test
-//     void testUpdateByIdExists() {
-//         Privilege privilege = new Privilege(1, "ADMIN");
-//         User existing = new User(1, "old@test.com", "oldpass", "Old", "Name", privilege);
-//         User updated = new User(null, "new@test.com", "newpass", "New", "Name", privilege);
+    @Test
+    void deleteById_userOnly() {
+        User user = new User();
+        user.setUserId(1);
 
-//         when(userRepository.findById(1)).thenReturn(Optional.of(existing));
-//         when(userRepository.save(existing)).thenReturn(existing);
+        when(userRepository.findById(1))
+            .thenReturn(Optional.of(user));
+        when(doctorService.findByUserId(1))
+            .thenReturn(Optional.empty());
+        when(patientService.findByUserId(1))
+            .thenReturn(Optional.empty());
 
-//         User result = userService.updateById(1, updated);
+        Optional<User> result = userService.deleteById(1);
 
-//         assertEquals("new@test.com", result.getEmail());
-//         assertEquals("newpass", result.getPassword());
-//         assertEquals("New", result.getFirstName());
-//         assertEquals("Name", result.getLastName());
-//         assertEquals(privilege, result.getPrivilege());
-//     }
+        assertTrue(result.isPresent());
+        verify(userRepository).deleteById(1);
+        verify(doctorService, never()).deleteById(anyInt());
+        verify(patientService, never()).deleteById(anyInt());
+    }
 
-//     @Test
-//     void testUpdateByIdNotExists() {
-//         User updated = new User(null, "new@test.com", "newpass", "New", "Name", null);
+    @Test
+    void deleteById_withDoctorAndPatient() {
+        User user = new User();
+        user.setUserId(1);
 
-//         when(userRepository.findById(1)).thenReturn(Optional.empty());
+        Doctor doctor = new Doctor();
+        doctor.setDoctorId(10);
 
-//         User result = userService.updateById(1, updated);
+        Patient patient = new Patient();
+        patient.setPatientId(20);
 
-//         assertNull(result);
-//     }
+        when(userRepository.findById(1))
+            .thenReturn(Optional.of(user));
+        when(doctorService.findByUserId(1))
+            .thenReturn(Optional.of(doctor));
+        when(patientService.findByUserId(1))
+            .thenReturn(Optional.of(patient));
 
-//     @Test
-//     void testFindUserByEmailFound() {
-//         User user = new User(1, "test@test.com", "pass", "John", "Doe", null);
-//         when(userRepository.findUserByEmail("test@test.com")).thenReturn(Optional.of(user));
+        Optional<User> result = userService.deleteById(1);
 
-//         Optional<User> result = userService.findUserByEmail("test@test.com");
+        assertTrue(result.isPresent());
 
-//         assertTrue(result.isPresent());
-//         assertEquals(user, result.get());
-//     }
+        verify(doctorService).deleteById(10);
+        verify(patientService).deleteById(20);
+        verify(userRepository).deleteById(1);
+    }
 
-//     @Test
-//     void testFindUserByEmailNotFound() {
-//         when(userRepository.findUserByEmail("notfound@test.com")).thenReturn(Optional.empty());
+    @Test
+    void deleteById_notFound() {
+        when(userRepository.findById(1))
+            .thenReturn(Optional.empty());
 
-//         Optional<User> result = userService.findUserByEmail("notfound@test.com");
+        Optional<User> result = userService.deleteById(1);
 
-//         assertFalse(result.isPresent());
-//     }
-// }
+        assertTrue(result.isEmpty());
+        verify(userRepository, never()).deleteById(anyInt());
+    }
+
+    // =====================
+    // updateById
+    // =====================
+
+    @Test
+    void updateById_success_partialUpdate() {
+        User existing = new User();
+        existing.setUserId(1);
+        existing.setEmail("old@email.com");
+
+        User updates = new User();
+        updates.setEmail("new@email.com");
+
+        when(userRepository.findById(1))
+            .thenReturn(Optional.of(existing));
+        when(userRepository.save(existing))
+            .thenReturn(existing);
+
+        User result = userService.updateById(1, updates);
+
+        assertNotNull(result);
+        assertEquals("new@email.com", result.getEmail());
+        verify(userRepository).save(existing);
+    }
+
+    @Test
+    void updateById_notFound() {
+        when(userRepository.findById(1))
+            .thenReturn(Optional.empty());
+
+        User result = userService.updateById(1, new User());
+
+        assertNull(result);
+        verify(userRepository, never()).save(any());
+    }
+
+    // =====================
+    // findUserByEmail
+    // =====================
+
+    @Test
+    void findUserByEmail_found() {
+        User user = new User();
+        user.setEmail("test@email.com");
+
+        when(userRepository.findUserByEmail("test@email.com"))
+            .thenReturn(Optional.of(user));
+
+        Optional<User> result =
+            userService.findUserByEmail("test@email.com");
+
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void findUserByEmail_notFound() {
+        when(userRepository.findUserByEmail("missing@email.com"))
+            .thenReturn(Optional.empty());
+
+        Optional<User> result =
+            userService.findUserByEmail("missing@email.com");
+
+        assertTrue(result.isEmpty());
+    }
+
+    // =====================
+    // getUsersForTable
+    // =====================
+
+    @Test
+    void getUsersForTable_success() {
+        when(userRepository.findUsersForTable())
+            .thenReturn(List.of(
+                mock(UserTableResponse.class),
+                mock(UserTableResponse.class)
+            ));
+
+        List<UserTableResponse> result =
+            userService.getUsersForTable();
+
+        assertEquals(2, result.size());
+        verify(userRepository).findUsersForTable();
+    }
+}

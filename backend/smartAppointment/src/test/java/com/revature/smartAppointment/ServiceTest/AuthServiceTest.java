@@ -1,135 +1,225 @@
-// package com.revature.smartAppointment.ServiceTest;
+package com.revature.smartAppointment.ServiceTest;
 
-// import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertThrows;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import static org.mockito.ArgumentMatchers.any;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import static org.mockito.Mockito.when;
-// import org.mockito.junit.jupiter.MockitoExtension;
+import java.util.Optional;
 
-// import com.revature.smartAppointment.Controller.Request.RegisterRequest;
-// import com.revature.smartAppointment.Controller.Response.LoginResponse;
-// import com.revature.smartAppointment.Controller.Response.RegisterResponse;
-// import com.revature.smartAppointment.Model.Privilege;
-// import com.revature.smartAppointment.Model.User;
-// import com.revature.smartAppointment.Service.AuthService;
-// import com.revature.smartAppointment.Service.DoctorService;
-// import com.revature.smartAppointment.Service.PatientService;
-// import com.revature.smartAppointment.Service.PrivilegeService;
-// import com.revature.smartAppointment.Service.UserService;
-// import com.revature.smartAppointment.Util.JwtUtil;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// @ExtendWith(MockitoExtension.class)
-// public class AuthServiceTest {
+import com.revature.smartAppointment.Controller.Request.RegisterRequest;
+import com.revature.smartAppointment.Controller.Response.LoginResponse;
+import com.revature.smartAppointment.Controller.Response.RegisterResponse;
+import com.revature.smartAppointment.Model.Doctor;
+import com.revature.smartAppointment.Model.Patient;
+import com.revature.smartAppointment.Model.Privilege;
+import com.revature.smartAppointment.Model.User;
+import com.revature.smartAppointment.Service.*;
+import com.revature.smartAppointment.Util.JwtUtil;
 
-//     @Mock
-//     private UserService userService;
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
 
-//     @Mock
-//     private PrivilegeService privilegeService;
+    @Mock
+    private UserService userService;
 
-//     @Mock
-//     private PatientService patientService;
+    @Mock
+    private PrivilegeService privilegeService;
 
-//     @Mock
-//     private DoctorService doctorService;
+    @Mock
+    private PatientService patientService;
 
-//     @Mock
-//     private JwtUtil jwtUtil;
+    @Mock
+    private DoctorService doctorService;
 
-//     @InjectMocks
-//     private AuthService authService;
+    @Mock
+    private JwtUtil jwtUtil;
 
-//     @Test
-//     void testValidateLoginSuccess() {
-//         Privilege privilege = new Privilege(1, "ADMIN");
-//         User user = new User(1, "test@test.com", "pass123", "John", "Doe", privilege);
+    @InjectMocks
+    private AuthService authService;
 
-//         when(userService.findUserByEmail("test@test.com")).thenReturn(Optional.of(user));
-//         when(jwtUtil.generateToken("test@test.com", 1, "ADMIN")).thenReturn("token123");
+    private User user;
+    private Privilege privilege;
 
-//         LoginResponse response = authService.validateLogin("test@test.com", "pass123");
+    @BeforeEach
+    void setup() {
+        privilege = new Privilege();
+        privilege.setPrivilegeId(1);
+        privilege.setRoleName("PATIENT");
 
-//         assertEquals(user.getUserId(), response.getUserId());
-//         assertEquals("token123", response.getToken());
-//         assertEquals(privilege, response.getPrivilege());
-//     }
+        user = new User("test@email.com", "password", "John", "Doe", privilege);
+        user.setUserId(1);
+    }
 
-//     @Test
-//     void testValidateLoginInvalidPassword() {
-//         User user = new User(1, "test@test.com", "pass123", "John", "Doe", null);
-//         when(userService.findUserByEmail("test@test.com")).thenReturn(Optional.of(user));
+    // =========================
+    // validateLogin tests
+    // =========================
 
-//         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-//                 authService.validateLogin("test@test.com", "wrongpass"));
+    @Test
+    void validateLogin_success() {
+        when(userService.findUserByEmail("test@email.com"))
+            .thenReturn(Optional.of(user));
 
-//         assertEquals("Invalid username or password", exception.getMessage());
-//     }
+        when(jwtUtil.generateToken(anyString(), anyInt(), anyString()))
+            .thenReturn("jwt-token");
 
-//     @Test
-//     void testValidateLoginUserNotFound() {
-//         when(userService.findUserByEmail("test@test.com")).thenReturn(Optional.empty());
+        LoginResponse response =
+            authService.validateLogin("test@email.com", "password");
 
-//         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-//                 authService.validateLogin("test@test.com", "pass123"));
+        assertNotNull(response);
+        assertEquals("test@email.com", response.getEmail());
+        assertEquals("jwt-token", response.getToken());
+    }
 
-//         assertEquals("Invalid username or password", exception.getMessage());
-//     }
+    @Test
+    void validateLogin_wrongPassword_throwsException() {
+        when(userService.findUserByEmail("test@email.com"))
+            .thenReturn(Optional.of(user));
 
-//     @Test
-//     void testValidateRegistrationSuccess() {
-//         Privilege privilege = new Privilege(1, "ADMIN");
-//         RegisterRequest request = new RegisterRequest("John", "Doe", "test@test.com", "pass123", 1);
+        RuntimeException ex = assertThrows(RuntimeException.class,
+            () -> authService.validateLogin("test@email.com", "wrong"));
 
-//         when(userService.findUserByEmail("test@test.com")).thenReturn(Optional.empty());
-//         when(privilegeService.findById(1)).thenReturn(Optional.of(privilege));
-//         User savedUser = new User(1, "test@test.com", "pass123", "John", "Doe", privilege);
-//         when(userService.save(any(User.class))).thenReturn(savedUser);
-//         // Mock patientService.save for privilegeId == 1 (ADMIN/Patient)
-//         when(patientService.save(any())).thenReturn(null);
+        assertEquals("Invalid username or password", ex.getMessage());
+    }
 
-//         RegisterResponse response = authService.validateRegistration(request);
+    @Test
+    void validateLogin_userNotFound_throwsException() {
+        when(userService.findUserByEmail("missing@email.com"))
+            .thenReturn(Optional.empty());
 
-//         assertEquals(1, response.getUserId());
-//         assertEquals("test@test.com", response.getEmail());
-//         assertEquals(privilege, response.getPrivilege());
-//     }
+        RuntimeException ex = assertThrows(RuntimeException.class,
+            () -> authService.validateLogin("missing@email.com", "password"));
 
-//     @Test
-//     void testValidateRegistrationEmailExists() {
-//         RegisterRequest request = new RegisterRequest("John", "Doe", "test@test.com", "pass123", 1);
-//         when(userService.findUserByEmail("test@test.com")).thenReturn(Optional.of(new User()));
+        assertEquals("Invalid username or password", ex.getMessage());
+    }
 
-//         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-//                 authService.validateRegistration(request));
+    // =========================
+    // validateRegistration tests
+    // =========================
 
-//         assertEquals("Invalid email: email already in use", exception.getMessage());
-//     }
+    @Test
+    void validateRegistration_success_patient() {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("new@email.com");
+        request.setPassword("password");
+        request.setFirstName("Jane");
+        request.setLastName("Doe");
+        request.setPrivilegeId(1);
 
-//     @Test
-//     void testValidateRegistrationPrivilegeNotFound() {
-//         RegisterRequest request = new RegisterRequest("John", "Doe", "test@test.com", "pass123", 1);
-//         when(userService.findUserByEmail("test@test.com")).thenReturn(Optional.empty());
-//         when(privilegeService.findById(1)).thenReturn(Optional.empty());
+        when(userService.findUserByEmail("new@email.com"))
+            .thenReturn(Optional.empty());
 
-//         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-//                 authService.validateRegistration(request));
+        when(privilegeService.findById(1))
+            .thenReturn(Optional.of(privilege));
 
-//         assertEquals("Invalid privilege: privilege does not exist", exception.getMessage());
-//     }
+        when(userService.save(any(User.class)))
+            .thenAnswer(invocation -> {
+                User saved = invocation.getArgument(0);
+                saved.setUserId(2);
+                return saved;
+            });
 
-//     @Test
-//     void testValidateRegistrationMissingFields() {
-//         RegisterRequest request = new RegisterRequest("", "Doe", "test@test.com", "pass123", 1);
+        RegisterResponse response =
+            authService.validateRegistration(request);
 
-//         RuntimeException exception = assertThrows(RuntimeException.class, () ->
-//                 authService.validateRegistration(request));
+        assertNotNull(response);
+        assertEquals("new@email.com", response.getEmail());
 
-//         assertEquals("Error: one or more required fields are empty", exception.getMessage());
-//     }
-// }
+        verify(patientService).save(any(Patient.class));
+        verify(doctorService, never()).save(any());
+    }
+
+    @Test
+    void validateRegistration_success_doctor() {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("doc@email.com");
+        request.setPassword("password");
+        request.setFirstName("Doc");
+        request.setLastName("Tor");
+        request.setPrivilegeId(2);
+
+        privilege.setPrivilegeId(2);
+        privilege.setRoleName("DOCTOR");
+
+        when(userService.findUserByEmail("doc@email.com"))
+            .thenReturn(Optional.empty());
+
+        when(privilegeService.findById(2))
+            .thenReturn(Optional.of(privilege));
+
+        when(userService.save(any(User.class)))
+            .thenAnswer(invocation -> {
+                User saved = invocation.getArgument(0);
+                saved.setUserId(3);
+                return saved;
+            });
+
+        authService.validateRegistration(request);
+
+        verify(doctorService).save(any(Doctor.class));
+        verify(patientService, never()).save(any());
+    }
+
+    @Test
+    void validateRegistration_emailAlreadyExists_throwsException() {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("test@email.com");
+        request.setPassword("password");
+        request.setFirstName("John");
+        request.setLastName("Doe");
+        request.setPrivilegeId(1);
+
+        when(userService.findUserByEmail("test@email.com"))
+            .thenReturn(Optional.of(user));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+            () -> authService.validateRegistration(request));
+
+        assertEquals("Invalid email: email already in use", ex.getMessage());
+    }
+
+    @Test
+    void validateRegistration_invalidPrivilege_throwsException() {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("new@email.com");
+        request.setPassword("password");
+        request.setFirstName("John");
+        request.setLastName("Doe");
+        request.setPrivilegeId(99);
+
+        when(userService.findUserByEmail("new@email.com"))
+            .thenReturn(Optional.empty());
+
+        when(privilegeService.findById(99))
+            .thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+            () -> authService.validateRegistration(request));
+
+        assertEquals("Invalid privilege: privilege does not exist", ex.getMessage());
+    }
+
+    @Test
+    void validateRegistration_missingRequiredField_throwsException() {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail("");  // triggers empty check
+        request.setPassword("password");
+        request.setFirstName("");  // not null
+        request.setLastName("");   // not null
+        request.setPrivilegeId(1); // optional if your method checks for null
+
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+            () -> authService.validateRegistration(request));
+
+        assertEquals("Error: one or more required fields are empty", ex.getMessage());
+    }
+}

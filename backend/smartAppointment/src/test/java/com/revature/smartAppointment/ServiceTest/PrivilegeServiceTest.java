@@ -1,117 +1,152 @@
-// package com.revature.smartAppointment.ServiceTest;
+package com.revature.smartAppointment.ServiceTest;
 
-// import com.revature.smartAppointment.Model.Privilege;
-// import com.revature.smartAppointment.Repository.PrivilegeRepository;
-// import com.revature.smartAppointment.Service.PrivilegeService;
-// import org.junit.jupiter.api.Test;
-// import org.junit.jupiter.api.extension.ExtendWith;
-// import org.mockito.InjectMocks;
-// import org.mockito.Mock;
-// import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-// import java.util.Arrays;
-// import java.util.List;
-// import java.util.Optional;
+import java.util.List;
+import java.util.Optional;
 
-// import static org.junit.jupiter.api.Assertions.*;
-// import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-// @ExtendWith(MockitoExtension.class)
-// public class PrivilegeServiceTest {
+import com.revature.smartAppointment.Model.Privilege;
+import com.revature.smartAppointment.Repository.PrivilegeRepository;
+import com.revature.smartAppointment.Service.PrivilegeService;
 
-//     @Mock
-//     private PrivilegeRepository privilegeRepository;
+@ExtendWith(MockitoExtension.class)
+class PrivilegeServiceTest {
 
-//     @InjectMocks
-//     private PrivilegeService privilegeService;
+    @Mock
+    private PrivilegeRepository privilegeRepository;
 
-//     @Test
-//     void testSavePrivilege() {
-//         Privilege privilege = new Privilege(null, "ADMIN");
-//         Privilege saved = new Privilege(1, "ADMIN");
+    @InjectMocks
+    private PrivilegeService privilegeService;
 
-//         when(privilegeRepository.save(privilege)).thenReturn(saved);
+    // =====================
+    // save
+    // =====================
 
-//         Privilege result = privilegeService.save(privilege);
+    @Test
+    void save_success() {
+        Privilege privilege = new Privilege();
+        privilege.setRoleName("ADMIN");
 
-//         assertEquals(saved, result);
-//     }
+        when(privilegeRepository.save(privilege)).thenReturn(privilege);
 
-//     @Test
-//     void testFindByIdExists() {
-//         Privilege privilege = new Privilege(1, "ADMIN");
-//         when(privilegeRepository.findById(1)).thenReturn(Optional.of(privilege));
+        Privilege saved = privilegeService.save(privilege);
 
-//         Optional<Privilege> result = privilegeService.findById(1);
+        assertEquals("ADMIN", saved.getRoleName());
+        verify(privilegeRepository).save(privilege);
+    }
 
-//         assertTrue(result.isPresent());
-//         assertEquals(privilege, result.get());
-//     }
+    // =====================
+    // findById
+    // =====================
 
-//     @Test
-//     void testFindByIdNotExists() {
-//         when(privilegeRepository.findById(1)).thenReturn(Optional.empty());
+    @Test
+    void findById_found() {
+        Privilege privilege = new Privilege();
+        privilege.setPrivilegeId(1);
 
-//         Optional<Privilege> result = privilegeService.findById(1);
+        when(privilegeRepository.findById(1))
+            .thenReturn(Optional.of(privilege));
 
-//         assertFalse(result.isPresent());
-//     }
+        Optional<Privilege> result = privilegeService.findById(1);
 
-//     @Test
-//     void testFindAll() {
-//         Privilege p1 = new Privilege(1, "ADMIN");
-//         Privilege p2 = new Privilege(2, "USER");
-//         List<Privilege> list = Arrays.asList(p1, p2);
+        assertTrue(result.isPresent());
+        assertEquals(1, result.get().getPrivilegeId());
+    }
 
-//         when(privilegeRepository.findAll()).thenReturn(list);
+    @Test
+    void findById_notFound() {
+        when(privilegeRepository.findById(1))
+            .thenReturn(Optional.empty());
 
-//         List<Privilege> result = privilegeService.findAll();
+        Optional<Privilege> result = privilegeService.findById(1);
 
-//         assertEquals(2, result.size());
-//         assertEquals(list, result);
-//     }
+        assertTrue(result.isEmpty());
+    }
 
-//     @Test
-//     void testDeleteByIdExists() {
-//         Privilege privilege = new Privilege(1, "ADMIN");
-//         when(privilegeRepository.findById(1)).thenReturn(Optional.of(privilege));
+    // =====================
+    // findAll
+    // =====================
 
-//         Optional<Privilege> result = privilegeService.deleteById(1);
+    @Test
+    void findAll_success() {
+        when(privilegeRepository.findAll())
+            .thenReturn(List.of(new Privilege(), new Privilege()));
 
-//         assertTrue(result.isPresent());
-//         verify(privilegeRepository, times(1)).deleteById(1);
-//     }
+        List<Privilege> result = privilegeService.findAll();
 
-//     @Test
-//     void testDeleteByIdNotExists() {
-//         when(privilegeRepository.findById(1)).thenReturn(Optional.empty());
+        assertEquals(2, result.size());
+    }
 
-//         Optional<Privilege> result = privilegeService.deleteById(1);
+    // =====================
+    // deleteById
+    // =====================
 
-//         assertFalse(result.isPresent());
-//         verify(privilegeRepository, never()).deleteById(anyInt());
-//     }
+    @Test
+    void deleteById_found_deletesAndReturns() {
+        Privilege privilege = new Privilege();
+        privilege.setPrivilegeId(1);
 
-//     @Test
-//     void testUpdateByIdExists() {
-//         Privilege oldP = new Privilege(1, "USER");
-//         Privilege newP = new Privilege(null, "ADMIN");
+        when(privilegeRepository.findById(1))
+            .thenReturn(Optional.of(privilege));
 
-//         when(privilegeRepository.findById(1)).thenReturn(Optional.of(oldP));
-//         when(privilegeRepository.save(oldP)).thenReturn(oldP);
+        Optional<Privilege> result = privilegeService.deleteById(1);
 
-//         Privilege result = privilegeService.updateById(1, newP);
+        assertTrue(result.isPresent());
+        verify(privilegeRepository).deleteById(1);
+    }
 
-//         assertEquals("ADMIN", result.getRoleName());
-//     }
+    @Test
+    void deleteById_notFound_returnsEmpty() {
+        when(privilegeRepository.findById(1))
+            .thenReturn(Optional.empty());
 
-//     @Test
-//     void testUpdateByIdNotExists() {
-//         Privilege newP = new Privilege(null, "ADMIN");
-//         when(privilegeRepository.findById(1)).thenReturn(Optional.empty());
+        Optional<Privilege> result = privilegeService.deleteById(1);
 
-//         Privilege result = privilegeService.updateById(1, newP);
+        assertTrue(result.isEmpty());
+        verify(privilegeRepository, never()).deleteById(anyInt());
+    }
 
-//         assertNull(result);
-//     }
-// }
+    // =====================
+    // updateById
+    // =====================
+
+    @Test
+    void updateById_success_updatesRoleName() {
+        Privilege existing = new Privilege();
+        existing.setPrivilegeId(1);
+        existing.setRoleName("USER");
+
+        Privilege updated = new Privilege();
+        updated.setRoleName("ADMIN");
+
+        when(privilegeRepository.findById(1))
+            .thenReturn(Optional.of(existing));
+        when(privilegeRepository.save(any()))
+            .thenReturn(existing);
+
+        Privilege result = privilegeService.updateById(1, updated);
+
+        assertNotNull(result);
+        assertEquals("ADMIN", result.getRoleName());
+        verify(privilegeRepository).save(existing);
+    }
+
+    @Test
+    void updateById_notFound_returnsNull() {
+        when(privilegeRepository.findById(1))
+            .thenReturn(Optional.empty());
+
+        Privilege result =
+            privilegeService.updateById(1, new Privilege());
+
+        assertNull(result);
+        verify(privilegeRepository, never()).save(any());
+    }
+}

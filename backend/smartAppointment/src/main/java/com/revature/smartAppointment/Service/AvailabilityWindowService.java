@@ -52,7 +52,7 @@ public class AvailabilityWindowService {
 
         LocalTime current = window.getStartTime();
 
-        while (current.plusMinutes(30).isAfter(window.getEndTime())) {
+        while (current.isBefore(window.getEndTime())) {
 
             LocalTime slotEnd = current.plusMinutes(30);
 
