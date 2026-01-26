@@ -9,7 +9,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+<<<<<<< HEAD
 import org.springframework.transaction.annotation.Transactional;
+=======
+import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
+>>>>>>> patients-appointment
 
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
@@ -17,7 +21,13 @@ import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
 
+<<<<<<< HEAD
     boolean existsByDoctor_DoctorIdAndDateAvailableAndStartTime(Integer doctorId, LocalDate dateAvailable, LocalTime startTime);
+=======
+    List<TimeSlot> findByDoctorDoctorId(Integer doctorId);
+    
+    
+>>>>>>> patients-appointment
 
     List<TimeSlot> findByDoctor_DoctorIdAndDateAvailableOrderByStartTimeAsc(Integer doctorId, LocalDate dateAvailable);
 
@@ -45,6 +55,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
             LocalTime startTime,
             LocalTime endTime
     );
+<<<<<<< HEAD
 
     @Modifying
     @Query("UPDATE TimeSlot t SET t.status = 'BOOKED' WHERE t.slotId = :slotId AND t.status = 'AVAILABLE'")
@@ -70,4 +81,11 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
     @Query("UPDATE TimeSlot t SET t.status = 'BLOCKED' WHERE t.slotId IN :slotIds AND t.status <> 'BOOKED'")
     @Transactional
     int blockSlotsIfNotBooked(@Param("slotIds") List<Integer> slotIds);
+=======
+     List<TimeSlot> findByStatus(TimeSlotStatus status);
+    /*List<TimeSlot> findByPatientIdAndStatusOrderByStartAt(
+        Integer patientId,
+        TimeSlotStatus status
+           );*/
+>>>>>>> patients-appointment
 }

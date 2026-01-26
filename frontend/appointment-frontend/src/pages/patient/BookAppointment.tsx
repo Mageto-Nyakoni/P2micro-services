@@ -3,7 +3,21 @@ import { useDoctorsBrowse } from "@/services/useDoctorBrowse";
 import { AppointmentType, Doctor } from "@/types/doctorTypes";
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+<<<<<<< HEAD
 import { useAuth } from "@/auth/useAuth";
+=======
+import { useParams } from "react-router-dom";
+/* ================= TYPES ================= */
+
+type Doctor = {
+  id: number;
+  name: string;
+  speciality: string;
+  services: string[];
+};
+
+/* ================= COMPONENT ================= */
+>>>>>>> patients-appointment
 
 export default function BookAppointment() {
 	const navigate = useNavigate();

@@ -1,5 +1,6 @@
 package com.revature.smartAppointment.Model;
-
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,10 @@ public class Doctor {
 
     @Column(name = "bio", length = 1000)
     private String bio;
+
+      //  Add this for slots
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TimeSlot> slots = new ArrayList<>();
 
     public Doctor (User user, Integer experienceYears, String gender, Speciality speciality, String bio){
         this.user = user;

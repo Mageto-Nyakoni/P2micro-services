@@ -12,9 +12,14 @@ import org.springframework.http.HttpStatus;
 
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.AppointmentType;
+<<<<<<< HEAD
+=======
+import com.revature.smartAppointment.Model.Patient;
+>>>>>>> patients-appointment
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
+<<<<<<< HEAD
 import com.revature.smartAppointment.Repository.AppointmentTypeRepository;
 import com.revature.smartAppointment.Repository.TimeSlotRepository;
 import com.revature.smartAppointment.Model.Patient;
@@ -25,6 +30,17 @@ public class AppointmentService implements ServiceInterface<Appointment> {
       private final AppointmentRepository appointmentRepository;
       private final TimeSlotRepository timeSlotRepository;
       private final AppointmentTypeRepository appointmentTypeRepository;
+=======
+import com.revature.smartAppointment.Repository.PatientRepository;
+import com.revature.smartAppointment.Repository.TimeSlotRepository;
+import com.revature.smartAppointment.dto.AppointmentDto;
+
+@Service
+public class AppointmentService implements ServiceInterface<Appointment> {
+
+    private final AppointmentRepository appointmentRepository;
+    private final TimeSlotRepository timeSlotRepository;
+>>>>>>> patients-appointment
 
     @Autowired
     public AppointmentService(AppointmentRepository appointmentRepository, TimeSlotRepository timeSlotRepository, AppointmentTypeRepository appointmentTypeRepository) {
@@ -32,7 +48,6 @@ public class AppointmentService implements ServiceInterface<Appointment> {
         this.timeSlotRepository = timeSlotRepository;
         this.appointmentTypeRepository = appointmentTypeRepository;
     }
-
 
     @Override
     @Transactional
@@ -52,7 +67,7 @@ public class AppointmentService implements ServiceInterface<Appointment> {
 
     @Override
     public Optional<Appointment> deleteById(int id) {
-         Optional<Appointment> appointment = appointmentRepository.findById(id);
+        Optional<Appointment> appointment = appointmentRepository.findById(id);
         appointment.ifPresent(a -> appointmentRepository.delete(a));
         return appointment;
     }
@@ -60,21 +75,20 @@ public class AppointmentService implements ServiceInterface<Appointment> {
     @Override
     public Appointment updateById(int id, Appointment entity) {
         Optional<Appointment> existingAppointment = appointmentRepository.findById(id);
-         if (existingAppointment.isPresent()) {
+        if (existingAppointment.isPresent()) {
             Appointment toUpdate = existingAppointment.get();
-            // update fields as needed
-             toUpdate.setDoctor(entity.getDoctor());
-        toUpdate.setSlot(entity.getSlot());
-        toUpdate.setAppointmentType(entity.getAppointmentType());
-        toUpdate.setPatient(entity.getPatient());
-        toUpdate.setDateTimeScheduled(entity.getDateTimeScheduled());
-        toUpdate.setStatus(entity.getStatus());
-
+            toUpdate.setDoctor(entity.getDoctor());
+            toUpdate.setSlot(entity.getSlot());
+            toUpdate.setAppointmentType(entity.getAppointmentType());
+            toUpdate.setPatient(entity.getPatient());
+            toUpdate.setDateTimeScheduled(entity.getDateTimeScheduled());
+            toUpdate.setStatus(entity.getStatus());
             return appointmentRepository.save(toUpdate);
         }
         return null;
     }
 
+<<<<<<< HEAD
     @Transactional
     public Appointment createAppointment(Appointment entity) {
         if (entity.getSlot() == null || entity.getSlot().getSlotId() == null) {
@@ -177,19 +191,68 @@ public class AppointmentService implements ServiceInterface<Appointment> {
         appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
     }
+=======
+>>>>>>> patients-appointment
     @Transactional
     public void cancelAppointment(int appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
         // Free the slot
-        TimeSlot slot = appointment.getSlot(); // Appointment must have a reference to TimeSlot
+        TimeSlot slot = appointment.getSlot();
         if (slot != null) {
             timeSlotRepository.freeSlotIfBooked(slot.getSlotId());
         }
 
-        // Mark appointment as cancelled
-        appointment.setStatus(AppointmentStatus.CANCELLED); // make sure Appointment has boolean 'cancelled'
+        // Cancel the appointment
+        appointment.setStatus(AppointmentStatus.CANCELLED);
         appointmentRepository.save(appointment);
     }
+<<<<<<< HEAD
+=======
+
+    // Get all appointments for a patient
+    public List<AppointmentDto> getAppointmentsForPatient(Integer patientId) {
+        List<Appointment> appointments = appointmentRepository.findByPatientPatientId(patientId);
+
+        return appointments.stream()
+                .map(appt -> new AppointmentDto(
+                        appt.getAppointmentId(),
+                        "Dr. " + appt.getDoctor().getDoctorId(),     // temporary doctor name
+                        appt.getAppointmentType().getName(),         // AppointmentType name
+                        LocalDateTime.of(appt.getSlot().getDateAvailable(), appt.getSlot().getStartTime()),
+                        appt.getStatus()
+                ))
+                .toList();
+    }
+
+    @Autowired
+private PatientRepository patientRepository;
+    @Transactional
+     public Appointment bookAppointment(Integer slotId, Integer patientId, AppointmentType appointmentType) {
+    TimeSlot slot = timeSlotRepository.findById(slotId)
+            .orElseThrow(() -> new RuntimeException("TimeSlot not found"));
+
+    if (slot.getStatus() != TimeSlotStatus.AVAILABLE) {
+        throw new RuntimeException("TimeSlot is not available");
+    }
+Patient patient = patientRepository.findById(patientId)
+            .orElseThrow(() -> new RuntimeException("Patient not found"));
+    // Create new Appointment
+    Appointment appointment = new Appointment();
+    appointment.setSlot(slot);
+    appointment.setDoctor(slot.getDoctor());
+    appointment.setPatient(patient);
+    appointment.setAppointmentType(appointmentType);
+    appointment.setDateTimeScheduled(java.time.LocalDateTime.of(slot.getDateAvailable(), slot.getStartTime()));
+    appointment.setStatus(AppointmentStatus.CONFIRMED);
+
+    // Mark slot as booked
+    slot.setStatus(TimeSlotStatus.BOOKED);
+    timeSlotRepository.save(slot);
+
+    return appointmentRepository.save(appointment);
+}
+
+>>>>>>> patients-appointment
 }

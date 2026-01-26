@@ -1,10 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { CalendarAvail } from "@/components/availability";
-import { DoctorAvailability } from "@/components/availability/types";
+import type { DoctorAvailability } from "@/components/availability";
+import { useEffect, useState } from "react";
+
+
+
+
+
 
 /* ============= MOCK DATA ================= */
 
-const availabilityByDate: Record<string, DoctorAvailability[]> = {
+/*const availabilityByDate: Record<string, DoctorAvailability[]> = {
   "2026-01-10": [
     {
       id: 1,
@@ -37,13 +43,30 @@ const availabilityByDate: Record<string, DoctorAvailability[]> = {
       ],
     },
   ],
-};
+};*/
 
 /* ============= COMPONENT ================= */
 
 const GuestHome: React.FC = () => {
   const navigate = useNavigate();
 
+
+   // STATE to hold backend availability
+  const [availabilityByDate, setAvailabilityByDate] = useState<Record<string, DoctorAvailability[]>>({});
+  const [loading, setLoading] = useState(true);
+  // FETCH availability from backend
+useEffect(() => {
+    fetch("http://localhost:8080/smart-appointment/api/availability")
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch availability");
+        return res.json();
+      })
+      .then(data => setAvailabilityByDate(data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-white">
       {/* HERO SECTION */}
@@ -75,21 +98,16 @@ const GuestHome: React.FC = () => {
       </section>
 
       {/* CALENDAR + AVAILABILITY */}
-      <section className="pb-20">
-     <CalendarAvail
-  availabilityByDate={availabilityByDate}
-  onBook={(doctor, date) =>
-    navigate("/login", {
-      state: {
-        redirectTo: "/patient/book",
-        doctor,
-        selectedDate: date,
-      },
-    })
-  }
-/>
-
-      </section>
+      <section className="pb-20 px-6 min-h-[400px]">
+  <CalendarAvail
+    availabilityByDate={availabilityByDate}
+    onBook={(doctor, date) =>
+      navigate("/login", {
+        state: { redirectTo: "/patient/book", doctor, selectedDate: date },
+      })
+    }
+  />
+</section>
     </div>
   );
 };

@@ -23,10 +23,12 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "appointment")
+@Data
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

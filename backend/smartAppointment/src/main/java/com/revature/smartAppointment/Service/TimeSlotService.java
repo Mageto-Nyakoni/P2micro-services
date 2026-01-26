@@ -1,5 +1,6 @@
 package com.revature.smartAppointment.Service;
 
+<<<<<<< HEAD
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -15,10 +16,23 @@ import com.revature.smartAppointment.Model.AvailabilityWindow;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 import com.revature.smartAppointment.Repository.TimeSlotRepository;
+=======
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.revature.smartAppointment.Model.TimeSlot;
+import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
+import com.revature.smartAppointment.Model.enums.AppointmentStatus;
+import com.revature.smartAppointment.Repository.TimeSlotRepository;
+import com.revature.smartAppointment.dto.AppointmentDto;
+>>>>>>> patients-appointment
 
 @Service
 public class TimeSlotService {
 
+<<<<<<< HEAD
     private final TimeSlotRepository timeSlotRepository;
 
     @Autowired
@@ -203,4 +217,14 @@ public class TimeSlotService {
         int rowsUpdated = timeSlotRepository.bookSlotIfAvailable(slotId);
         return rowsUpdated > 0;
     }
+=======
+    @Autowired
+    private TimeSlotRepository timeSlotRepository;
+ public List<TimeSlot> getAvailableSlotsForDoctor(Integer doctorId) {
+        return timeSlotRepository.findByDoctorDoctorId(doctorId).stream()
+                .filter(slot -> slot.getStatus() == TimeSlotStatus.AVAILABLE)
+                .toList();
+    }
+  
+>>>>>>> patients-appointment
 }
