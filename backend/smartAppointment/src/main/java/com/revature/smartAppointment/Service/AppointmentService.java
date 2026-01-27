@@ -250,7 +250,7 @@ public class AppointmentService implements ServiceInterface<Appointment> {
     }
 
     public List<Appointment> getConfirmedAppointmentsForPatient(Integer patientId) {
-        return appointmentRepository.findByPatient_PatientIdAndStatus(patientId, AppointmentStatus.CONFIRMED);
+        return appointmentRepository.findByPatient_PatientIdAndStatus(patientId, AppointmentStatus.REQUESTED);
     }
 
     @Transactional(readOnly = true)
