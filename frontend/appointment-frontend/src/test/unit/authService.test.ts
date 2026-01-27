@@ -1,27 +1,27 @@
-/// <reference types="vitest" />
-
-import { describe, it, expect,vi, beforeEach } from "vitest";
 import { http } from "@/services/http";
 import { login } from "@/services/authService";
 
 // Mock http.post
-vi.mock("@/services/http", () => ({
-  http: { post: vi.fn() },
+jest.mock("@/services/http", () => ({
+  http: {
+    post: jest.fn(),
+  },
 }));
 
 describe("authService.login (UNIT TEST)", () => {
- beforeEach(() => {
-  vi.clearAllMocks();
-});
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it("calls login API with correct email and password", async () => {
-    (http.post as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
-     data: {
-    token: "fake-token",
-    privilege: {
-      roleName: "Patient",
-    },
-  },
-});
+    (http.post as jest.Mock).mockResolvedValue({
+      data: {
+        token: "fake-token",
+        privilege: {
+          roleName: "Patient",
+        },
+      },
+    });
 
     const result = await login("tester@mail.com", "password");
 
@@ -37,8 +37,12 @@ describe("authService.login (UNIT TEST)", () => {
   });
 
   it("throws an error when API fails", async () => {
-    (http.post as unknown as ReturnType<typeof vi.fn>).mockRejectedValue(new Error("Network error"));
+    (http.post as jest.Mock).mockRejectedValue(
+      new Error("Network error")
+    );
 
-    await expect(login("tester@mail.com", "password")).rejects.toThrow("Network error");
+    await expect(
+      login("tester@mail.com", "password")
+    ).rejects.toThrow("Network error");
   });
 });

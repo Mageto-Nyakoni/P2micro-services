@@ -12,9 +12,11 @@ import BookAppointment from "./pages/patient/BookAppointment";
 import EditPatientProfile from "./pages/patient/EditPatientProfile";
 
 import DoctorHome from "./pages/doctor/DoctorHome";
-import DoctorCalendar from "./pages/doctor/DoctorCalendar";
+//import DoctorCalendar from "./pages/doctor/DoctorCalendar";
+import DoctorCalendarPage from "./pages/doctor/DoctorCalendarPage";
+
+
 import AdminHome from "./pages/admin/AdminHome";
-import AdminStaffList from "./pages/admin/AdminStaffList";
 import Navbar from "./components/NavBar/Navbar";
 import SuperHome from "./pages/super/SuperHome";
 import Home from "./pages/public/Home";
@@ -67,7 +69,7 @@ function App() {
               } />
             <Route path="/doctor/calendar" element={
               <ProtectedRoute allowedRoles={["Doctor"]}> 
-                <DoctorCalendar />
+                <DoctorCalendarPage />
               </ProtectedRoute>
               } />
 
@@ -76,11 +78,6 @@ function App() {
             <Route path="/admin/home" element={
               <ProtectedRoute allowedRoles={["Admin"]}>
                 <AdminHome />
-              </ProtectedRoute>
-              } />
-            <Route path="/admin/staff" element={
-              <ProtectedRoute allowedRoles={["Admin"]}> 
-                <AdminStaffList />
               </ProtectedRoute>
               } />
 

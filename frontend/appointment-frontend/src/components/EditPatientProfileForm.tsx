@@ -13,7 +13,7 @@ type Props = {
     onBack: () => void;
 }
 
-export default function EditPatietProfileForm({value, onChange, onSubmit, saving, allergies, bloodTypes, onBack}: Props){
+export default function EditPatientProfileForm({value, onChange, onSubmit, saving, allergies, bloodTypes, onBack}: Props){
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value: inputValue } = e.target;
 

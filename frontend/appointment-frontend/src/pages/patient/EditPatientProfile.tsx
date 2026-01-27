@@ -4,7 +4,7 @@ import { formatPhoneNumber, getAgeFromDOB } from "@/utils/validators";
 import { getMyPatient, patchPatient } from "@/services/patientServices";
 import { getAllergies } from "@/services/allergyService";
 import { getBloodType } from "@/services/bloodTypeService";
-import EditPatietProfileForm from "@/components/EditPatietProfileForm";
+import EditPatientProfileForm from "@/components/EditPatientProfileForm";
 import { Allergy, BloodType, PatchPatientRequest, Patient, PatientEditForm } from "@/types/patientTypes";
 
 const emptyForm: PatientEditForm = {
@@ -146,7 +146,7 @@ function EditPatientProfile() {
     };
 
     return (
-        <EditPatietProfileForm
+        <EditPatientProfileForm
             value={form}
             onChange={setForm}
             onSubmit={handleSubmit}

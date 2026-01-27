@@ -30,10 +30,8 @@ public class AdminScheduleService {
         Doctor doctor = doctorRepository.findById(doctorId)
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
 
-        //  Convert LocalTime → LocalDateTime
-        // LocalDateTime startDateTime = LocalDateTime.of(date, start);
-        // LocalDateTime endDateTime = LocalDateTime.of(date, end);
-        TimeSlot slot = new TimeSlot(start, end, date, doctor);
+        LocalTime correctedEnd = start.plusMinutes(30);
+        TimeSlot slot = new TimeSlot(start, correctedEnd, date, doctor);
         return timeSlotRepository.save(slot);
     }
 }

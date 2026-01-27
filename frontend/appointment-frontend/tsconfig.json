@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "types": ["vitest/globals"],
+    "types": ["jest", "@testing-library/jest-dom", "node"],
     "target": "ES6",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "allowJs": false,
@@ -14,7 +14,6 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

@@ -1,146 +1,141 @@
-import { useState } from "react";
-import { TimeSlotCard, DoctorCard, ScheduleDoctorForm } from "@/components/admin";
+import { useEffect, useMemo, useState } from "react";
+import { TimeSlotCard, ScheduleDoctorForm } from "@/components/admin";
+import { getAllDoctors } from "@/services/doctorServices";
+import { useAuth } from "@/auth/useAuth";
+import {
+  AdminAppointment,
+  AdminTimeSlot,
+  AvailabilityWindow,
+  createAvailabilityWindow,
+  deleteAvailabilityWindow,
+  denyAppointment,
+  fetchAdminAppointments,
+  fetchAdminTimeSlots,
+  fetchAvailabilityWindows,
+} from "@/services/adminService";
+import { Doctor as DoctorModel } from "@/types/doctorTypes";
 
-interface TimeSlot {
-  id: number;
-  doctorName: string;
-  date: string;
-  timeslot: string;
-}
-
-interface Doctor {
+interface DoctorOption {
   id: number;
   name: string;
-  email: string;
-  speciality: string;
-  yearsOfExperience: number;
-  gender?: string;
-  bio?: string;
 }
 
 export default function AdminHome() {
-  // Sample data for demonstration purposes. Will connect to backend later.
+  const { user } = useAuth();
   const admin = {
-    name: "Robert Surtain",
-    title: "Administrative Lead",
-    experience: "4+ Years in Administration",
-    education: "MD, Johns Hopkins University School of Medicine.",
-    contact: "Robert.Surtain@email.com",
+    name: user?.firstName || user?.lastName ? `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() : "Admin",
+    contact: user?.email ?? "",
   };
 
-  const [doctorOptions] = useState([
-    { id: 1, name: "Dr. John Peters" },
-    { id: 2, name: "Dr. Steven Drove" },
-    { id: 3, name: "Dr. Charlotte Web" },
-  ]);
+  const [doctors, setDoctors] = useState<DoctorModel[]>([]);
+  const [availabilityWindows, setAvailabilityWindows] = useState<AvailabilityWindow[]>([]);
+  const [slots, setSlots] = useState<AdminTimeSlot[]>([]);
+  const [appointments, setAppointments] = useState<AdminAppointment[]>([]);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
 
-  const [todaySlots, setTodaySlots] = useState<TimeSlot[]>([
-    {
-      id: 1,
-      doctorName: "Dr. John Peters",
-      date: "JAN 3 2025",
-      timeslot: "9:00am - 5:00pm",
-    },
-    {
-      id: 2,
-      doctorName: "Dr. Steven Drove",
-      date: "JAN 3 2025",
-      timeslot: "10:00am - 6:00pm",
-    },
-    {
-      id: 3,
-      doctorName: "Dr. Charlotte Web",
-      date: "JAN 3 2025",
-      timeslot: "7:00am - 7:00pm",
-    },
-  ]);
+  const doctorOptions = useMemo<DoctorOption[]>(
+    () =>
+      doctors.map((doctor) => ({
+        id: doctor.doctorId,
+        name: `${doctor.user.firstName} ${doctor.user.lastName}`,
+      })),
+    [doctors]
+  );
 
-  const [tomorrowSlots, setTomorrowSlots] = useState<TimeSlot[]>([
-    {
-      id: 4,
-      doctorName: "Dr. John Peters",
-      date: "JAN 4 2025",
-      timeslot: "9:00am - 5:00pm",
-    },
-    {
-      id: 5,
-      doctorName: "Dr. Steven Drove",
-      date: "JAN 4 2025",
-      timeslot: "10:00am - 6:00pm",
-    },
-    {
-      id: 6,
-      doctorName: "Dr. Charlotte Web",
-      date: "JAN 4 2025",
-      timeslot: "7:00am - 7:00pm",
-    },
-  ]);
+  useEffect(() => {
+    const controller = new AbortController();
+    getAllDoctors(controller.signal)
+      .then(setDoctors)
+      .catch((error) => {
+        console.error("AdminHome: failed to load doctors", error);
+      });
+    fetchAdminAppointments("ALL")
+      .then(setAppointments)
+      .catch((error) => {
+        console.error("AdminHome: failed to load appointments", error);
+      });
+    fetchAdminTimeSlots()
+      .then(setSlots)
+      .catch((error) => {
+        console.error("AdminHome: failed to load time slots", error);
+      });
+    return () => controller.abort();
+  }, []);
 
-  const [doctors] = useState<Doctor[]>([
-    {
-      id: 1,
-      name: "Dr. John Peters",
-      email: "john.peters@email.com",
-      speciality: "Cardiology",
-      yearsOfExperience: 10,
-    },
-    {
-      id: 2,
-      name: "Dr. Steven Drove",
-      email: "steven.drove@email.com",
-      speciality: "Neurology",
-      yearsOfExperience: 8,
-    },
-    {
-      id: 3,
-      name: "Dr. Charlotte Web",
-      email: "charlotte.web@email.com",
-      speciality: "Pediatrics",
-      yearsOfExperience: 12,
-    },
-    {
-      id: 4,
-      name: "Dr. John Peters",
-      email: "john.peters@email.com",
-      speciality: "Cardiology",
-      yearsOfExperience: 10,
-    },
-    {
-      id: 5,
-      name: "Dr. Steven Drove",
-      email: "steven.drove@email.com",
-      speciality: "Neurology",
-      yearsOfExperience: 8,
-    },
-    {
-      id: 6,
-      name: "Dr. Charlotte Web",
-      email: "charlotte.web@email.com",
-      speciality: "Pediatrics",
-      yearsOfExperience: 12,
-    },
-  ]);
+  useEffect(() => {
+    if (selectedDoctorId !== null || doctors.length === 0) return;
+    const firstDoctorId = doctors[0].doctorId;
+    setSelectedDoctorId(firstDoctorId);
+    fetchAvailabilityWindows(firstDoctorId)
+      .then(setAvailabilityWindows)
+      .catch((error) => {
+        console.error("AdminHome: failed to load availability windows", error);
+      });
+  }, [doctors, selectedDoctorId]);
 
   const handleScheduleSubmit = (
     doctorId: number,
-    fromDate: string,
-    toDate: string
+    date: string,
+    startTime: string,
+    endTime: string
   ) => {
-    // todo: Connect to backend API
-    console.log("Schedule submitted:", { doctorId, fromDate, toDate });
-    // For now, just show an alert
-    alert(
-      `Schedule created for doctor ${doctorId} from ${fromDate} to ${toDate}`
-    );
+    createAvailabilityWindow(doctorId, { date, startTime, endTime })
+      .then(() => Promise.all([
+        fetchAvailabilityWindows(doctorId),
+        fetchAdminTimeSlots(),
+      ]))
+      .then(([windows, timeSlots]) => {
+        setAvailabilityWindows(windows);
+        setSlots(timeSlots);
+        setSelectedDoctorId(doctorId);
+      })
+      .catch((error) => {
+        console.error("AdminHome: failed to create availability window", error);
+      });
   };
 
-  const handleDeleteTimeSlot = (id: number, isToday: boolean) => {
-    if (isToday) {
-      setTodaySlots(todaySlots.filter((slot) => slot.id !== id));
-    } else {
-      setTomorrowSlots(tomorrowSlots.filter((slot) => slot.id !== id));
-    }
-    // todo : Connect to backend API to delete
+  const handleDeleteWindow = (windowId: number) => {
+    deleteAvailabilityWindow(windowId)
+      .then(() => {
+        if (!selectedDoctorId) return;
+        return Promise.all([
+          fetchAvailabilityWindows(selectedDoctorId),
+          fetchAdminTimeSlots(),
+        ]);
+      })
+      .then((result) => {
+        if (!result) return;
+        const [windows, timeSlots] = result;
+        setAvailabilityWindows(windows);
+        setSlots(timeSlots);
+      })
+      .catch((error) => {
+        console.error("AdminHome: failed to delete availability window", error);
+      });
+  };
+
+  const handleDoctorChange = (doctorId: number) => {
+    setSelectedDoctorId(doctorId);
+    Promise.all([
+      fetchAvailabilityWindows(doctorId),
+      fetchAdminTimeSlots(),
+    ])
+      .then(([windows, timeSlots]) => {
+        setAvailabilityWindows(windows);
+        setSlots(timeSlots);
+      })
+      .catch((error) => {
+        console.error("AdminHome: failed to update doctor view", error);
+      });
+  };
+
+  const handleDenyAppointment = (appointmentId: number) => {
+    denyAppointment(appointmentId)
+      .then(() => fetchAdminAppointments("ALL"))
+      .then(setAppointments)
+      .catch((error) => {
+        console.error("AdminHome: failed to deny appointment", error);
+      });
   };
 
   return (
@@ -155,36 +150,8 @@ export default function AdminHome() {
                 {admin.name}
               </h1>
               <p className="m-0 mb-6 font-medium text-slate-500 text-lg">
-                {admin.title}
+                {admin.contact}
               </p>
-
-              <div className="mb-4">
-                <h3 className="m-0 mb-4 font-semibold text-slate-800 text-lg">
-                  Organization Details
-                </h3>
-                <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
-                  <div>
-                    <p className="m-0 mb-1 font-semibold uppercase tracking-wide text-slate-500 text-sm">
-                      Experience
-                    </p>
-                    <p className="m-0 text-slate-800">{admin.experience}</p>
-                  </div>
-
-                  <div>
-                    <p className="m-0 mb-1 font-semibold uppercase tracking-wide text-slate-500 text-sm">
-                      Education
-                    </p>
-                    <p className="m-0 text-slate-800">{admin.education}</p>
-                  </div>
-
-                  <div>
-                    <p className="m-0 mb-1 font-semibold uppercase tracking-wide text-slate-500 text-sm">
-                      Contact
-                    </p>
-                    <p className="m-0 text-slate-800">Email: {admin.contact}</p>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Professional Image */}
@@ -217,58 +184,114 @@ export default function AdminHome() {
         </div>
 
         {/* Schedule Doctor Section */}
-        <ScheduleDoctorForm doctors={doctorOptions} onSubmit={handleScheduleSubmit} />
+        <ScheduleDoctorForm
+          doctors={doctorOptions}
+          onSubmit={handleScheduleSubmit}
+          onDoctorChange={handleDoctorChange}
+        />
 
         {/* Scheduled Time Slots Section */}
         <div className="mb-8">
           <h2 className="m-0 mb-6 font-bold text-slate-800 text-2xl">
-            Scheduled Time Slots
+            Availability Windows
           </h2>
 
-          {/* Today's Appointments */}
-          <div className="mb-6">
-            <h3 className="m-0 mb-4 font-semibold text-slate-700 text-xl">
-              Today's
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {todaySlots.map((slot) => (
-                <TimeSlotCard
-                  key={slot.id}
-                  {...slot}
-                  onDelete={(id) => handleDeleteTimeSlot(id, true)}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Tomorrow's Appointments */}
-          <div>
-            <h3 className="m-0 mb-4 font-semibold text-slate-700 text-xl">
-              Tomorrow
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {tomorrowSlots.map((slot) => (
-                <TimeSlotCard
-                  key={slot.id}
-                  {...slot}
-                  onDelete={(id) => handleDeleteTimeSlot(id, false)}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Doctors List Section */}
-        <div>
-          <h2 className="m-0 mb-6 font-bold text-slate-800 text-2xl">
-            Doctors List
-          </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {doctors.map((doctor) => (
-              <DoctorCard key={doctor.id} {...doctor} />
+            {availabilityWindows.map((window) => (
+              <TimeSlotCard
+                key={window.windowId}
+                id={window.windowId}
+                doctorName={window.doctorName ?? "Unknown"}
+                date={window.date}
+                timeslot={`${window.startTime} - ${window.endTime}`}
+                onDelete={handleDeleteWindow}
+              />
             ))}
           </div>
         </div>
+
+        {/* Time Slots */}
+        <div className="mb-8">
+          <h2 className="m-0 mb-6 font-bold text-slate-800 text-2xl">
+            Time Slots
+          </h2>
+          {slots.length === 0 ? (
+            <p className="text-slate-500">No time slots found.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {slots.map((slot) => (
+                <TimeSlotCard
+                  key={slot.slotId}
+                  id={slot.slotId}
+                  doctorName={slot.doctorName ?? "Unknown"}
+                  date={slot.dateAvailable}
+                  timeslot={`${slot.startTime} - ${slot.endTime} (${slot.status})`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Appointments */}
+        <div className="mb-8">
+          <h2 className="m-0 mb-6 font-bold text-slate-800 text-2xl">
+            Appointments
+          </h2>
+          {appointments.length === 0 ? (
+            <p className="text-slate-500">No appointments found.</p>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+              <table className="w-full text-sm">
+                <thead className="bg-slate-100 text-slate-600">
+                  <tr>
+                    <th className="text-left px-4 py-3">Patient</th>
+                    <th className="text-left px-4 py-3">Doctor</th>
+                    <th className="text-left px-4 py-3">Date</th>
+                    <th className="text-left px-4 py-3">Time</th>
+                    <th className="text-left px-4 py-3">Type</th>
+                    <th className="text-left px-4 py-3">Status</th>
+                    <th className="text-left px-4 py-3">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {appointments.map((appt) => (
+                    <tr key={appt.appointmentId} className="border-t border-slate-100">
+                      <td className="px-4 py-3">{appt.patientName ?? "—"}</td>
+                      <td className="px-4 py-3">{appt.doctorName ?? "—"}</td>
+                      <td className="px-4 py-3">
+                        {appt.dateAvailable ?? appt.scheduledDateTime?.split("T")[0] ?? "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {appt.startTime && appt.endTime
+                          ? `${appt.startTime} - ${appt.endTime}`
+                          : appt.scheduledDateTime
+                            ? appt.scheduledDateTime.split("T")[1]?.slice(0, 5) ?? "—"
+                            : "—"}
+                      </td>
+                      <td className="px-4 py-3">
+                        {typeof appt.appointmentType === "string"
+                          ? appt.appointmentType
+                          : appt.appointmentType?.name ?? "—"}
+                      </td>
+                      <td className="px-4 py-3">{appt.status}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleDenyAppointment(appt.appointmentId)}
+                          className="px-3 py-1 rounded-md text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-60"
+                          disabled={appt.status === "DENIED" || appt.status === "CANCELLED"}
+                        >
+                          Deny
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Staff List lives in AdminStaffList only */}
       </div>
     </div>
   );
