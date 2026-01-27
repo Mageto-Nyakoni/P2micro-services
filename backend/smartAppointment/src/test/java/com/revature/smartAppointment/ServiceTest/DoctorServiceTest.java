@@ -1,6 +1,8 @@
 package com.revature.smartAppointment.ServiceTest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -52,6 +55,9 @@ class DoctorServiceTest {
         doctor = new Doctor();
         doctor.setDoctorId(1);
 
+        AppointmentType type = new AppointmentType();
+        type.setName("Checkup");
+
         slot = new TimeSlot();
         slot.setDoctor(doctor);
         slot.setStartTime(LocalTime.of(9, 0));
@@ -62,13 +68,11 @@ class DoctorServiceTest {
         appointment.setSlot(slot);
         appointment.setStatus(AppointmentStatus.CONFIRMED);
         appointment.setDateTimeScheduled(LocalDateTime.now());
+        appointment.setAppointmentType(type);
     }
 
-    // =====================
-    // Basic CRUD
-    // =====================
-
     @Test
+    @DisplayName("Basic CRUD")
     void save_success() {
         when(doctorRepository.save(doctor)).thenReturn(doctor);
         Doctor saved = doctorService.save(doctor);
@@ -94,11 +98,8 @@ class DoctorServiceTest {
         assertNull(doctorService.updateById(1, new Doctor()));
     }
 
-    // =====================
-    // Appointments
-    // =====================
-
     @Test
+    @DisplayName("Appointments")
     void getTodaysAppointments_success() {
         when(doctorRepository.findById(1)).thenReturn(Optional.of(doctor));
         when(appointmentRepository
@@ -163,11 +164,8 @@ class DoctorServiceTest {
         assertEquals(400, ex.getStatusCode().value());
     }
 
-    // =====================
-    // Appointment Status
-    // =====================
-
     @Test
+    @DisplayName("Appointment Status")
     void updateAppointmentStatus_success() {
         when(appointmentRepository.findById(100))
             .thenReturn(Optional.of(appointment));
@@ -191,14 +189,11 @@ class DoctorServiceTest {
                 1, 100, AppointmentStatus.CANCELLED));
     }
 
-    // =====================
-    // Time Slots
-    // =====================
-
     @Test
+    @DisplayName("Time Slots")
     void getDoctorTimeSlots_success() {
         when(doctorRepository.findById(1)).thenReturn(Optional.of(doctor));
-        when(timeSlotRepository.findByDoctorDoctorId(1))
+        when(timeSlotRepository.findByDoctor_DoctorIdOrderByDateAvailableAscStartTimeAsc(1))
             .thenReturn(List.of(slot));
 
         var result = doctorService.getDoctorTimeSlots(1);

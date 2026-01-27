@@ -1,11 +1,15 @@
 package com.revature.smartAppointment.ServiceTest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.revature.smartAppointment.Model.Appointment;
+import com.revature.smartAppointment.Model.Doctor;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
@@ -32,16 +37,26 @@ class AppointmentServiceTest {
     @InjectMocks
     private AppointmentService appointmentService;
 
-    // =====================
-    // save
-    // =====================
-
     @Test
+    @DisplayName("save")
     void save_success() {
-        Appointment appointment = new Appointment();
+        Doctor doctor = new Doctor();
+        doctor.setDoctorId(1);
 
-        when(appointmentRepository.save(appointment))
-            .thenReturn(appointment);
+        TimeSlot timeSlot = new TimeSlot();
+        timeSlot.setSlotId(1);
+        timeSlot.setDoctor(doctor);
+        timeSlot.setDateAvailable(LocalDate.now());
+        timeSlot.setStartTime(LocalTime.of(9, 0));
+
+        Appointment appointment = new Appointment();
+        appointment.setDoctor(doctor);
+        appointment.setSlot(timeSlot);
+        
+
+        when(timeSlotRepository.findById(timeSlot.getSlotId())).thenReturn(Optional.of(timeSlot));
+        when(timeSlotRepository.bookSlotIfAvailable(timeSlot.getSlotId())).thenReturn(1);
+        when(appointmentRepository.save(appointment)).thenReturn(appointment);
 
         Appointment saved = appointmentService.save(appointment);
 
@@ -49,11 +64,8 @@ class AppointmentServiceTest {
         verify(appointmentRepository).save(appointment);
     }
 
-    // =====================
-    // findById
-    // =====================
-
     @Test
+    @DisplayName("findById")
     void findById_found() {
         Appointment appointment = new Appointment();
         appointment.setAppointmentId(1);
@@ -77,11 +89,8 @@ class AppointmentServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // findAll
-    // =====================
-
     @Test
+    @DisplayName("findAll")
     void findAll_success() {
         when(appointmentRepository.findAll())
             .thenReturn(List.of(new Appointment(), new Appointment()));
@@ -91,11 +100,8 @@ class AppointmentServiceTest {
         assertEquals(2, result.size());
     }
 
-    // =====================
-    // deleteById
-    // =====================
-
     @Test
+    @DisplayName("deleteById")
     void deleteById_found_deletes() {
         Appointment appointment = new Appointment();
         appointment.setAppointmentId(1);
@@ -122,11 +128,8 @@ class AppointmentServiceTest {
         verify(appointmentRepository, never()).delete(any());
     }
 
-    // =====================
-    // updateById
-    // =====================
-
     @Test
+    @DisplayName("updateById")
     void updateById_success() {
         Appointment existing = new Appointment();
         existing.setAppointmentId(1);
@@ -159,13 +162,15 @@ class AppointmentServiceTest {
         verify(appointmentRepository, never()).save(any());
     }
 
-    // =====================
-    // cancelAppointment
-    // =====================
-
     @Test
+    @DisplayName("cancelAppointment")
     void cancelAppointment_success_freesSlotAndCancels() {
+        Doctor doctor = new Doctor();
+        doctor.setDoctorId(1);
+
         TimeSlot slot = new TimeSlot();
+        slot.setSlotId(1);
+        slot.setDoctor(doctor);
         slot.setStatus(TimeSlotStatus.BOOKED);
 
         Appointment appointment = new Appointment();
@@ -176,14 +181,20 @@ class AppointmentServiceTest {
         when(appointmentRepository.findById(1))
             .thenReturn(Optional.of(appointment));
 
+        doAnswer(invocation -> {
+            slot.setStatus(TimeSlotStatus.AVAILABLE);
+            return null;
+        }).when(timeSlotRepository).freeSlotIfBooked(slot.getSlotId());
+
         appointmentService.cancelAppointment(1);
 
         assertEquals(TimeSlotStatus.AVAILABLE, slot.getStatus());
         assertEquals(AppointmentStatus.CANCELLED, appointment.getStatus());
 
-        verify(timeSlotRepository).save(slot);
+        verify(timeSlotRepository).freeSlotIfBooked(slot.getSlotId());
         verify(appointmentRepository).save(appointment);
     }
+
 
     @Test
     void cancelAppointment_noSlot_stillCancelsAppointment() {

@@ -10,6 +10,7 @@ import com.revature.smartAppointment.Model.Speciality;
 import com.revature.smartAppointment.Repository.SpecialityRepository;
 import com.revature.smartAppointment.Service.SpecialityService;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,10 +26,8 @@ class SpecialityServiceTest {
     @InjectMocks
     private SpecialityService specialityService;
 
-    // =====================
-    // save
-    // =====================
     @Test
+    @DisplayName("save")
     void save_success() {
         Speciality speciality = new Speciality();
         speciality.setSpecialityName("Cardiology");
@@ -42,10 +41,8 @@ class SpecialityServiceTest {
         verify(specialityRepository).save(speciality);
     }
 
-    // =====================
-    // findById
-    // =====================
     @Test
+    @DisplayName("findById")
     void findById_found() {
         Speciality speciality = new Speciality();
         speciality.setSpecialityId(1);
@@ -67,10 +64,8 @@ class SpecialityServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // findAll
-    // =====================
     @Test
+    @DisplayName("findAll")
     void findAll_returnsList() {
         when(specialityRepository.findAll()).thenReturn(List.of(
                 new Speciality(), new Speciality()
@@ -82,20 +77,16 @@ class SpecialityServiceTest {
         verify(specialityRepository).findAll();
     }
 
-    // =====================
-    // deleteById (not implemented)
-    // =====================
     @Test
+    @DisplayName("deleteById (not implemented)")
     void deleteById_alwaysEmpty() {
         Optional<Speciality> result = specialityService.deleteById(1);
 
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // updateById (not implemented)
-    // =====================
     @Test
+    @DisplayName("updateById (not implemented)")
     void updateById_alwaysNull() {
         Speciality speciality = new Speciality();
         Speciality result = specialityService.updateById(1, speciality);
@@ -103,10 +94,8 @@ class SpecialityServiceTest {
         assertNull(result);
     }
 
-    // =====================
-    // findSpecialityBySpecialityName
-    // =====================
     @Test
+    @DisplayName("findSpecialityBySpecialityName")
     void findSpecialityBySpecialityName_found() {
         Speciality speciality = new Speciality();
         speciality.setSpecialityName("Neurology");

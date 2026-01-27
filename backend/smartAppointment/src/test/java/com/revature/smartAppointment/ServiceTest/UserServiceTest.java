@@ -1,11 +1,14 @@
 package com.revature.smartAppointment.ServiceTest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,11 +39,8 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    // =====================
-    // save
-    // =====================
-
     @Test
+    @DisplayName("save")
     void save_success() {
         User user = new User();
         user.setEmail("test@email.com");
@@ -53,11 +53,8 @@ class UserServiceTest {
         verify(userRepository).save(user);
     }
 
-    // =====================
-    // findById
-    // =====================
-
     @Test
+    @DisplayName("findById")
     void findById_found() {
         User user = new User();
         user.setUserId(1);
@@ -81,11 +78,8 @@ class UserServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // findAll
-    // =====================
-
     @Test
+    @DisplayName("findAll")
     void findAll_success() {
         when(userRepository.findAll())
             .thenReturn(List.of(new User(), new User()));
@@ -95,11 +89,8 @@ class UserServiceTest {
         assertEquals(2, users.size());
     }
 
-    // =====================
-    // deleteById
-    // =====================
-
     @Test
+    @DisplayName("deleteById")
     void deleteById_userOnly() {
         User user = new User();
         user.setUserId(1);
@@ -157,11 +148,8 @@ class UserServiceTest {
         verify(userRepository, never()).deleteById(anyInt());
     }
 
-    // =====================
-    // updateById
-    // =====================
-
     @Test
+    @DisplayName("updateById")
     void updateById_success_partialUpdate() {
         User existing = new User();
         existing.setUserId(1);
@@ -193,11 +181,8 @@ class UserServiceTest {
         verify(userRepository, never()).save(any());
     }
 
-    // =====================
-    // findUserByEmail
-    // =====================
-
     @Test
+    @DisplayName("findUserByEmail")
     void findUserByEmail_found() {
         User user = new User();
         user.setEmail("test@email.com");
@@ -222,11 +207,8 @@ class UserServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // getUsersForTable
-    // =====================
-
     @Test
+    @DisplayName("getUsersForTable")
     void getUsersForTable_success() {
         when(userRepository.findUsersForTable())
             .thenReturn(List.of(

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -59,11 +60,8 @@ class AuthServiceTest {
         user.setUserId(1);
     }
 
-    // =========================
-    // validateLogin tests
-    // =========================
-
     @Test
+    @DisplayName("validateLogin")
     void validateLogin_success() {
         when(userService.findUserByEmail("test@email.com"))
             .thenReturn(Optional.of(user));
@@ -101,11 +99,8 @@ class AuthServiceTest {
         assertEquals("Invalid username or password", ex.getMessage());
     }
 
-    // =========================
-    // validateRegistration tests
-    // =========================
-
     @Test
+    @DisplayName("validateRegistration")
     void validateRegistration_success_patient() {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("new@email.com");

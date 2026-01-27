@@ -1,12 +1,15 @@
 package com.revature.smartAppointment.ServiceTest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,11 +40,8 @@ class PatientServiceTest {
     @InjectMocks
     private PatientService patientService;
 
-    // =====================
-    // save
-    // =====================
-
     @Test
+    @DisplayName("save")
     void save_success() {
         Patient patient = new Patient();
 
@@ -54,11 +54,8 @@ class PatientServiceTest {
         verify(patientRepository).save(patient);
     }
 
-    // =====================
-    // findById
-    // =====================
-
     @Test
+    @DisplayName("findById")
     void findById_found() {
         Patient patient = new Patient();
         patient.setPatientId(1);
@@ -82,11 +79,8 @@ class PatientServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // findAll
-    // =====================
-
     @Test
+    @DisplayName("findAll")
     void findAll_success() {
         when(patientRepository.findAll())
             .thenReturn(List.of(new Patient(), new Patient()));
@@ -96,11 +90,8 @@ class PatientServiceTest {
         assertEquals(2, result.size());
     }
 
-    // =====================
-    // deleteById
-    // =====================
-
     @Test
+    @DisplayName("deleteById")
     void deleteById_found_deletes() {
         Patient patient = new Patient();
         patient.setPatientId(1);
@@ -127,11 +118,8 @@ class PatientServiceTest {
         verify(patientRepository, never()).deleteById(anyInt());
     }
 
-    // =====================
-    // updateById
-    // =====================
-
     @Test
+    @DisplayName("updateById")
     void updateById_success_partialUpdate() {
         Patient existing = new Patient();
         existing.setPatientId(1);
@@ -165,11 +153,8 @@ class PatientServiceTest {
         verify(patientRepository, never()).save(any());
     }
 
-    // =====================
-    // findByUserId
-    // =====================
-
     @Test
+    @DisplayName("findByUserId")
     void findByUserId_found() {
         Patient patient = new Patient();
 
@@ -193,11 +178,8 @@ class PatientServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // convertRequestToObject
-    // =====================
-
     @Test
+    @DisplayName("convertRequestToObject")
     void convertRequestToObject_success_mapsFieldsAndRelations() {
         PatientInfoRequest request = new PatientInfoRequest();
         request.setAge(30);

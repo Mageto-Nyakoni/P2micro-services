@@ -4,13 +4,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.revature.smartAppointment.Controller.PatientController;
 import com.revature.smartAppointment.Controller.Request.PatientInfoRequest;
 import com.revature.smartAppointment.Model.Patient;
+import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Service.PatientService;
+import com.revature.smartAppointment.Service.UserService;
 import com.revature.smartAppointment.Util.JwtUtil;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.http.MediaType;
@@ -25,18 +28,25 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(PatientController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class PatientControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MockitoBean
     private PatientService patientService;
 
     @MockitoBean
     private JwtUtil jwtUtil;
+
+    @MockitoBean
+    private UserService userService;
+
+    @MockitoBean
+    private AppointmentRepository appointmentRepository;
 
     private static final String BASE = "/smart-appointment/api/patients";
 

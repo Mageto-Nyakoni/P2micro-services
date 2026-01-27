@@ -1,11 +1,14 @@
 package com.revature.smartAppointment.ServiceTest;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,11 +28,8 @@ class PrivilegeServiceTest {
     @InjectMocks
     private PrivilegeService privilegeService;
 
-    // =====================
-    // save
-    // =====================
-
     @Test
+    @DisplayName("save")
     void save_success() {
         Privilege privilege = new Privilege();
         privilege.setRoleName("ADMIN");
@@ -42,11 +42,9 @@ class PrivilegeServiceTest {
         verify(privilegeRepository).save(privilege);
     }
 
-    // =====================
-    // findById
-    // =====================
 
     @Test
+    @DisplayName("findById")
     void findById_found() {
         Privilege privilege = new Privilege();
         privilege.setPrivilegeId(1);
@@ -70,11 +68,9 @@ class PrivilegeServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // findAll
-    // =====================
 
     @Test
+    @DisplayName("findAll")
     void findAll_success() {
         when(privilegeRepository.findAll())
             .thenReturn(List.of(new Privilege(), new Privilege()));
@@ -84,11 +80,9 @@ class PrivilegeServiceTest {
         assertEquals(2, result.size());
     }
 
-    // =====================
-    // deleteById
-    // =====================
 
     @Test
+    @DisplayName("deleteById")
     void deleteById_found_deletesAndReturns() {
         Privilege privilege = new Privilege();
         privilege.setPrivilegeId(1);
@@ -113,11 +107,8 @@ class PrivilegeServiceTest {
         verify(privilegeRepository, never()).deleteById(anyInt());
     }
 
-    // =====================
-    // updateById
-    // =====================
-
     @Test
+    @DisplayName("updateById")
     void updateById_success_updatesRoleName() {
         Privilege existing = new Privilege();
         existing.setPrivilegeId(1);

@@ -7,6 +7,7 @@ import com.revature.smartAppointment.Repository.TimeSlotRepository;
 import com.revature.smartAppointment.Service.admin.AdminAppointmentService;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,66 +44,92 @@ class AdminAppointmentServiceTest {
         appointment.setDateTimeScheduled(LocalDateTime.of(2026, 1, 25, 10, 0));
     }
 
-    // =====================
-    // getAllAppointments
-    // =====================
     @Test
+    @DisplayName("getAppointments")
     void getAllAppointments_returnsAllAppointments() {
-        when(appointmentRepository.findAll()).thenReturn(List.of(appointment));
+        when(appointmentRepository.findAllWithDetails())
+                .thenReturn(List.of(appointment));
 
-        List<Appointment> result = adminAppointmentService.getAllAppointments();
+        List<Map<String, Object>> result =
+                adminAppointmentService.getAppointments("ALL");
 
         assertEquals(1, result.size());
-        assertEquals(appointment, result.get(0));
-        verify(appointmentRepository).findAll();
+        assertEquals(1, result.get(0).get("appointmentId"));
+        assertEquals(AppointmentStatus.REQUESTED, result.get(0).get("status"));
+
+        verify(appointmentRepository).findAllWithDetails();
     }
 
-    // =====================
-    // updateStatus
-    // =====================
     @Test
+    void getAppointments_byStatus_returnsFilteredAppointments() {
+        when(appointmentRepository.findByStatusWithDetails(AppointmentStatus.REQUESTED))
+                .thenReturn(List.of(appointment));
+
+        List<Map<String, Object>> result =
+                adminAppointmentService.getAppointments("REQUESTED");
+
+        assertEquals(1, result.size());
+        assertEquals(AppointmentStatus.REQUESTED, result.get(0).get("status"));
+
+        verify(appointmentRepository)
+                .findByStatusWithDetails(AppointmentStatus.REQUESTED);
+    }
+
+
+    @Test
+    @DisplayName("updateStatus")
     void updateStatus_existingAppointment_updatesStatus() {
-        when(appointmentRepository.findById(1)).thenReturn(Optional.of(appointment));
-        when(appointmentRepository.save(any(Appointment.class))).thenAnswer(i -> i.getArgument(0));
+        when(appointmentRepository.findById(1))
+                .thenReturn(Optional.of(appointment));
+        when(appointmentRepository.save(any(Appointment.class)))
+                .thenAnswer(i -> i.getArgument(0));
 
-        Appointment updated = adminAppointmentService.updateStatus(1, AppointmentStatus.CONFIRMED);
+        Map<String, Object> updated =
+                adminAppointmentService.updateStatus(1, AppointmentStatus.CONFIRMED);
 
-        assertEquals(AppointmentStatus.CONFIRMED, updated.getStatus());
+        assertEquals(AppointmentStatus.CONFIRMED, updated.get("status"));
+
         verify(appointmentRepository).findById(1);
         verify(appointmentRepository).save(appointment);
     }
 
     @Test
     void updateStatus_nonExistingAppointment_throwsException() {
-        when(appointmentRepository.findById(1)).thenReturn(Optional.empty());
+        when(appointmentRepository.findById(1))
+                .thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> adminAppointmentService.updateStatus(1, AppointmentStatus.CONFIRMED));
 
         assertEquals("Appointment not found", ex.getMessage());
+
         verify(appointmentRepository).findById(1);
         verify(appointmentRepository, never()).save(any());
     }
 
-    // =====================
-    // reschedule
-    // =====================
     @Test
+    @DisplayName("reschedule")
     void reschedule_existingAppointment_updatesDateTime() {
         LocalDateTime newDateTime = LocalDateTime.of(2026, 1, 26, 11, 30);
-        when(appointmentRepository.findById(1)).thenReturn(Optional.of(appointment));
-        when(appointmentRepository.save(any(Appointment.class))).thenAnswer(i -> i.getArgument(0));
 
-        Appointment rescheduled = adminAppointmentService.reschedule(1, newDateTime);
+        when(appointmentRepository.findById(1))
+                .thenReturn(Optional.of(appointment));
+        when(appointmentRepository.save(any(Appointment.class)))
+                .thenAnswer(i -> i.getArgument(0));
 
-        assertEquals(newDateTime, rescheduled.getDateTimeScheduled());
+        Map<String, Object> rescheduled =
+                adminAppointmentService.reschedule(1, newDateTime);
+
+        assertEquals(newDateTime, rescheduled.get("scheduledDateTime"));
+
         verify(appointmentRepository).findById(1);
         verify(appointmentRepository).save(appointment);
     }
 
     @Test
     void reschedule_nonExistingAppointment_throwsException() {
-        when(appointmentRepository.findById(1)).thenReturn(Optional.empty());
+        when(appointmentRepository.findById(1))
+                .thenReturn(Optional.empty());
 
         LocalDateTime newDateTime = LocalDateTime.of(2026, 1, 26, 11, 30);
 
@@ -109,6 +137,7 @@ class AdminAppointmentServiceTest {
                 () -> adminAppointmentService.reschedule(1, newDateTime));
 
         assertEquals("Appointment not found", ex.getMessage());
+
         verify(appointmentRepository).findById(1);
         verify(appointmentRepository, never()).save(any());
     }

@@ -7,6 +7,7 @@ import com.revature.smartAppointment.Repository.TimeSlotRepository;
 import com.revature.smartAppointment.Service.admin.AdminScheduleService;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,14 +41,12 @@ class AdminScheduleServiceTest {
         doctor.setDoctorId(1);
     }
 
-    // =====================
-    // addDoctorAvailability
-    // =====================
     @Test
+    @DisplayName("addDoctorAvailability")
     void addDoctorAvailability_success_returnsTimeSlot() {
         LocalDate date = LocalDate.of(2026, 1, 25);
         LocalTime start = LocalTime.of(9, 0);
-        LocalTime end = LocalTime.of(10, 0);
+        LocalTime end = LocalTime.of(9, 30);
 
         when(doctorRepository.findById(1)).thenReturn(Optional.of(doctor));
         when(timeSlotRepository.save(any(TimeSlot.class)))

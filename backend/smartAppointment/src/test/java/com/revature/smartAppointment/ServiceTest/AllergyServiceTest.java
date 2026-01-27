@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,11 +26,8 @@ class AllergyServiceTest {
     @InjectMocks
     private AllergyService allergyService;
 
-    // =====================
-    // save
-    // =====================
-
     @Test
+    @DisplayName("save")
     void save_success() {
         Allergy allergy = new Allergy();
         allergy.setName("Peanuts");
@@ -42,11 +40,8 @@ class AllergyServiceTest {
         verify(allergyRepository).save(allergy);
     }
 
-    // =====================
-    // findById
-    // =====================
-
     @Test
+    @DisplayName("findById")
     void findById_found() {
         Allergy allergy = new Allergy();
         allergy.setAllergyId(1);
@@ -70,11 +65,8 @@ class AllergyServiceTest {
         assertTrue(result.isEmpty());
     }
 
-    // =====================
-    // findAll
-    // =====================
-
     @Test
+    @DisplayName("findAll")
     void findAll_success() {
         when(allergyRepository.findAll())
             .thenReturn(List.of(new Allergy(), new Allergy()));
@@ -85,11 +77,8 @@ class AllergyServiceTest {
         verify(allergyRepository).findAll();
     }
 
-    // =====================
-    // deleteById
-    // =====================
-
     @Test
+    @DisplayName("deleteById")
     void deleteById_notSupported_returnsEmpty() {
         Optional<Allergy> result = allergyService.deleteById(1);
 
@@ -97,11 +86,8 @@ class AllergyServiceTest {
         verifyNoInteractions(allergyRepository);
     }
 
-    // =====================
-    // updateById
-    // =====================
-
     @Test
+    @DisplayName("updateById")
     void updateById_notSupported_returnsNull() {
         Allergy result = allergyService.updateById(1, new Allergy());
 
@@ -109,11 +95,8 @@ class AllergyServiceTest {
         verifyNoInteractions(allergyRepository);
     }
 
-    // =====================
-    // findAllergyByName
-    // =====================
-
     @Test
+    @DisplayName("findAllergyByName")
     void findAllergyByName_found() {
         Allergy allergy = new Allergy();
         allergy.setName("Peanuts");
