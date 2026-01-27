@@ -157,8 +157,17 @@ public class DoctorService implements ServiceInterface<Doctor> {
         enforceOwnership(doctorId, appt);
 
         appt.setStatus(newStatus);
-        Appointment saved = appointmentRepository.save(appt);
 
+        Appointment saved = appointmentRepository.save(appt);
+       TimeSlot slot = appt.getSlot();
+    if (slot != null) {
+        if (newStatus == AppointmentStatus.CANCELLED || newStatus == AppointmentStatus.DENIED) {
+            slot.setAvailable(true);   // free the slot
+        } else {
+            slot.setAvailable(false);  // keep slot booked (COMPLETED, NO_SHOW, etc.)
+        }
+        timeSlotRepository.save(slot);
+    }
         return toDoctorAppointmentView(saved);
     }
 
