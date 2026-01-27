@@ -20,14 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.smartAppointment.Controller.Request.DoctorInfoRequest;
 import com.revature.smartAppointment.Model.Doctor;
-import com.revature.smartAppointment.Model.Patient;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Service.DoctorService;
 import com.revature.smartAppointment.Service.DoctorService.DoctorAppointmentView;
 import com.revature.smartAppointment.Service.DoctorService.DoctorTimeSlotView;
 import com.revature.smartAppointment.Util.JwtUtil;
 
-import io.jsonwebtoken.Jwt;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -167,11 +165,16 @@ public ResponseEntity<List<DoctorAppointmentView>> getMyTodaysAppointments(
 }
     
    @GetMapping("/{doctorId}/appointments/upcoming")
-public List<DoctorService.DoctorAppointmentView> getUpcomingAppointments(
-        @PathVariable Integer doctorId) {
+    public List<DoctorService.DoctorAppointmentView> getUpcomingAppointments(
+            @PathVariable Integer doctorId) {
 
-    return doctorService.getUpcomingAppointments(doctorId);
-}
+        return doctorService.getUpcomingAppointments(doctorId);
+    }
+
+    @GetMapping("/{doctorId}/appointments/all")
+    public ResponseEntity<List<DoctorService.DoctorAppointmentView>> getAllAppointments(@PathVariable Integer doctorId) {
+        return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
+    }
 
 
 

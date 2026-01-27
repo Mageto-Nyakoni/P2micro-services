@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,10 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.revature.smartAppointment.Controller.Request.DoctorInfoRequest;
-import com.revature.smartAppointment.Model.Allergy;
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.Doctor;
-import com.revature.smartAppointment.Model.Patient;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
@@ -101,7 +98,42 @@ public class DoctorService implements ServiceInterface<Doctor> {
             .toList();
 }
 
+    public List<DoctorAppointmentView> getAllAppointmentsForDoctor(Integer doctorId) {
+        ensureDoctorExists(doctorId);
+        List<Appointment> appointments =
+                appointmentRepository.findBySlotDoctorDoctorIdOrderByDateTimeScheduledAsc(doctorId);
+        return appointments.stream()
+                .map(DoctorService::toDoctorAppointmentViewWithPatient)
+                .toList();
+    }
 
+    private static DoctorAppointmentView toDoctorAppointmentViewWithPatient(Appointment a) {
+        String firstName = null;
+        String lastName = null;
+        String appointmentType = null;
+        Integer estimatedTime = 0;
+
+        if (a.getPatient() != null && a.getPatient().getUser() != null) {
+            firstName = a.getPatient().getUser().getFirstName();
+            lastName = a.getPatient().getUser().getLastName();
+        }
+
+        if (a.getAppointmentType() != null) {
+            appointmentType = a.getAppointmentType().getName(); // if enum
+            estimatedTime = a.getAppointmentType().getEstimatedTime();
+        }
+
+        return new DoctorAppointmentView(
+                a.getAppointmentId(),
+                firstName,
+                lastName,
+                appointmentType,
+                a.getDateTimeScheduled(),
+                estimatedTime,
+                a.getStatus()
+        );
+
+    }
 
 
 
@@ -276,4 +308,6 @@ public class DoctorService implements ServiceInterface<Doctor> {
         
         return doctor;
     }
+
+    
 }
