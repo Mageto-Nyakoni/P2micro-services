@@ -1,15 +1,17 @@
 /* ================= TIME SLOT ================= */
 
 export type TimeSlot = {
-  time: string;
+ slotId: number;
+  startTime: string;
+  endTime: string;
   available: boolean;
-};
+}
 
 /* ================= DOCTOR AVAILABILITY ================= */
 
 export type DoctorAvailability = {
-  id: number;
-  name: string;
+   doctorId: number;       // <-- must match backend
+  doctorName: string;     // <-- must match backend
   specialization: string;
   slots: TimeSlot[];
 };

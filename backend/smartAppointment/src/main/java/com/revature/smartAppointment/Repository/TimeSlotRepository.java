@@ -3,13 +3,13 @@ package com.revature.smartAppointment.Repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
@@ -17,7 +17,14 @@ import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
 
-    boolean existsByDoctor_DoctorIdAndDateAvailableAndStartTime(Integer doctorId, LocalDate dateAvailable, LocalTime startTime);
+    List<TimeSlot> findByDoctorDoctorId(Integer doctorId);
+
+    boolean existsByDoctor_DoctorIdAndDateAvailableAndStartTime(
+            Integer doctorId,
+            LocalDate dateAvailable,
+            LocalTime startTime
+    );
+    
 
     List<TimeSlot> findByDoctor_DoctorIdAndDateAvailableOrderByStartTimeAsc(Integer doctorId, LocalDate dateAvailable);
 
@@ -39,35 +46,60 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
 
     List<TimeSlot> findByStatusOrderByDateAvailableAscStartTimeAsc(TimeSlotStatus status);
 
+    List<TimeSlot> findByDateAvailableBetweenOrderByDateAvailableAscStartTimeAsc(LocalDate start, LocalDate end);
+
+    List<TimeSlot> findAllByOrderByDateAvailableAscStartTimeAsc();
+
+    long countByStatus(TimeSlotStatus status);
+
+    long countByDoctor_DoctorIdAndStatus(Integer doctorId, TimeSlotStatus status);
+
+    long countByDoctor_DoctorIdAndDateAvailableAndStatus(
+            Integer doctorId,
+            LocalDate dateAvailable,
+            TimeSlotStatus status
+    );
+
+    long countByDoctor_DoctorIdAndDateAvailableBetweenAndStatus(
+            Integer doctorId,
+            LocalDate start,
+            LocalDate end,
+            TimeSlotStatus status
+    );
+
+    long countByDateAvailableAndStatus(LocalDate dateAvailable, TimeSlotStatus status);
+
+    long countByDateAvailableBetweenAndStatus(
+            LocalDate start,
+            LocalDate end,
+            TimeSlotStatus status
+    );
+
     List<TimeSlot> findByDoctor_DoctorIdAndDateAvailableAndStartTimeGreaterThanEqualAndEndTimeLessThanEqualOrderByStartTimeAsc(
             Integer doctorId,
             LocalDate dateAvailable,
             LocalTime startTime,
             LocalTime endTime
     );
+     List<TimeSlot> findByStatus(TimeSlotStatus status);
+    /*List<TimeSlot> findByPatientIdAndStatusOrderByStartAt(
+        Integer patientId,
+        TimeSlotStatus status
+           );*/
 
-    @Modifying
-    @Query("UPDATE TimeSlot t SET t.status = 'BOOKED' WHERE t.slotId = :slotId AND t.status = 'AVAILABLE'")
+    /* ================= NEW METHOD ================= */
     @Transactional
-    int bookSlotIfAvailable(@Param("slotId") Integer slotId);
-
     @Modifying
     @Query("UPDATE TimeSlot t SET t.status = 'AVAILABLE' WHERE t.slotId = :slotId AND t.status = 'BOOKED'")
-    @Transactional
-    int freeSlotIfBooked(@Param("slotId") Integer slotId);
+    int freeSlotIfBooked(Integer slotId);
 
+    @Transactional
     @Modifying
-    @Query("UPDATE TimeSlot t SET t.status = 'HELD' WHERE t.slotId = :slotId AND t.status = 'AVAILABLE'")
-    @Transactional
-    int holdSlotIfAvailable(@Param("slotId") Integer slotId);
+    @Query("UPDATE TimeSlot t SET t.status = 'BOOKED' WHERE t.slotId = :slotId AND t.status = 'AVAILABLE'")
+    int bookSlotIfAvailable(Integer slotId);
 
-    @Modifying
-    @Query("UPDATE TimeSlot t SET t.status = 'AVAILABLE' WHERE t.slotId = :slotId AND t.status = 'HELD'")
     @Transactional
-    int releaseHold(@Param("slotId") Integer slotId);
-
     @Modifying
     @Query("UPDATE TimeSlot t SET t.status = 'BLOCKED' WHERE t.slotId IN :slotIds AND t.status <> 'BOOKED'")
-    @Transactional
     int blockSlotsIfNotBooked(@Param("slotIds") List<Integer> slotIds);
 }

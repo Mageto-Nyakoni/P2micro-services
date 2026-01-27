@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,12 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.revature.smartAppointment.Controller.Request.DoctorInfoRequest;
-import com.revature.smartAppointment.Model.Allergy;
 import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.Doctor;
-import com.revature.smartAppointment.Model.Patient;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
+import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Repository.DoctorRepository;
 import com.revature.smartAppointment.Repository.TimeSlotRepository;
@@ -87,10 +85,61 @@ public class DoctorService implements ServiceInterface<Doctor> {
     public Optional<Doctor> findByUserId(int user_id) {
         return doctorRepository.findDoctorByUser_UserId(user_id);
     }
+       
+    public List<DoctorAppointmentView> getUpcomingAppointments(Integer doctorId) {
+    ensureDoctorExists(doctorId);
+
+    LocalDateTime now = LocalDateTime.now();
+
+    List<Appointment> appts =
+            appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledAfter(doctorId, now);
+
+    return appts.stream()
+            .map(DoctorService::toDoctorAppointmentView)
+            .toList();
+}
+
+    public List<DoctorAppointmentView> getAllAppointmentsForDoctor(Integer doctorId) {
+        ensureDoctorExists(doctorId);
+        List<Appointment> appointments =
+                appointmentRepository.findBySlotDoctorDoctorIdOrderByDateTimeScheduledAsc(doctorId);
+        return appointments.stream()
+                .map(DoctorService::toDoctorAppointmentViewWithPatient)
+                .toList();
+    }
+
+    private static DoctorAppointmentView toDoctorAppointmentViewWithPatient(Appointment a) {
+        String firstName = null;
+        String lastName = null;
+        String appointmentType = null;
+        Integer estimatedTime = 0;
+
+        if (a.getPatient() != null && a.getPatient().getUser() != null) {
+            firstName = a.getPatient().getUser().getFirstName();
+            lastName = a.getPatient().getUser().getLastName();
+        }
+
+        if (a.getAppointmentType() != null) {
+            appointmentType = a.getAppointmentType().getName(); // if enum
+            estimatedTime = a.getAppointmentType().getEstimatedTime();
+        }
+
+        return new DoctorAppointmentView(
+                a.getAppointmentId(),
+                firstName,
+                lastName,
+                appointmentType,
+                a.getDateTimeScheduled(),
+                estimatedTime,
+                a.getStatus()
+        );
+
+    }
+
+
 
     public List<DoctorAppointmentView> getTodaysAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
-
         LocalDate today = LocalDate.now();
         LocalDateTime start = today.atStartOfDay();
         LocalDateTime end = today.atTime(LocalTime.MAX);
@@ -141,8 +190,17 @@ public class DoctorService implements ServiceInterface<Doctor> {
         enforceOwnership(doctorId, appt);
 
         appt.setStatus(newStatus);
-        Appointment saved = appointmentRepository.save(appt);
 
+        Appointment saved = appointmentRepository.save(appt);
+       TimeSlot slot = appt.getSlot();
+    if (slot != null) {
+        if (newStatus == AppointmentStatus.CANCELLED || newStatus == AppointmentStatus.DENIED) {
+            slot.setStatus(TimeSlotStatus.AVAILABLE);   // free the slot
+        } else {
+            slot.setStatus(TimeSlotStatus.BOOKED);  // keep slot booked (COMPLETED, NO_SHOW, etc.)
+        }
+        timeSlotRepository.save(slot);
+    }
         return toDoctorAppointmentView(saved);
     }
 
@@ -199,14 +257,29 @@ public class DoctorService implements ServiceInterface<Doctor> {
 }
 
     private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
+        String patientFirstName = null;
+        String patientLastName = null;
+        if (a.getPatient() != null && a.getPatient().getUser() != null) {
+            patientFirstName = a.getPatient().getUser().getFirstName();
+            patientLastName = a.getPatient().getUser().getLastName();
+        }
+        // Calculate duration from slot start/end time if slot exists
+        Integer estimatedDurationMinutes = null;
+        if (a.getSlot() != null && a.getSlot().getStartTime() != null && a.getSlot().getEndTime() != null) {
+            estimatedDurationMinutes = (int) java.time.Duration
+                .between(a.getSlot().getStartTime(), a.getSlot().getEndTime())
+                .toMinutes();
+        }
+
         return new DoctorAppointmentView(
-                a.getAppointmentId(),
-                null, // patientFirstName (not ready with Appointment model currently, wip)
-                null, // patientLastName (not ready with Appointment model currently, wip)
-                null, // appointmentType (not ready with Appointment model currently, wip)
-                a.getDateTimeScheduled(),
-                null, // estimatedDurationMinutes (not ready with Appointment model currently, wip)
-                a.getStatus());
+            a.getAppointmentId(),
+            patientFirstName,
+            patientLastName,
+            a.getAppointmentType().getName(), // placeholder for appointment type
+            a.getDateTimeScheduled(),
+            estimatedDurationMinutes,
+            a.getStatus()
+        );
     }
 
     // Lightweight response DTOs
@@ -245,4 +318,6 @@ public class DoctorService implements ServiceInterface<Doctor> {
         
         return doctor;
     }
+
+    
 }

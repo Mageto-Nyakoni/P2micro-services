@@ -2,6 +2,7 @@ package com.revature.smartAppointment.Controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,10 +17,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.smartAppointment.Controller.Request.PatientInfoRequest;
+import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.Patient;
+import com.revature.smartAppointment.Model.enums.AppointmentStatus;
+import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Service.PatientService;
 import com.revature.smartAppointment.Util.JwtUtil;
-
+import com.revature.smartAppointment.dto.AppointmentDto;
 
 @RestController
 @RequestMapping("/smart-appointment/api/patients")
@@ -29,10 +33,27 @@ public class PatientController {
     private final JwtUtil jwtUtil;
 
     @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
     public PatientController(PatientService patientService, JwtUtil jwtUtil) {
         this.patientService = patientService;
         this.jwtUtil = jwtUtil;
     }
+     
+    @GetMapping("{patientId}/appointments")
+public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patientId) {
+    List<Appointment> appointments = appointmentRepository.findByPatient_PatientIdAndStatus(patientId, AppointmentStatus.CONFIRMED);
+
+    return appointments.stream().map(appt -> new AppointmentDto(
+            appt.getAppointmentId(),
+            appt.getDoctor().getUser().getFirstName() + " " + appt.getDoctor().getUser().getLastName(),
+            appt.getAppointmentType().getName(),
+            appt.getDateTimeScheduled(),
+            appt.getDateTimeScheduled().plusMinutes(30),
+            appt.getStatus()
+    )).collect(Collectors.toList());
+}
 
     @GetMapping()
     public ResponseEntity<List<Patient>> getPatients() {
@@ -114,5 +135,8 @@ public class PatientController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        
+
     }
 }

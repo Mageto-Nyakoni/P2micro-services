@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.smartAppointment.Controller.Request.DoctorInfoRequest;
 import com.revature.smartAppointment.Model.Doctor;
-import com.revature.smartAppointment.Model.Patient;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
 import com.revature.smartAppointment.Service.DoctorService;
 import com.revature.smartAppointment.Service.DoctorService.DoctorAppointmentView;
@@ -139,6 +138,44 @@ public class DoctorController {
     // Dashboard: appointments today/week
     // -----------------------------
 
+
+// GET /doctors/me/appointments/today
+@GetMapping("/me/appointments/today")
+public ResponseEntity<List<DoctorAppointmentView>> getMyTodaysAppointments(
+        @RequestHeader("Authorization") String authHeader) {
+
+    String token = authHeader.substring(7);
+
+    if (!jwtUtil.validateToken(token)) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    if (!jwtUtil.extractPrivilege(token).equals("Doctor")) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    }
+
+    int userId = jwtUtil.extractId(token);
+    int doctorId = doctorService.findByUserId(userId)
+            .orElseThrow()
+            .getDoctorId();
+
+    return ResponseEntity.ok(
+        doctorService.getTodaysAppointments(doctorId)
+    );
+}
+    
+   @GetMapping("/{doctorId}/appointments/upcoming")
+    public List<DoctorService.DoctorAppointmentView> getUpcomingAppointments(
+            @PathVariable Integer doctorId) {
+
+        return doctorService.getUpcomingAppointments(doctorId);
+    }
+
+    @GetMapping("/{doctorId}/appointments/all")
+    public ResponseEntity<List<DoctorService.DoctorAppointmentView>> getAllAppointments(@PathVariable Integer doctorId) {
+        return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
+    }
+
     // GET /doctors/{doctorId}/appointments/today
     @GetMapping("/{doctorId}/appointments/today")
     public ResponseEntity<List<DoctorAppointmentView>> getTodaysAppointments(@PathVariable Integer doctorId) {
@@ -167,6 +204,8 @@ public class DoctorController {
     public ResponseEntity<DoctorAppointmentView> updateStatus(@PathVariable Integer doctorId,
                                                               @PathVariable Integer appointmentId,
                                                               @RequestBody UpdateStatusRequest req) {
+
+                       System.out.println("Received status: " + req.getStatus());                                         
         return ResponseEntity.ok(doctorService.updateAppointmentStatus(doctorId, appointmentId, req.getStatus()));
     }
 

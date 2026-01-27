@@ -66,8 +66,8 @@ export default function LoginPage() {
 
         {/* Login Form */}
         <LoginForm 
-          initialEmail="tester@mail.com"
-          initialPassword="password"
+          initialEmail=""
+          initialPassword=""
           busy={busy}
           error={error}
           onSubmit={handleSubmit}

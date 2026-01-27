@@ -16,21 +16,18 @@ Node.js Version 20.19
 NOTES
 =====
 
-- DoctorBrowse page "back" button directs to BookAppointment page
-- BookAppointment page "back" button directs to DoctorBrose page (infinite loop)
 
-- when logged in, the Doctor Availability Calendar in the homepage doesnt do anything
+FINAL TOUCHUPS
+==============
 
-- Admin page 
-- Super page
 
-- Resgistration
-    - make registration a 2 part process
-    - Part 1: ask for first/last name, email, and password (creates User Entity in DB)
-    - Part 2: ask for age, blood type, address, allergies, phone number, DOB (Creates Patient Entity in DB) 
+- military time in availble slots (guest/patient homepage)
+- military time in bookingappointment (bookingpage)
+- military time in Availability windows (admin homepage)
 
-- Patient page
-    - update the info so that it actually shows the logged in pateint's info
+    
+- add more status types tags for appointment calendar in doctor page (NO_SHOW TAG MISSING)
 
-- Doctor page
-    - update the info so that it actually shows the logged in doctor's info
+- NO SHOW being weird
+
+- appoitment calendar removing completed appointments

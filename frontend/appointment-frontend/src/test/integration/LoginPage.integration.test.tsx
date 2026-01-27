@@ -34,8 +34,8 @@ jest.mock("../../components/LoginForm", () => ({
         type="button"
         onClick={() =>
           props.onSubmit?.({
-            email: props.initialEmail ?? "tester@mail.com",
-            password: props.initialPassword ?? "password",
+            email: "tester@mail.com",
+            password: "password",
           })
         }
       >
