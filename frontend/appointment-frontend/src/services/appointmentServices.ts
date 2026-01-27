@@ -19,8 +19,10 @@ export async function updateDoctorAppointmentStatus(
   status: "COMPLETED" | "CANCELLED" | "NO_SHOW",
   token: string
 ) {
+if (!doctorId) throw new Error("doctorId is undefined");
+
   const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/doctors/${doctorId}/appointments/${appointmentId}/status`,
+    `http://localhost:8080/smart-appointment/api/doctors/${doctorId}/appointments/${appointmentId}/status`,
     {
       method: "PATCH",
       headers: {
@@ -31,7 +33,9 @@ export async function updateDoctorAppointmentStatus(
     }
   );
 
-  if (!response.ok) {
+ if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Backend error:", errorText);
     throw new Error("Failed to update appointment status");
   }
 

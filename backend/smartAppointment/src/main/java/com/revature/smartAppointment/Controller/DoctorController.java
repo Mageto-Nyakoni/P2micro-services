@@ -203,6 +203,8 @@ public List<DoctorService.DoctorAppointmentView> getUpcomingAppointments(
     public ResponseEntity<DoctorAppointmentView> updateStatus(@PathVariable Integer doctorId,
                                                               @PathVariable Integer appointmentId,
                                                               @RequestBody UpdateStatusRequest req) {
+
+                       System.out.println("Received status: " + req.getStatus());                                         
         return ResponseEntity.ok(doctorService.updateAppointmentStatus(doctorId, appointmentId, req.getStatus()));
     }
 
