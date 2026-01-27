@@ -2,19 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { Value } from "react-calendar/dist/shared/types";
+import type { Appointment } from "../../types/appointment";
 
 // ---------- Types ----------
 type ActionResult = { isOk: boolean; message?: string };
 
-type Appointment = {
-  id?: number;
-  __backendId?: number;
-  patient_name?: string;
-  appointment_type?: string;
-  date?: string; // "YYYY-MM-DD"
-  time?: string; // "HH:MM"
-  [key: string]: unknown;
-};
 
 type Props = {
   title?: string;
@@ -56,7 +48,13 @@ export default function DoctorCalendar({
   onDelete = async () => ({ isOk: true }),
   onUpdate = async () => ({ isOk: true }),
 }: Props) {
-  const appointments = useMemo<Appointment[]>(() => appointmentsProp ?? [], [appointmentsProp]);
+  const appointments = useMemo<Appointment[]>(() => {
+  return (appointmentsProp ?? []).map((apt) => ({
+    ...apt,
+    date: apt.date ?? apt.scheduledDateTime?.split("T")[0],
+    time: apt.time ?? apt.scheduledDateTime?.slice(11, 16),
+  }));
+}, [appointmentsProp]);
 
   // Store selected date as a Date (react-calendar is Date-based)
   const [selectedDateObj, setSelectedDateObj] = useState<Date | null>(new Date());

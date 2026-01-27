@@ -12,7 +12,10 @@ import BookAppointment from "./pages/patient/BookAppointment";
 import EditPatientProfile from "./pages/patient/EditPatientProfile";
 
 import DoctorHome from "./pages/doctor/DoctorHome";
-import DoctorCalendar from "./pages/doctor/DoctorCalendar";
+//import DoctorCalendar from "./pages/doctor/DoctorCalendar";
+import DoctorCalendarPage from "./pages/doctor/DoctorCalendarPage";
+
+
 import AdminHome from "./pages/admin/AdminHome";
 import Navbar from "./components/NavBar/Navbar";
 import SuperHome from "./pages/super/SuperHome";
@@ -66,7 +69,7 @@ function App() {
               } />
             <Route path="/doctor/calendar" element={
               <ProtectedRoute allowedRoles={["Doctor"]}> 
-                <DoctorCalendar />
+                <DoctorCalendarPage />
               </ProtectedRoute>
               } />
 
