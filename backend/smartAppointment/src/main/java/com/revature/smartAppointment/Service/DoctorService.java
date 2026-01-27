@@ -19,6 +19,7 @@ import com.revature.smartAppointment.Model.Appointment;
 import com.revature.smartAppointment.Model.Doctor;
 import com.revature.smartAppointment.Model.TimeSlot;
 import com.revature.smartAppointment.Model.enums.AppointmentStatus;
+import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 import com.revature.smartAppointment.Repository.AppointmentRepository;
 import com.revature.smartAppointment.Repository.DoctorRepository;
 import com.revature.smartAppointment.Repository.TimeSlotRepository;
@@ -189,8 +190,17 @@ public class DoctorService implements ServiceInterface<Doctor> {
         enforceOwnership(doctorId, appt);
 
         appt.setStatus(newStatus);
-        Appointment saved = appointmentRepository.save(appt);
 
+        Appointment saved = appointmentRepository.save(appt);
+       TimeSlot slot = appt.getSlot();
+    if (slot != null) {
+        if (newStatus == AppointmentStatus.CANCELLED || newStatus == AppointmentStatus.DENIED) {
+            slot.setStatus(TimeSlotStatus.AVAILABLE);   // free the slot
+        } else {
+            slot.setStatus(TimeSlotStatus.BOOKED);  // keep slot booked (COMPLETED, NO_SHOW, etc.)
+        }
+        timeSlotRepository.save(slot);
+    }
         return toDoctorAppointmentView(saved);
     }
 

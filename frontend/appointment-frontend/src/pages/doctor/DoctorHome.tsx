@@ -1,5 +1,5 @@
 import { getMyDoctor } from "@/services/doctorServices";
-import { getMyAppointments } from "@/services/appointmentServices";
+import { getMyAppointments, updateAppointmentStatus } from "@/services/appointmentService";
 // import { updateAppointmentStatus } from "@/services/appointmentServices"; // uncomment when backend ready
 import { Doctor } from "@/types/doctorTypes";
 import { useEffect, useState } from "react";
@@ -11,8 +11,48 @@ export default function DoctorHome() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+const [savingId, setSavingId] = useState<number | null>(null);
+const doctorId = doctor?.doctorId;
 
   const { token, loading } = useAuth();
+
+  const updateStatus = async (appointmentId: number, status: string) => {
+
+    if(!doctorId) return;
+  try {
+    setSavingId(appointmentId); // disable buttons while saving
+
+    const res = await fetch(
+      `http://localhost:8080/doctors/${doctorId}/appointments/${appointmentId}/status`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      }
+    );
+
+    if (!res.ok) throw new Error("Failed to update status");
+
+    const updatedAppointment = await res.json();
+
+    //  Remove from today's list (REAL LIFE behavior)
+    setAppointments(prev =>
+      prev.filter(a => a.id !== appointmentId)
+    );
+
+  } catch (err) {
+    console.error(err);
+    alert("Could not update appointment");
+  } finally {
+    setSavingId(null);
+  }
+};
+
+
+
+
 
   useEffect(() => {
     if (!token || loading) return;
@@ -43,7 +83,7 @@ export default function DoctorHome() {
     };
   }, [token, loading]);
 
-  // ✅ Only show CONFIRMED appointments
+  //  Only show CONFIRMED appointments
   const confirmedAppointments = appointments.filter(
     (apt) => apt.status === "CONFIRMED"
   );
@@ -52,19 +92,27 @@ export default function DoctorHome() {
     appointmentId: number,
     status: "COMPLETED" | "CANCELLED" | "NO_SHOW"
   ) => {
+    if (!doctor || !token) return;
     try {
-      // 🔥 Call backend when ready
+      setSavingId(appointmentId);
+      //  Call backend when ready
       // await updateAppointmentStatus(appointmentId, status, token);
-
-      // 🔥 Instantly remove from UI
+         await updateAppointmentStatus(
+        doctor.doctorId,
+        appointmentId,
+        status,
+      );
+      //  Instantly remove from UI
       setAppointments((prev) =>
         prev.filter((apt) => apt.appointmentId !== appointmentId)
       );
 
       setExpandedId(null);
-    } catch (err) {
-      console.error("Status update failed", err);
+    }catch (err) {
+      console.error(err);
       alert("Failed to update appointment status");
+    } finally {
+      setSavingId(null);
     }
   };
 
@@ -129,82 +177,76 @@ export default function DoctorHome() {
 
        {confirmedAppointments.map((apt) => {
   const isExpanded = expandedId === apt.appointmentId;
+          const isSaving = savingId === apt.appointmentId;
 
-  return (
-    <div
-      key={apt.appointmentId}
-      className="mb-4 bg-white rounded-2xl shadow-sm border border-violet-100 hover:shadow-md transition-all"
-    >
-      {/* HEADER */}
-      <div
-        onClick={() =>
-          setExpandedId(isExpanded ? null : apt.appointmentId)
-        }
-        className="p-5 cursor-pointer flex justify-between items-start"
-      >
-        <div className="space-y-1">
-          <p className="text-slate-800 font-semibold">
-            {apt.patientFirstName} {apt.patientLastName}
-          </p>
-
-          <p className="text-sm text-slate-500">
-            {new Date(apt.scheduledDateTime).toLocaleString()}
-          </p>
-
-          <p className="text-sm text-slate-500">
-            Type: {apt.appointmentType ?? "—"}
-          </p>
-        </div>
-
-        {/* STATUS BADGE */}
-        <span className="px-3 py-1 text-xs font-semibold rounded-full bg-violet-100 text-violet-700">
-          {apt.status}
-        </span>
-      </div>
-
-      {/* EXPANDED ACTIONS */}
-      {isExpanded && (
-        <div className="px-5 pb-5 pt-3 border-t border-violet-100 bg-violet-50 rounded-b-2xl">
-          <p className="text-sm text-slate-600 mb-3">
-            Update appointment status
-          </p>
-
-          <div className="flex gap-3 flex-wrap">
-            <button
-              onClick={() =>
-                handleStatusChange(apt.appointmentId, "COMPLETED")
-              }
-              className="px-4 py-2 rounded-xl text-sm font-medium bg-emerald-500 text-white hover:bg-emerald-600 transition"
+   return (
+            <div
+              key={apt.appointmentId}
+              className="mb-4 bg-white rounded-2xl shadow-sm border border-violet-100"
             >
-              Completed
-            </button>
+              <div
+                onClick={() =>
+                  setExpandedId(isExpanded ? null : apt.appointmentId)
+                }
+                className="p-5 cursor-pointer flex justify-between items-start"
+              >
+                <div>
+                  <p className="font-semibold text-slate-800">
+                    {apt.patientFirstName} {apt.patientLastName}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    {new Date(apt.scheduledDateTime).toLocaleString()}
+                  </p>
+                </div>
 
-            <button
-              onClick={() =>
-                handleStatusChange(apt.appointmentId, "CANCELLED")
-              }
-              className="px-4 py-2 rounded-xl text-sm font-medium bg-rose-500 text-white hover:bg-rose-600 transition"
-            >
-              Cancelled
-            </button>
+                <span className="px-3 py-1 text-xs font-semibold rounded-full bg-violet-100 text-violet-700">
+                  {apt.status}
+                </span>
+              </div>
 
-            <button
-              onClick={() =>
-                handleStatusChange(apt.appointmentId, "NO_SHOW")
-              }
-              className="px-4 py-2 rounded-xl text-sm font-medium bg-amber-400 text-white hover:bg-amber-500 transition"
-            >
-              No Show
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-})}
+              {isExpanded && (
+                <div className="px-5 pb-5 pt-3 border-t bg-violet-50 rounded-b-2xl">
+                  <p className="text-sm text-slate-600 mb-3">
+                    Update appointment status
+                  </p>
 
+                  <div className="flex gap-3">
+                    <button
+                      disabled={isSaving}
+                      onClick={() =>
+                        handleStatusChange(apt.appointmentId, "COMPLETED")
+                      }
+                      className="px-4 py-2 rounded-xl bg-emerald-500 text-white disabled:opacity-50"
+                    >
+                      Completed
+                    </button>
+
+                    <button
+                      disabled={isSaving}
+                      onClick={() =>
+                        handleStatusChange(apt.appointmentId, "CANCELLED")
+                      }
+                      className="px-4 py-2 rounded-xl bg-rose-500 text-white disabled:opacity-50"
+                    >
+                      Cancelled
+                    </button>
+
+                    <button
+                      disabled={isSaving}
+                      onClick={() =>
+                        handleStatusChange(apt.appointmentId, "NO_SHOW")
+                      }
+                      className="px-4 py-2 rounded-xl bg-amber-400 text-white disabled:opacity-50"
+                    >
+                      No Show
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
 }
-

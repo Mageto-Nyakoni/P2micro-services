@@ -70,3 +70,8 @@ export async function updateAppointmentStatus(doctorId: number, appointmentId: n
     const {data} = await http.patch(`doctors/${doctorId}/appointments/${appointmentId}/status`, {status});
     return data;
 }
+
+export const getMyAppointments = async () => {
+  const { data } = await http.get("/doctors/me/appointments/today");
+  return data;
+};
