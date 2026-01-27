@@ -176,8 +176,6 @@ public ResponseEntity<List<DoctorAppointmentView>> getMyTodaysAppointments(
         return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
     }
 
-
-
     // GET /doctors/{doctorId}/appointments/today
     @GetMapping("/{doctorId}/appointments/today")
     public ResponseEntity<List<DoctorAppointmentView>> getTodaysAppointments(@PathVariable Integer doctorId) {

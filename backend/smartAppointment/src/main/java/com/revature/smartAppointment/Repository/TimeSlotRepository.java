@@ -18,7 +18,12 @@ import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
 
     List<TimeSlot> findByDoctorDoctorId(Integer doctorId);
-    
+
+    boolean existsByDoctor_DoctorIdAndDateAvailableAndStartTime(
+            Integer doctorId,
+            LocalDate dateAvailable,
+            LocalTime startTime
+    );
     
 
     List<TimeSlot> findByDoctor_DoctorIdAndDateAvailableOrderByStartTimeAsc(Integer doctorId, LocalDate dateAvailable);
@@ -41,6 +46,35 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
 
     List<TimeSlot> findByStatusOrderByDateAvailableAscStartTimeAsc(TimeSlotStatus status);
 
+    List<TimeSlot> findByDateAvailableBetweenOrderByDateAvailableAscStartTimeAsc(LocalDate start, LocalDate end);
+
+    List<TimeSlot> findAllByOrderByDateAvailableAscStartTimeAsc();
+
+    long countByStatus(TimeSlotStatus status);
+
+    long countByDoctor_DoctorIdAndStatus(Integer doctorId, TimeSlotStatus status);
+
+    long countByDoctor_DoctorIdAndDateAvailableAndStatus(
+            Integer doctorId,
+            LocalDate dateAvailable,
+            TimeSlotStatus status
+    );
+
+    long countByDoctor_DoctorIdAndDateAvailableBetweenAndStatus(
+            Integer doctorId,
+            LocalDate start,
+            LocalDate end,
+            TimeSlotStatus status
+    );
+
+    long countByDateAvailableAndStatus(LocalDate dateAvailable, TimeSlotStatus status);
+
+    long countByDateAvailableBetweenAndStatus(
+            LocalDate start,
+            LocalDate end,
+            TimeSlotStatus status
+    );
+
     List<TimeSlot> findByDoctor_DoctorIdAndDateAvailableAndStartTimeGreaterThanEqualAndEndTimeLessThanEqualOrderByStartTimeAsc(
             Integer doctorId,
             LocalDate dateAvailable,
@@ -53,9 +87,19 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {
         TimeSlotStatus status
            );*/
 
-            /* ================= NEW METHOD ================= */
+    /* ================= NEW METHOD ================= */
     @Transactional
     @Modifying
     @Query("UPDATE TimeSlot t SET t.status = 'AVAILABLE' WHERE t.slotId = :slotId AND t.status = 'BOOKED'")
     int freeSlotIfBooked(Integer slotId);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE TimeSlot t SET t.status = 'BOOKED' WHERE t.slotId = :slotId AND t.status = 'AVAILABLE'")
+    int bookSlotIfAvailable(Integer slotId);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE TimeSlot t SET t.status = 'BLOCKED' WHERE t.slotId IN :slotIds AND t.status <> 'BOOKED'")
+    int blockSlotsIfNotBooked(@Param("slotIds") List<Integer> slotIds);
 }

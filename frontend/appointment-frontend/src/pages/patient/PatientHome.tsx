@@ -113,7 +113,7 @@ return (
       <section className="flex flex-col items-center text-center px-6 py-16 md:py-20">
         <div className="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
           <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
-          Welcome back
+          Welcome
         </div>
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4 tracking-tight">
           Hello, <span className="text-indigo-600">{firstName}</span>!

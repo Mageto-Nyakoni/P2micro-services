@@ -13,7 +13,6 @@ import EditPatientProfile from "./pages/patient/EditPatientProfile";
 
 import DoctorHome from "./pages/doctor/DoctorHome";
 import AdminHome from "./pages/admin/AdminHome";
-import AdminStaffList from "./pages/admin/AdminStaffList";
 import Navbar from "./components/NavBar/Navbar";
 import SuperHome from "./pages/super/SuperHome";
 import Home from "./pages/public/Home";
@@ -80,7 +79,6 @@ function App() {
               } />
             <Route path="/admin/staff" element={
               <ProtectedRoute allowedRoles={["Admin"]}> 
-                <AdminStaffList />
               </ProtectedRoute>
               } />
 
