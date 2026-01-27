@@ -42,9 +42,6 @@ public class TimeSlot {
     @Column(name = "slot_id")
     private Integer slotId;
 
-     // Add this field
-    private boolean available = true;
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
