@@ -52,8 +52,7 @@ export type PatchPatientResponse = {
 };
 
 export type PatientDetailsForm = {
-    address: string
-    age: string;
+    address: string;
     gender: "male" | "female" | "other";
     phoneNumber: string;
     dateOfBirth: string;

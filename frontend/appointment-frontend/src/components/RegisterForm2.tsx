@@ -44,16 +44,8 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (!value.age || !value.dateOfBirth || !value.phoneNumber || !value.address || !value.bloodType) {
+        if (!value.dateOfBirth || !value.phoneNumber || !value.address || !value.bloodType) {
             alert("Please fill all fields");
-            return;
-        }
-
-        const enteredAge = Number(value.age);
-        const computedAge = getAgeFromDOB(value.dateOfBirth);
-
-        if (computedAge != enteredAge) {
-            alert(`Age and Birthday do not match. Based on DOB, age should be ${computedAge}`);
             return;
         }
 
@@ -79,22 +71,7 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                 </p>
 
                 <form onSubmit={handleSubmit} className="mt-8 spacy-y-5">
-                    <div className="mb-2">
-                        <label className="block text-sm mb-1 text-gray-600">
-                            Age
-                        </label>
-                        <input
-                            type="number"
-                            name="age"
-                            value={value.age}
-                            onChange={handleChange}
-                            placeholder="Enter age"
-                            min={1}
-                            step={1}
-                            className="w-full rounded-lg border border-gray-300 px-4 py-2 
-                                        focus:outline-none focus:ring-2 focus:ring-purple-400"
-                        />
-                    </div>
+                    
 
                     <div className="mb-2">
                         <label className="block text-sm mb-1 text-gray-600">

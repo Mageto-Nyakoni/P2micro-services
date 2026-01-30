@@ -8,6 +8,7 @@ import { getAllergies } from "@/services/allergyService";
 import { getBloodType } from "@/services/bloodTypeService";
 import { Allergy, BloodType, PatchPatientRequest, PatientDetailsForm } from "@/types/patientTypes";
 import { RegisterUserForm } from "@/types/userTypes";
+import { getAgeFromDOB } from "@/utils/validators";
 
 
 
@@ -45,7 +46,6 @@ export default function RegisterWizard() {
     password: "",
   });
   const [patientForm, setPatientForm] = useState<PatientDetailsForm>({
-    age: "",
     gender: "other",
     phoneNumber: "",
     dateOfBirth: "",
@@ -78,11 +78,16 @@ export default function RegisterWizard() {
       setTokenGetter(() => tokenRef.current);   
       
       console.log(token);
+
+      const patientAge = getAgeFromDOB(patientForm.dateOfBirth);
+      if (patientAge === null){
+        throw new Error ("Invalid date of birth")
+      }
       
       const allergyPayload: string[] = allergies.filter((a) => patientForm.allergyIds.includes(a.allergyId)).map((a) => a.name);
       const payload: PatchPatientRequest = {
         address: patientForm.address,
-        age: Number(patientForm.age),
+        age: patientAge,
         allergies: allergyPayload,
         bloodType: patientForm.bloodType,
         dateOfBirth: patientForm.dateOfBirth,
