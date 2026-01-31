@@ -112,7 +112,7 @@ export const UserModal: React.FC<UserModalProps> = ({
         }
         if (formData.privilege === 'Doctor') {
             if (!formData.speciality) {
-                newErrors.speciality = 'Specialty is required for doctors';
+                newErrors.speciality = 'Speciality is required for doctors';
             }
             if (!formData.experience) {
                 newErrors.experience = 'Years of Experience is required for doctors';
@@ -287,7 +287,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                             </select>
                         </div>
 
-                        {/* Specialty (only for doctors) */}
+                        {/* Speciality (only for doctors) */}
                         {formData.privilege === "Doctor" && (
                             <div>
                                 <label htmlFor="speciality" className="block text-sm font-medium text-gray-700 mb-1">
@@ -301,7 +301,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                                         errors.speciality ? 'border-red-300' : 'border-gray-300'
                                     }`}
                                 >
-                                    <option value="">Select a specialty</option>
+                                    <option value="">Select a speciality</option>
                                     {specialities.map((speciality) => (
                                         <option key={speciality.id} value={speciality.name}>
                                             {speciality.name}
@@ -351,7 +351,7 @@ export const UserModal: React.FC<UserModalProps> = ({
                                         errors.gender ? 'border-red-300' : 'border-gray-300'
                                     }`}
                                 >
-                                    <option value="">Select a specialty</option>
+                                    <option value="">Select a gender</option>
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
                                     <option value="other">Other</option>
