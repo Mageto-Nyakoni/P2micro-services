@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { formatPhoneNumber, getAgeFromDOB } from "@/utils/validators";
+import { formatPhoneNumber } from "@/utils/validators";
 import { Allergy, BloodType, PatientDetailsForm } from "@/types/patientTypes";
 
 type Props = {

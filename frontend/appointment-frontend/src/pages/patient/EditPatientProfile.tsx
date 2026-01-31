@@ -10,7 +10,6 @@ import { Allergy, BloodType, PatchPatientRequest, Patient, PatientEditForm } fro
 const emptyForm: PatientEditForm = {
   patientId: 0,
   address: "",
-  age: "",
   dateOfBirth: "",
   gender: "other",
   phoneNumber: "",
@@ -101,7 +100,6 @@ function EditPatientProfile() {
 		setForm({
 			patientId: patient.patientId ?? 0,
 			address: patient.address ?? "",
-			age: patient.age != null ? String(patient.age) : "",
 			dateOfBirth: patient.dateOfBirth ?? "",
 			gender: toGender(patient.gender),
 			phoneNumber: patient.phoneNumber ?? "",
@@ -116,9 +114,14 @@ function EditPatientProfile() {
 	const handleSave = async () => {
 		const allergyPayload: string[] = allergies.filter((a) => form.allergyIds.includes(a.allergyId)).map((a) => a.name);
 		
+		const patientAge = getAgeFromDOB(form.dateOfBirth);
+		if (patientAge === null){
+			throw new Error ("Invalid date of birth")
+		}
+
 		const payload: PatchPatientRequest = {
 			address: form.address,
-			age: Number(form.age),
+			age: patientAge,
 			allergies: allergyPayload,
 			bloodType: form.bloodType,
 			dateOfBirth: form.dateOfBirth,

@@ -63,7 +63,6 @@ export type PatientDetailsForm = {
 export type PatientEditForm = {
   patientId: number;
   address: string;
-  age: string;               // keep as string for inputs
   dateOfBirth: string;
   gender: "male" | "female" | "other";
   phoneNumber: string;
