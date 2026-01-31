@@ -14,6 +14,7 @@ import {
   fetchAvailabilityWindows,
 } from "@/services/adminService";
 import { Doctor as DoctorModel } from "@/types/doctorTypes";
+import { formatTime } from "@/utils/validators";
 
 interface DoctorOption {
   id: number;
@@ -203,7 +204,7 @@ export default function AdminHome() {
                 id={window.windowId}
                 doctorName={window.doctorName ?? "Unknown"}
                 date={window.date}
-                timeslot={`${window.startTime} - ${window.endTime}`}
+                timeslot={`${formatTime(window.startTime)} - ${formatTime(window.endTime)}`}
                 onDelete={handleDeleteWindow}
               />
             ))}
@@ -225,7 +226,7 @@ export default function AdminHome() {
                   id={slot.slotId}
                   doctorName={slot.doctorName ?? "Unknown"}
                   date={slot.dateAvailable}
-                  timeslot={`${slot.startTime} - ${slot.endTime} (${slot.status})`}
+                  timeslot={`${formatTime(slot.startTime)} - ${formatTime(slot.endTime)} (${slot.status})`}
                 />
               ))}
             </div>
@@ -263,7 +264,7 @@ export default function AdminHome() {
                       </td>
                       <td className="px-4 py-3">
                         {appt.startTime && appt.endTime
-                          ? `${appt.startTime} - ${appt.endTime}`
+                          ? `${formatTime(appt.startTime)} - ${formatTime(appt.endTime)}`
                           : appt.scheduledDateTime
                             ? appt.scheduledDateTime.split("T")[1]?.slice(0, 5) ?? "—"
                             : "—"}
