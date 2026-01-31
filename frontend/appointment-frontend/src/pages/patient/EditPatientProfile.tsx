@@ -108,7 +108,6 @@ function EditPatientProfile() {
 		});
   	}, [patient]);
 
-	if (error) return <p className="text-red-600">{error}</p>;
 	if (!patient) return <p>Loading information...</p>;
 
 	const handleSave = async () => {
@@ -138,15 +137,17 @@ function EditPatientProfile() {
 		try {
 			setSaving(true);
             await handleSave();
-            alert("Profile updated successfully!");
             navigate("/patient/profile");
         } catch (err){
 			console.error(err);
-			alert("Failed to update profile");
+			setError("Failed to update profile");
         } finally {
 			setSaving(false);
 		}
     };
+
+	if (error) return <p className="text-red-600">{error}</p>;
+	
 
     return (
         <EditPatientProfileForm

@@ -1,5 +1,6 @@
 import { Allergy, BloodType, PatientEditForm } from "@/types/patientTypes";
 import { formatPhoneNumber, getAgeFromDOB } from "@/utils/validators";
+import { useState } from "react";
 
 type Props = {
     value: PatientEditForm;
@@ -14,6 +15,8 @@ type Props = {
 }
 
 export default function EditPatientProfileForm({value, onChange, onSubmit, saving, allergies, bloodTypes, onBack}: Props){
+    const [error, setError] = useState<String>();
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value: inputValue } = e.target;
 
@@ -44,7 +47,7 @@ export default function EditPatientProfileForm({value, onChange, onSubmit, savin
         e.preventDefault();
         
         if (!value.dateOfBirth || !value.phoneNumber || !value.address || !value.bloodType) {
-            alert("Please fill all fields");
+            setError("Please fill all fields");
             return;
         }
 
@@ -176,6 +179,15 @@ export default function EditPatientProfileForm({value, onChange, onSubmit, savin
                         {saving ? "Updating..." : "Update Profile"}
                     </button>
                 </div>
+
+                
+                    {error && (
+                        <div className="rounded-xl border border-red-200 font-medium bg-red-50 p-3 text-sm text-red-700 text-center">
+                        {error}
+                        </div>
+                    )}
+                
+                
             </form>
         </div>
     );

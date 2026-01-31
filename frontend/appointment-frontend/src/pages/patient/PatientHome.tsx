@@ -75,7 +75,6 @@ const PatientHome: React.FC = () => {
     })
       .then((res) => res.json())
       .then((newAppointment) => {
-        alert("Slot booked successfully!");
 
         // Map backend response to your Appointment type
         const mappedAppointment: AppointmentDto = {
@@ -92,7 +91,6 @@ const PatientHome: React.FC = () => {
 
         // Update availability if needed
         fetchAvailability();
-         alert("Slot booked successfully!");
 
       })
       .catch((err) => console.error(err));

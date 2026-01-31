@@ -11,8 +11,8 @@ export default function DoctorHome() {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-const [savingId, setSavingId] = useState<number | null>(null);
-const doctorId = doctor?.doctorId;
+  const [savingId, setSavingId] = useState<number | null>(null);
+  const doctorId = doctor?.doctorId;
 
   const { token, loading } = useAuth();
 
@@ -44,7 +44,7 @@ const doctorId = doctor?.doctorId;
 
   } catch (err) {
     console.error(err);
-    alert("Could not update appointment");
+    setError("Could not update appointment");
   } finally {
     setSavingId(null);
   }
@@ -110,7 +110,7 @@ const doctorId = doctor?.doctorId;
       setExpandedId(null);
     }catch (err) {
       console.error(err);
-      alert("Failed to update appointment status");
+      setError("Failed to update appointment status");
     } finally {
       setSavingId(null);
     }

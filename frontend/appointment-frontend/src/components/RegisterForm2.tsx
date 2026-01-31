@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
 import { formatPhoneNumber } from "@/utils/validators";
 import { Allergy, BloodType, PatientDetailsForm } from "@/types/patientTypes";
+import { useState } from "react";
 
 type Props = {
     value: PatientDetailsForm;
@@ -12,7 +12,8 @@ type Props = {
 }
 
 export default function RegisterForm2({value, onChange, onSubmit, allergies, bloodTypes}: Props){
-    const navigate = useNavigate();
+
+    const [error, setError] = useState<String | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         
@@ -41,20 +42,20 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
         });
     };
 
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setError(null);
 
         if (!value.dateOfBirth || !value.phoneNumber || !value.address || !value.bloodType) {
-            alert("Please fill all fields");
+            setError("Please fill all fields");
             return;
         }
 
         try {
             await onSubmit();
-            alert("Registration Completed!");
-            navigate("/login");
         } catch {
-            //register.tsx handles errors
+            setError("Registration failed. Please try again.");
         }
        
     };
@@ -181,6 +182,14 @@ export default function RegisterForm2({value, onChange, onSubmit, allergies, blo
                         >
                             Register
                         </button>
+                    </div>
+
+                    <div className="flex justify-center">
+                        {error && (
+                            <div className="rounded-xl border border-red-200 font-medium bg-red-50 p-3 text-sm text-red-700 text-center">
+                            {error}
+                            </div>
+                        )}
                     </div>
                 </form>
             </div>

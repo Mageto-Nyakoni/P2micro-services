@@ -74,7 +74,6 @@ export const UserModal: React.FC<UserModalProps> = ({
                 }
             } catch (err) {
                 console.error(err);
-                alert("Failed to load specialities")
             }
         })();
 
