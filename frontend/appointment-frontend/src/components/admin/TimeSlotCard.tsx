@@ -3,14 +3,30 @@ interface TimeSlotCardProps {
   doctorName: string;
   date: string;
   timeslot: string;
+  status?: string | null;
   onDelete?: (id: number) => void;
 }
+
+const statusPillClasses: Record<string, string> = {
+  AVAILABLE: "bg-emerald-100 text-emerald-700",
+  BOOKED: "bg-rose-100 text-rose-700",
+  BLOCKED: "bg-slate-200 text-slate-700",
+  HELD: "bg-amber-100 text-amber-700",
+};
+
+const getStatusPillClass = (status?: string | null) => {
+  if (!status) return "bg-slate-100 text-slate-600";
+  return (
+    statusPillClasses[status.toUpperCase()] ?? "bg-slate-100 text-slate-600"
+  );
+};
 
 export default function TimeSlotCard({
   id,
   doctorName,
   date,
   timeslot,
+  status,
   onDelete,
 }: TimeSlotCardProps) {
   return (
@@ -35,16 +51,31 @@ export default function TimeSlotCard({
           </svg>
         </button>
       )}
+
       <div className="pr-8">
         <p className="m-0 mb-2 text-slate-800">
           <span className="font-semibold">Name:</span> {doctorName}
         </p>
+
         <p className="m-0 mb-2 text-slate-800">
           <span className="font-semibold">Date:</span> {date}
         </p>
+
         <p className="m-0 text-slate-800">
           <span className="font-semibold">Timeslot:</span> {timeslot}
         </p>
+
+        {status && (
+          <div className="mt-2">
+            <span className="font-semibold text-slate-800">Status:</span>{" "}
+            <span
+              className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full ${getStatusPillClass(status)}`}
+              aria-label={`Status ${status}`}
+            >
+              {status}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );
