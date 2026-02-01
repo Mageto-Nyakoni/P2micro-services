@@ -45,6 +45,12 @@ export default function AdminHome() {
   const [slots, setSlots] = useState<AdminTimeSlot[]>([]);
   const [appointments, setAppointments] = useState<AdminAppointment[]>([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
+  const [slotDoctorFilterId, setSlotDoctorFilterId] = useState<number | "ALL">(
+    "ALL",
+  );
+  const [appointmentDoctorFilterId, setAppointmentDoctorFilterId] = useState<
+    number | "ALL"
+  >("ALL");
   const [slotPage, setSlotPage] = useState(1);
   const [slotPageSize, setSlotPageSize] = useState(9);
   const [appointmentPage, setAppointmentPage] = useState(1);
@@ -55,11 +61,33 @@ export default function AdminHome() {
       doctors.map((doctor) => ({
         id: doctor.doctorId,
 
-        name: `${doctor.user.firstName} ${doctor.user.lastName}`,
+        name: doctor.speciality?.specialityName
+          ? `${doctor.user.firstName} ${doctor.user.lastName} (${doctor.speciality.specialityName})`
+          : `${doctor.user.firstName} ${doctor.user.lastName}`,
       })),
 
     [doctors],
   );
+
+  const doctorById = useMemo(() => {
+    const map = new Map<number, DoctorModel>();
+    doctors.forEach((doctor) => {
+      map.set(doctor.doctorId, doctor);
+    });
+    return map;
+  }, [doctors]);
+
+  const formatDoctorDisplay = (
+    doctorId?: number | null,
+    fallbackName?: string | null,
+  ) => {
+    const doctor = doctorId ? doctorById.get(doctorId) : undefined;
+    const baseName = doctor
+      ? `${doctor.user.firstName} ${doctor.user.lastName}`
+      : (fallbackName ?? "Unknown");
+    const speciality = doctor?.speciality?.specialityName;
+    return speciality ? `${baseName} (${speciality})` : baseName;
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -95,34 +123,54 @@ export default function AdminHome() {
 
   useEffect(() => {
     setSlotPage(1);
-  }, [slots]);
+  }, [slots, slotDoctorFilterId]);
 
   useEffect(() => {
     setAppointmentPage(1);
-  }, [appointments]);
+  }, [appointments, appointmentDoctorFilterId]);
 
-  const slotTotalPages = Math.max(1, Math.ceil(slots.length / slotPageSize));
+  const filteredSlots = useMemo(
+    () =>
+      slotDoctorFilterId === "ALL"
+        ? slots
+        : slots.filter((slot) => slot.doctorId === slotDoctorFilterId),
+    [slots, slotDoctorFilterId],
+  );
+
+  const slotTotalPages = Math.max(
+    1,
+    Math.ceil(filteredSlots.length / slotPageSize),
+  );
+
+  const filteredAppointments = useMemo(
+    () =>
+      appointmentDoctorFilterId === "ALL"
+        ? appointments
+        : appointments.filter((appt) => appt.doctorId === appointmentDoctorFilterId),
+    [appointments, appointmentDoctorFilterId],
+  );
 
   const appointmentTotalPages = Math.max(
     1,
-    Math.ceil(appointments.length / appointmentPageSize),
+    Math.ceil(filteredAppointments.length / appointmentPageSize),
   );
 
   const pagedSlots = useMemo(
-    () => slots.slice((slotPage - 1) * slotPageSize, slotPage * slotPageSize),
-
-    [slots, slotPage, slotPageSize],
+    () =>
+      filteredSlots.slice(
+        (slotPage - 1) * slotPageSize,
+        slotPage * slotPageSize,
+      ),
+    [filteredSlots, slotPage, slotPageSize],
   );
 
   const pagedAppointments = useMemo(
     () =>
-      appointments.slice(
+      filteredAppointments.slice(
         (appointmentPage - 1) * appointmentPageSize,
-
         appointmentPage * appointmentPageSize,
       ),
-
-    [appointments, appointmentPage, appointmentPageSize],
+    [filteredAppointments, appointmentPage, appointmentPageSize],
   );
 
   const handleScheduleSubmit = (
@@ -272,7 +320,10 @@ export default function AdminHome() {
               <TimeSlotCard
                 key={window.windowId}
                 id={window.windowId}
-                doctorName={window.doctorName ?? "Unknown"}
+                doctorName={formatDoctorDisplay(
+                  window.doctorId,
+                  window.doctorName,
+                )}
                 date={window.date}
                 timeslot={`${formatTime(window.startTime)} - ${formatTime(window.endTime)}`}
                 onDelete={handleDeleteWindow}
@@ -288,7 +339,30 @@ export default function AdminHome() {
             Time Slots
           </h2>
 
-          {slots.length === 0 ? (
+          <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+            <label className="flex items-center gap-2">
+              <span>Doctor:</span>
+              <select
+                value={slotDoctorFilterId}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setSlotDoctorFilterId(
+                    nextValue === "ALL" ? "ALL" : Number(nextValue),
+                  );
+                }}
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-700"
+              >
+                <option value="ALL">All</option>
+                {doctorOptions.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          {filteredSlots.length === 0 ? (
             <p className="text-slate-500">No time slots found.</p>
           ) : (
             <>
@@ -297,7 +371,10 @@ export default function AdminHome() {
                   <TimeSlotCard
                     key={slot.slotId}
                     id={slot.slotId}
-                    doctorName={slot.doctorName ?? "Unknown"}
+                    doctorName={formatDoctorDisplay(
+                      slot.doctorId,
+                      slot.doctorName,
+                    )}
                     date={slot.dateAvailable}
                     timeslot={`${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}`}
                     status={slot.status}
@@ -361,7 +438,30 @@ export default function AdminHome() {
             Appointments
           </h2>
 
-          {appointments.length === 0 ? (
+          <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+            <label className="flex items-center gap-2">
+              <span>Doctor:</span>
+              <select
+                value={appointmentDoctorFilterId}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setAppointmentDoctorFilterId(
+                    nextValue === "ALL" ? "ALL" : Number(nextValue),
+                  );
+                }}
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-700"
+              >
+                <option value="ALL">All</option>
+                {doctorOptions.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+
+          {filteredAppointments.length === 0 ? (
             <p className="text-slate-500">No appointments found.</p>
           ) : (
             <>
@@ -393,7 +493,9 @@ export default function AdminHome() {
                       >
                         <td className="px-4 py-3">{appt.patientName ?? "—"}</td>
 
-                        <td className="px-4 py-3">{appt.doctorName ?? "—"}</td>
+                        <td className="px-4 py-3">
+                          {formatDoctorDisplay(appt.doctorId, appt.doctorName)}
+                        </td>
 
                         <td className="px-4 py-3">
                           {appt.dateAvailable ??
