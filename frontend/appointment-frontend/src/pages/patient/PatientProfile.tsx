@@ -44,7 +44,9 @@ function PatientProfile() {
 
     (async () => {
       try {
-        const allAppointments = await fetchAppointmentsForPatient(patient.patientId);
+        const allAppointments = await fetchAppointmentsForPatient(patient.user.userId);
+
+        console.log(allAppointments);
 
         if (cancelled) return;
 
@@ -53,6 +55,8 @@ function PatientProfile() {
         );
 
         setAppointments(completedAppointments);
+
+        
       } catch (err) {
         console.error(err);
         if (!cancelled) {
