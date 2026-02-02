@@ -46,8 +46,6 @@ function PatientProfile() {
       try {
         const allAppointments = await fetchAppointmentsForPatient(patient.user.userId);
 
-        console.log(allAppointments);
-
         if (cancelled) return;
 
         const completedAppointments = allAppointments.filter(
@@ -136,7 +134,7 @@ function PatientProfile() {
         {/* Appointment History */}
         <div className="mt-10">
           <h3 className="text-xl font-bold text-purple-700 mb-4">
-            Previous Appointments
+            Completed Appointments
           </h3>
 
           {appointments.length === 0 ? (

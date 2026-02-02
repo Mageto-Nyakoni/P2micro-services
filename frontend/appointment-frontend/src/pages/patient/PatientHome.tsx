@@ -52,7 +52,12 @@ const PatientHome: React.FC = () => {
 
     try {
       const appointments = await fetchAppointmentsForPatient(auth.user.id);
-      setAppointments(appointments);
+
+      const confirmedAppointments = appointments.filter(
+          (appt) => appt.status === "CONFIRMED"
+      );
+
+      setAppointments(confirmedAppointments);
     } catch (err) {
       console.error(err);
     }
