@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { TimeSlotCard, ScheduleDoctorForm } from "@/components/admin";
 
@@ -45,16 +45,21 @@ export default function AdminHome() {
   const [slots, setSlots] = useState<AdminTimeSlot[]>([]);
   const [appointments, setAppointments] = useState<AdminAppointment[]>([]);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
+  const [windowDoctorFilterId, setWindowDoctorFilterId] = useState<
+    number | "ALL"
+  >("ALL");
   const [slotDoctorFilterId, setSlotDoctorFilterId] = useState<number | "ALL">(
     "ALL",
   );
   const [appointmentDoctorFilterId, setAppointmentDoctorFilterId] = useState<
     number | "ALL"
   >("ALL");
+  const [windowPage, setWindowPage] = useState(1);
+  const [windowPageSize, setWindowPageSize] = useState(9);
   const [slotPage, setSlotPage] = useState(1);
   const [slotPageSize, setSlotPageSize] = useState(9);
   const [appointmentPage, setAppointmentPage] = useState(1);
-  const [appointmentPageSize, setAppointmentPageSize] = useState(20);
+  const [appointmentPageSize, setAppointmentPageSize] = useState(10);
 
   const doctorOptions = useMemo<DoctorOption[]>(
     () =>
@@ -89,6 +94,22 @@ export default function AdminHome() {
     return speciality ? `${baseName} (${speciality})` : baseName;
   };
 
+  const loadAllAvailabilityWindows = useCallback(
+    async (sourceDoctors: DoctorModel[] = doctors) => {
+      if (sourceDoctors.length === 0) {
+        setAvailabilityWindows([]);
+        return [];
+      }
+      const windowsByDoctor = await Promise.all(
+        sourceDoctors.map((doctor) => fetchAvailabilityWindows(doctor.doctorId)),
+      );
+      const merged = windowsByDoctor.flat();
+      setAvailabilityWindows(merged);
+      return merged;
+    },
+    [doctors],
+  );
+
   useEffect(() => {
     const controller = new AbortController();
     getAllDoctors(controller.signal)
@@ -114,20 +135,38 @@ export default function AdminHome() {
     if (selectedDoctorId !== null || doctors.length === 0) return;
     const firstDoctorId = doctors[0].doctorId;
     setSelectedDoctorId(firstDoctorId);
-    fetchAvailabilityWindows(firstDoctorId)
-      .then(setAvailabilityWindows)
-      .catch((error) => {
-        console.error("AdminHome: failed to load availability windows", error);
-      });
-  }, [doctors, selectedDoctorId]);
+    setWindowDoctorFilterId("ALL");
+    loadAllAvailabilityWindows(doctors).catch((error) => {
+      console.error("AdminHome: failed to load availability windows", error);
+    });
+  }, [doctors, selectedDoctorId, loadAllAvailabilityWindows]);
 
   useEffect(() => {
     setSlotPage(1);
   }, [slots, slotDoctorFilterId]);
 
   useEffect(() => {
+    setWindowPage(1);
+  }, [availabilityWindows, windowDoctorFilterId]);
+
+  useEffect(() => {
     setAppointmentPage(1);
   }, [appointments, appointmentDoctorFilterId]);
+
+  const filteredAvailabilityWindows = useMemo(
+    () =>
+      windowDoctorFilterId === "ALL"
+        ? availabilityWindows
+        : availabilityWindows.filter(
+            (window) => window.doctorId === windowDoctorFilterId,
+          ),
+    [availabilityWindows, windowDoctorFilterId],
+  );
+
+  const windowTotalPages = Math.max(
+    1,
+    Math.ceil(filteredAvailabilityWindows.length / windowPageSize),
+  );
 
   const filteredSlots = useMemo(
     () =>
@@ -173,6 +212,15 @@ export default function AdminHome() {
     [filteredAppointments, appointmentPage, appointmentPageSize],
   );
 
+  const pagedAvailabilityWindows = useMemo(
+    () =>
+      filteredAvailabilityWindows.slice(
+        (windowPage - 1) * windowPageSize,
+        windowPage * windowPageSize,
+      ),
+    [filteredAvailabilityWindows, windowPage, windowPageSize],
+  );
+
   const handleScheduleSubmit = (
     doctorId: number,
     date: string,
@@ -181,17 +229,13 @@ export default function AdminHome() {
   ) => {
     createAvailabilityWindow(doctorId, { date, startTime, endTime })
       .then(() =>
-        Promise.all([
-          fetchAvailabilityWindows(doctorId),
-
-          fetchAdminTimeSlots(),
-        ]),
+        Promise.all([loadAllAvailabilityWindows(), fetchAdminTimeSlots()]),
       )
 
-      .then(([windows, timeSlots]) => {
-        setAvailabilityWindows(windows);
+      .then(([, timeSlots]) => {
         setSlots(timeSlots);
         setSelectedDoctorId(doctorId);
+        setWindowDoctorFilterId(doctorId);
       })
       .catch((error) => {
         console.error("AdminHome: failed to create availability window", error);
@@ -200,18 +244,8 @@ export default function AdminHome() {
 
   const handleDeleteWindow = (windowId: number) => {
     deleteAvailabilityWindow(windowId)
-      .then(() => {
-        if (!selectedDoctorId) return;
-        return Promise.all([
-          fetchAvailabilityWindows(selectedDoctorId),
-          fetchAdminTimeSlots(),
-        ]);
-      })
-
-      .then((result) => {
-        if (!result) return;
-        const [windows, timeSlots] = result;
-        setAvailabilityWindows(windows);
+      .then(() => Promise.all([loadAllAvailabilityWindows(), fetchAdminTimeSlots()]))
+      .then(([, timeSlots]) => {
         setSlots(timeSlots);
       })
 
@@ -222,17 +256,6 @@ export default function AdminHome() {
 
   const handleDoctorChange = (doctorId: number) => {
     setSelectedDoctorId(doctorId);
-
-    Promise.all([fetchAvailabilityWindows(doctorId), fetchAdminTimeSlots()])
-
-      .then(([windows, timeSlots]) => {
-        setAvailabilityWindows(windows);
-        setSlots(timeSlots);
-      })
-
-      .catch((error) => {
-        console.error("AdminHome: failed to update doctor view", error);
-      });
   };
 
   const handleDenyAppointment = (appointmentId: number) => {
@@ -315,21 +338,100 @@ export default function AdminHome() {
             Availability Windows
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {availabilityWindows.map((window) => (
-              <TimeSlotCard
-                key={window.windowId}
-                id={window.windowId}
-                doctorName={formatDoctorDisplay(
-                  window.doctorId,
-                  window.doctorName,
-                )}
-                date={window.date}
-                timeslot={`${formatTime(window.startTime)} - ${formatTime(window.endTime)}`}
-                onDelete={handleDeleteWindow}
-              />
-            ))}
+          <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+            <label className="flex items-center gap-2">
+              <span>Doctor:</span>
+              <select
+                value={windowDoctorFilterId}
+                onChange={(event) => {
+                  const nextValue = event.target.value;
+                  setWindowDoctorFilterId(
+                    nextValue === "ALL" ? "ALL" : Number(nextValue),
+                  );
+                }}
+                className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-700"
+              >
+                <option value="ALL">All</option>
+                {doctorOptions.map((doctor) => (
+                  <option key={doctor.id} value={doctor.id}>
+                    {doctor.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
+
+          {filteredAvailabilityWindows.length === 0 ? (
+            <p className="text-slate-500">No availability windows found.</p>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pagedAvailabilityWindows.map((window) => (
+                  <TimeSlotCard
+                    key={window.windowId}
+                    id={window.windowId}
+                    doctorName={formatDoctorDisplay(
+                      window.doctorId,
+                      window.doctorName,
+                    )}
+                    date={window.date}
+                    timeslot={`${formatTime(window.startTime)} - ${formatTime(window.endTime)}`}
+                    onDelete={handleDeleteWindow}
+                  />
+                ))}
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-slate-600">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() =>
+                      setWindowPage((page) => Math.max(1, page - 1))
+                    }
+                    disabled={windowPage === 1}
+                    className="px-3 py-1 rounded-md border border-slate-200 bg-white text-slate-700 disabled:opacity-60"
+                  >
+                    Prev
+                  </button>
+
+                  <button
+                    onClick={() =>
+                      setWindowPage((page) =>
+                        Math.min(windowTotalPages, page + 1),
+                      )
+                    }
+                    disabled={windowPage === windowTotalPages}
+                    className="px-3 py-1 rounded-md border border-slate-200 bg-white text-slate-700 disabled:opacity-60"
+                  >
+                    Next
+                  </button>
+
+                  <span>
+                    Page {windowPage} of {windowTotalPages}
+                  </span>
+                </div>
+
+                <label className="flex items-center gap-2">
+                  <span>Windows:</span>
+
+                  <select
+                    value={windowPageSize}
+                    onChange={(event) => {
+                      setWindowPageSize(Number(event.target.value));
+
+                      setWindowPage(1);
+                    }}
+                    className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-700"
+                  >
+                    {[9, 18, 27].map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Time Slots */}
@@ -408,7 +510,7 @@ export default function AdminHome() {
                 </div>
 
                 <label className="flex items-center gap-2">
-                  <span>Rows:</span>
+                  <span>Slots:</span>
 
                   <select
                     value={slotPageSize}
@@ -419,7 +521,7 @@ export default function AdminHome() {
                     }}
                     className="rounded-md border border-slate-200 bg-white px-2 py-1 text-slate-700"
                   >
-                    {[10, 20, 50].map((size) => (
+                    {[9, 18, 27].map((size) => (
                       <option key={size} value={size}>
                         {size}
                       </option>
