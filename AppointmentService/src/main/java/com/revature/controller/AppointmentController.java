@@ -4,11 +4,13 @@ import java.util.List;
 import org.springframework.web.bind.annotation.*;
 
 import com.revature.dto.request.BookAppointmentRequestDto;
+import com.revature.dto.response.AppointmentDto;
 import com.revature.model.Appointment;
 import com.revature.service.AppointmentService;
 
 @RestController
 @RequestMapping("/appointments")
+@CrossOrigin(origins = "*")
 public class AppointmentController {
 
      private final AppointmentService service;
@@ -16,7 +18,7 @@ public class AppointmentController {
     public AppointmentController(AppointmentService service) {
         this.service = service;
     }
-
+//=================book====================
     @PostMapping
 public Appointment create(@RequestBody BookAppointmentRequestDto request) {
     return service.bookAppointment(
@@ -26,14 +28,14 @@ public Appointment create(@RequestBody BookAppointmentRequestDto request) {
             request.getAppointmentTypeId()
     );
 }
-
+//====================get doctor===================
     @GetMapping("/doctor/{doctorId}")
-    public List<Appointment> doctorAppointments(@PathVariable Long doctorId) {
+    public List<AppointmentDto> getDoctorAppointments(@PathVariable Long doctorId) {
         return service.getDoctorAppointments(doctorId);
     }
 
     @GetMapping("/patient/{patientId}")
-    public List<Appointment> patientAppointments(@PathVariable Long patientId) {
+    public List<AppointmentDto> patientAppointments(@PathVariable Long patientId) {
         return service.getPatientAppointments(patientId);
     }
 

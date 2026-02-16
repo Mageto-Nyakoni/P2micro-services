@@ -3,10 +3,13 @@ package com.revature.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Service;
 
 import com.revature.client.InfoClient;
 import com.revature.client.ScheduleClient;
+import com.revature.dto.response.AppointmentDto;
+import com.revature.dto.response.SlotDto;
 import com.revature.model.Appointment;
 import com.revature.model.AppointmentStatus;
 import com.revature.repository.AppointmentRepository;
@@ -27,6 +30,7 @@ public class AppointmentService {
         this.infoClient = infoClient;
         this.scheduleClient = scheduleClient;
     }
+  
 
     // ================= BOOK APPOINTMENT =================
     public Appointment bookAppointment(
@@ -41,33 +45,55 @@ public class AppointmentService {
 
         // Validate Doctor (Info Service)
         infoClient.getDoctor(doctorId);
+// Validate Slot
+    SlotDto slot = scheduleClient.getTimeSlot(slotId);
+    if (!slot.isAvailable()) {
+        throw new RuntimeException("Slot is not available");
+    }
+          // Convert slot start time from String to LocalDateTime
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME; // or match your string format
+    LocalDateTime slotTime = LocalDateTime.parse(slot.getStartTime(), formatter);
 
-        // Validate Slot (Scheduling Service)
-        scheduleClient.getTimeSlot(slotId);
 
-        // Create Appointment
-        Appointment appt = Appointment.builder()
-                .patientId(patientId)
-                .doctorId(doctorId)
-                .slotId(slotId)
-                .appointmentTypeId(appointmentTypeId)
-                .dateTimeScheduled(LocalDateTime.now()) // You can replace with slot time later
-                .status(AppointmentStatus.CONFIRMED)
-                .build();
+
+
+          // Create Appointment
+    Appointment appt = Appointment.builder()
+            .patientId(patientId)
+            .doctorId(doctorId)
+            .slotId(slotId)
+            .appointmentTypeId(appointmentTypeId)
+            .dateTimeScheduled(slotTime)
+            .status(AppointmentStatus.CONFIRMED)
+            .build();
 
         return repo.save(appt);
     }
-
+                      private AppointmentDto mapToDto(Appointment appt) {
+    return new AppointmentDto(
+            appt.getAppointmentId().intValue(),
+            "Doctor " + appt.getDoctorId(),
+            "Type " + appt.getAppointmentTypeId(),
+            appt.getDateTimeScheduled(),
+            appt.getDateTimeScheduled().plusMinutes(30),
+            appt.getStatus()
+    );
+}
     // ================= GET DOCTOR APPOINTMENTS =================
-    public List<Appointment> getDoctorAppointments(Long doctorId) {
-        return repo.findByDoctorId(doctorId);
-    }
+    public List<AppointmentDto> getDoctorAppointments(Long doctorId) {
+    return repo.findByDoctorId(doctorId)
+            .stream()
+            .map(this::mapToDto)
+            .toList();
+}
 
     // ================= GET PATIENT APPOINTMENTS =================
-    public List<Appointment> getPatientAppointments(Long patientId) {
-        return repo.findByPatientId(patientId);
-    }
-
+   public List<AppointmentDto> getPatientAppointments(Long patientId) {
+    return repo.findByPatientId(patientId)
+            .stream()
+            .map(this::mapToDto)
+            .toList();
+}
     // ================= CANCEL APPOINTMENT =================
     public void cancelAppointment(Long id) {
         Appointment appt = repo.findById(id)
