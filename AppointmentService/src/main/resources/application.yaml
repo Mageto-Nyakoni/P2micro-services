@@ -1,6 +1,6 @@
 spring:
   application:
-    name: AppointmentService
+    name: appointment-service
 
 datasource:
     url: jdbc:postgresql://localhost:5433/auth_db
@@ -25,4 +25,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     instance:
-      perfer-ip-address: true
+       prefer-ip-address: true
