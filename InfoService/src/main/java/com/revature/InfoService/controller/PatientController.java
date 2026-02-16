@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.revature.InfoService.dto.Appointment;
+import com.revature.InfoService.dto.AppointmentPatientView;
 import com.revature.InfoService.dto.request.PatientInfoRequest;
 import com.revature.InfoService.model.Patient;
 import com.revature.InfoService.service.PatientService;
@@ -25,11 +27,10 @@ public class PatientController {
     }
     
     @GetMapping("{patientId}/appointments")
-    public List<AppointmentDto> getPatientAppointments(@PathVariable Integer patientId) {
-        /*
-        List<Appointment> appointments = appointmentRepository.findByPatient_PatientIdAndStatus(patientId, AppointmentStatus.CONFIRMED);
+    public List<AppointmentPatientView> getPatientAppointments(@PathVariable Integer patientId) {
+        List<Appointment> appointments = findByPatient_PatientIdAndStatus(patientId, AppointmentStatus.CONFIRMED);
 
-        return appointments.stream().map(appt -> new AppointmentDto(
+        return appointments.stream().map(appt -> new AppointmentPatientView(
             appt.getAppointmentId(),
             appt.getDoctor().getUser().getFirstName() + " " + appt.getDoctor().getUser().getLastName(),
             appt.getAppointmentType().getName(),
@@ -37,7 +38,6 @@ public class PatientController {
             appt.getDateTimeScheduled().plusMinutes(30),
             appt.getStatus()
         )).collect(Collectors.toList());
-        */
     }
 
     @GetMapping()
@@ -126,5 +126,12 @@ public class PatientController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    @DeleteMapping("/{patient_id}")
+    public ResponseEntity<?> deletePatient(@RequestHeader("Authorization") String authHeader, @PathVariable(name="patient_id") int patientId) {
+        return patientService.deleteById(patientId)
+            .map(p -> ResponseEntity.noContent().build())
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

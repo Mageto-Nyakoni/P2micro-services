@@ -8,18 +8,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.revature.InfoService.model.Doctor;
+import com.revature.InfoService.service.DoctorService;
 
 @RestController
 @RequestMapping("/smart-appointment/api/doctors")
 @CrossOrigin("*")
 public class DoctorController {
     private final DoctorService doctorService;
-    private final JwtUtil jwtUtil;
+    //private final JwtUtil jwtUtil;
 
     @Autowired
-    public DoctorController(DoctorService doctorService, JwtUtil jwtUtil) {
+    public DoctorController(DoctorService doctorService) {
         this.doctorService = doctorService;
-        this.jwtUtil = jwtUtil;
     }
 
     // Basic CRUD for Doctor
@@ -110,8 +110,8 @@ public class DoctorController {
     @DeleteMapping("/{doctorId}")
     public ResponseEntity<?> deleteDoctor(@PathVariable Integer doctorId) {
         return doctorService.deleteById(doctorId)
-                .map(d -> ResponseEntity.noContent().build())
-                .orElseGet(() -> ResponseEntity.notFound().build());
+            .map(d -> ResponseEntity.noContent().build())
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // -----------------------------
@@ -119,30 +119,30 @@ public class DoctorController {
     // -----------------------------
 
 
-// GET /doctors/me/appointments/today
-@GetMapping("/me/appointments/today")
-public ResponseEntity<List<DoctorAppointmentView>> getMyTodaysAppointments(
+    // GET /doctors/me/appointments/today
+    @GetMapping("/me/appointments/today")
+    public ResponseEntity<List<DoctorAppointmentView>> getMyTodaysAppointments(
         @RequestHeader("Authorization") String authHeader) {
 
-    String token = authHeader.substring(7);
+        String token = authHeader.substring(7);
 
-    if (!jwtUtil.validateToken(token)) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-    }
+        if (!jwtUtil.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
-    if (!jwtUtil.extractPrivilege(token).equals("Doctor")) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-    }
+        if (!jwtUtil.extractPrivilege(token).equals("Doctor")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
-    int userId = jwtUtil.extractId(token);
-    int doctorId = doctorService.findByUserId(userId)
+        int userId = jwtUtil.extractId(token);
+        int doctorId = doctorService.findByUserId(userId)
             .orElseThrow()
             .getDoctorId();
 
-    return ResponseEntity.ok(
-        doctorService.getTodaysAppointments(doctorId)
-    );
-}
+        return ResponseEntity.ok(
+            doctorService.getTodaysAppointments(doctorId)
+        );
+    }
     
    @GetMapping("/{doctorId}/appointments/upcoming")
     public List<DoctorService.DoctorAppointmentView> getUpcomingAppointments(

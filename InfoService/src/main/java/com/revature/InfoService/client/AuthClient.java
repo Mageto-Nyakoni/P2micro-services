@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 
 import com.revature.InfoService.dto.response.AuthResponse;
 
-@FeignClient(name = "auth-service", path = "auth")
+@FeignClient(name = "AuthService", path = "/smart-appointment/api/auth")
 public interface AuthClient {
     @GetMapping
     AuthResponse validateToken(@RequestHeader("Authorization") String authHeader);

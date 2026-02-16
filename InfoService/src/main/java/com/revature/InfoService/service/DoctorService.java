@@ -1,12 +1,21 @@
 package com.revature.InfoService.service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.revature.InfoService.dto.AppointmentDoctorView;
+import com.revature.InfoService.dto.TimeSlotDoctorView;
 import com.revature.InfoService.dto.request.DoctorInfoRequest;
 import com.revature.InfoService.model.Doctor;
 import com.revature.InfoService.repository.DoctorRepository;
@@ -17,10 +26,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     private final SpecialityService specialityService;
 
     @Autowired
-    public DoctorService(
-        DoctorRepository doctorRepository, 
-        SpecialityService specialityService
-    ) {
+    public DoctorService(DoctorRepository doctorRepository, SpecialityService specialityService) {
         this.doctorRepository = doctorRepository;
         this.specialityService = specialityService;
     }
@@ -69,8 +75,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         return doctorRepository.findDoctorByUser_UserId(user_id);
     }
     
-    /*
-    public List<DoctorAppointmentView> getUpcomingAppointments(Integer doctorId) {
+    public List<AppointmentDoctorView> getUpcomingAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
 
         LocalDateTime now = LocalDateTime.now();
@@ -78,19 +83,19 @@ public class DoctorService implements ServiceInterface<Doctor> {
         List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledAfter(doctorId, now);
 
         return appts.stream()
-            .map(DoctorService::toDoctorAppointmentView)
+            .map(DoctorService::toAppointmentDoctorView)
             .toList();
     }
 
-    public List<DoctorAppointmentView> getAllAppointmentsForDoctor(Integer doctorId) {
+    public List<AppointmentDoctorView> getAllAppointmentsForDoctor(Integer doctorId) {
         ensureDoctorExists(doctorId);
         List<Appointment> appointments = appointmentRepository.findBySlotDoctorDoctorIdOrderByDateTimeScheduledAsc(doctorId);
         return appointments.stream()
-            .map(DoctorService::toDoctorAppointmentViewWithPatient)
+            .map(DoctorService::toAppointmentDoctorViewWithPatient)
             .toList();
     }
 
-    private static DoctorAppointmentView toDoctorAppointmentViewWithPatient(Appointment a) {
+    private static AppointmentDoctorView toAppointmentDoctorViewWithPatient(Appointment a) {
         String firstName = null;
         String lastName = null;
         String appointmentType = null;
@@ -106,7 +111,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
             estimatedTime = a.getAppointmentType().getEstimatedTime();
         }
 
-        return new DoctorAppointmentView(
+        return new AppointmentDoctorView(
             a.getAppointmentId(),
             firstName,
             lastName,
@@ -119,7 +124,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
 
 
-    public List<DoctorAppointmentView> getTodaysAppointments(Integer doctorId) {
+    public List<AppointmentDoctorView> getTodaysAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
         LocalDate today = LocalDate.now();
         LocalDateTime start = today.atStartOfDay();
@@ -129,10 +134,10 @@ public class DoctorService implements ServiceInterface<Doctor> {
         // List<Appointment> findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
         List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
-        return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
+        return appts.stream().map(DoctorService::toAppointmentDoctorView).toList();
     }
 
-    public List<DoctorAppointmentView> getCurrentWeeksAppointments(Integer doctorId) {
+    public List<AppointmentDoctorView> getCurrentWeeksAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
 
         LocalDate today = LocalDate.now();
@@ -144,19 +149,19 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
-        return appts.stream().map(DoctorService::toDoctorAppointmentView).toList();
+        return appts.stream().map(DoctorService::toAppointmentDoctorView).toList();
     }
 
-    public DoctorAppointmentView getAppointmentDetailsForDoctor(Integer doctorId, Integer appointmentId) {
+    public AppointmentDoctorView getAppointmentDetailsForDoctor(Integer doctorId, Integer appointmentId) {
         Appointment appt = appointmentRepository.findById(appointmentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
 
         enforceOwnership(doctorId, appt);
-        return toDoctorAppointmentView(appt);
+        return toAppointmentDoctorView(appt);
     }
 
     @Transactional
-    public DoctorAppointmentView updateAppointmentStatus(Integer doctorId, Integer appointmentId, AppointmentStatus newStatus) {
+    public AppointmentDoctorView updateAppointmentStatus(Integer doctorId, Integer appointmentId, AppointmentStatus newStatus) {
         // Proposal: doctor can update status completed/cancelled/no-show
         // :contentReference[oaicite:7]{index=7}
 
@@ -179,11 +184,11 @@ public class DoctorService implements ServiceInterface<Doctor> {
             timeSlotRepository.save(slot);
         }
 
-        return toDoctorAppointmentView(saved);
+        return toAppointmentDoctorView(saved);
     }
 
     @Transactional
-    public DoctorAppointmentView cancelAppointment(Integer doctorId, Integer appointmentId) {
+    public AppointmentDoctorView cancelAppointment(Integer doctorId, Integer appointmentId) {
         // Proposal: doctor can cancel patient appointment
         // :contentReference[oaicite:8]{index=8}
 
@@ -191,7 +196,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     }
 
     // Read-only: Doctor time slots
-    public List<DoctorTimeSlotView> getDoctorTimeSlots(Integer doctorId) {
+    public List<TimeSlotDoctorView> getDoctorTimeSlots(Integer doctorId) {
         ensureDoctorExists(doctorId);
         // Proposal: doctor can view time slot details, but cannot create/delete/modify
         // :contentReference[oaicite:9]{index=9}
@@ -199,7 +204,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         List<TimeSlot> slots = timeSlotRepository.findByDoctor_DoctorIdOrderByDateAvailableAscStartTimeAsc(doctorId);
 
         return slots.stream()
-            .map(s -> new DoctorTimeSlotView(
+            .map(s -> new TimeSlotDoctorView(
                 s.getSlotId(),
                 s.getStartTime(),
                 s.getEndTime()))
@@ -231,7 +236,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         }
     }
 
-    private static DoctorAppointmentView toDoctorAppointmentView(Appointment a) {
+    private static AppointmentDoctorView toAppointmentDoctorView(Appointment a) {
         String patientFirstName = null;
         String patientLastName = null;
         if (a.getPatient() != null && a.getPatient().getUser() != null) {
@@ -246,7 +251,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
                 .toMinutes();
         }
 
-        return new DoctorAppointmentView(
+        return new AppointmentDoctorView(
             a.getAppointmentId(),
             patientFirstName,
             patientLastName,
@@ -256,34 +261,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
             a.getStatus()
         );
     }
-
-    // Lightweight response DTOs
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class DoctorAppointmentView {
-        private Integer appointmentId;
-
-        private String patientFirstName;
-        private String patientLastName;
-
-        private String appointmentType;
-        private LocalDateTime scheduledDateTime;
-        private Integer estimatedDurationMinutes;
-
-        private AppointmentStatus status;
-    }
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class DoctorTimeSlotView {
-        private Integer slotId;
-        private LocalTime startTime;
-        private LocalTime endTime;
-    }
-    */
+    
     public Doctor convertRequestToObject(DoctorInfoRequest info) {
         Doctor doctor = new Doctor();
 
