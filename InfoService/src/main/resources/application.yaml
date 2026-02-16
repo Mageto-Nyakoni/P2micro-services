@@ -1,6 +1,14 @@
 spring:
   application:
     name: InfoService
+  datasource:
+    url: jdbc:postgresql://localhost:5433/auth_db
+    username: auth_user
+    password: auth_password
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 server:
   port: 8082

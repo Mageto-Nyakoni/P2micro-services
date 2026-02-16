@@ -1,0 +1,66 @@
+services:
+  postgres-auth:
+    image: postgres:18.1
+    container_name: postgres-auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_data:/var/lib/postgresql
+    networks:
+      - backend
+
+  postgres-info:
+    image: postgres:18.1
+    container_name: postgres-info
+    environment:
+      POSTGRES_DB: info_db
+      POSTGRES_USER: info_user
+      POSTGRES_PASSWORD: info_password
+    ports:
+      - "5434:5432"
+    volumes:
+      - info_data:/var/lib/postgresql
+    networks:
+      - backend
+
+  postgres-appointment:
+    image: postgres:18.1
+    container_name: postgres-appointment
+    environment:
+      POSTGRES_DB: appointment_db
+      POSTGRES_USER: appointment_user
+      POSTGRES_PASSWORD: appointment_password
+    ports:
+      - "5435:5432"
+    volumes:
+      - appointment_data:/var/lib/postgresql
+    networks:
+      - backend
+
+  postgres-schedule:
+    image: postgres:18.1
+    container_name: postgres-schedule
+    environment:
+      POSTGRES_DB: schedule_db
+      POSTGRES_USER: schedule_user
+      POSTGRES_PASSWORD: schedule_password
+    ports:
+      - "5436:5432"
+    volumes:
+      - schedule_data:/var/lib/postgresql
+    networks:
+      - backend
+
+volumes:
+  auth_data:
+  info_data:
+  appointment_data:
+  schedule_data:
+
+networks:
+  backend:
+    driver: bridge
