@@ -1,12 +1,12 @@
-package com.revature.controller;
+package com.revature.AppointmentService.controller;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
 
-import com.revature.dto.request.BookAppointmentRequestDto;
-import com.revature.dto.response.AppointmentDto;
-import com.revature.model.Appointment;
-import com.revature.service.AppointmentService;
+import com.revature.AppointmentService.dto.request.BookAppointmentRequestDto;
+import com.revature.AppointmentService.dto.response.AppointmentDto;
+import com.revature.AppointmentService.model.Appointment;
+import com.revature.AppointmentService.service.AppointmentService;
 
 @RestController
 @RequestMapping("/appointments")

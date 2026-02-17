@@ -1,9 +1,10 @@
-package com.revature.repository;
+package com.revature.AppointmentService.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.revature.model.Appointment;
-import com.revature.model.AppointmentStatus;
+
+import com.revature.AppointmentService.model.Appointment;
+import com.revature.AppointmentService.model.AppointmentStatus;
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
     List<Appointment> findByDoctorId(Long doctorId);

@@ -1,18 +1,32 @@
-
-
-# datasource:
- #   url: jdbc:postgresql://localhost:5433/auth_db
-   # username: auth_user
-   # password: auth_password
-
-#jpa:
-   # hibernate:
-    #  ddl-auto: update
-   # show-sql: true
-
 server:
   port: 8080
 
+spring:
+  application:
+    name: ApiGateway
+  cloud:
+    gateway:
+      routes:
+        - id: AuthService
+          uri: lb://AUTHSERVICE
+          predicates:
+            - Path=/auth/**
+
+        - id: AppointmentService
+          uri: lb://APPOINTMENTSERVICE
+          predicates:
+            - Path=/appointments/**
+
+        - id: InfoService
+          uri: lb://INFOSERVICE
+          predicates:
+            - Path=/info/**
+
+        - id: ScheduleService
+          uri: lb://SCHEDULESERVICE
+          predicates:
+            - Path=/schedule/**
+        
 eureka:
 # instance:
 #   hostname: localhost
@@ -24,17 +38,4 @@ eureka:
     fetch-registry: true
     instance:
       prefer-ip-address: true
-
-spring:
-  application:
-    name: ApiGateway
-  cloud:
-    gateway:
-      routes:
-        - id: AppointmentService
-          uri: lb://APPOINTMENTSERVICE
-          predicates:
-            - Path=/appointments/**
-        
-
 

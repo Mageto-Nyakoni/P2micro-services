@@ -1,4 +1,4 @@
-package com.revature.dto.response;
+package com.revature.AppointmentService.dto.response;
 
 import lombok.Data;
 

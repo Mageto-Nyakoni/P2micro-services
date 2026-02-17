@@ -1,9 +1,9 @@
-package com.revature.client;
+package com.revature.AppointmentService.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.revature.dto.response.SlotDto;
+import com.revature.AppointmentService.dto.response.SlotDto;
 
 // is the slot exist - scheduleservice
 @FeignClient(name = "schedule-service")

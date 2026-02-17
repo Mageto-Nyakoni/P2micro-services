@@ -1,4 +1,4 @@
-package com.revature.dto.request;
+package com.revature.AppointmentService.dto.request;
 import lombok.Getter;
 import lombok.Setter;
 public class BookAppointmentRequestDto {

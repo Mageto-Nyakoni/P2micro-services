@@ -1,4 +1,4 @@
-package com.revature.model;
+package com.revature.AppointmentService.model;
 import jakarta.persistence.*;
 import lombok.*;
 

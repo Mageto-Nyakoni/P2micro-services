@@ -1,4 +1,4 @@
-package com.revature.model;
+package com.revature.AppointmentService.model;
 
 public enum AppointmentStatus {
     CONFIRMED,

@@ -1,4 +1,4 @@
-package com.revature.service;
+package com.revature.AppointmentService.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -6,13 +6,13 @@ import java.util.List;
 import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Service;
 
-import com.revature.client.InfoClient;
-import com.revature.client.ScheduleClient;
-import com.revature.dto.response.AppointmentDto;
-import com.revature.dto.response.SlotDto;
-import com.revature.model.Appointment;
-import com.revature.model.AppointmentStatus;
-import com.revature.repository.AppointmentRepository;
+import com.revature.AppointmentService.client.InfoClient;
+import com.revature.AppointmentService.client.ScheduleClient;
+import com.revature.AppointmentService.dto.response.AppointmentDto;
+import com.revature.AppointmentService.dto.response.SlotDto;
+import com.revature.AppointmentService.model.Appointment;
+import com.revature.AppointmentService.model.AppointmentStatus;
+import com.revature.AppointmentService.repository.AppointmentRepository;
 
 @Service
 public class AppointmentService {

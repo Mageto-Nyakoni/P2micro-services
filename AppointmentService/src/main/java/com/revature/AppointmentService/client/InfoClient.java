@@ -1,4 +1,4 @@
-package com.revature.client;
+package com.revature.AppointmentService.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

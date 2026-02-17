@@ -1,4 +1,4 @@
-package com.revature.model;
+package com.revature.AppointmentService.model;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
