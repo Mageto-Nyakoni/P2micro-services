@@ -19,14 +19,16 @@ public class AppointmentController {
         this.service = service;
     }
 //=================book====================
-    @PostMapping
-public Appointment create(@RequestBody BookAppointmentRequestDto request) {
-    return service.bookAppointment(
+@PostMapping
+public Long create(@RequestBody BookAppointmentRequestDto request) {
+     Appointment appointment = service.bookAppointment(
             request.getPatientId(),
             request.getDoctorId(),
             request.getSlotId(),
             request.getAppointmentTypeId()
     );
+
+    return appointment.getAppointmentId(); 
 }
 //====================get doctor===================
     @GetMapping("/doctor/{doctorId}")
@@ -44,5 +46,10 @@ public Appointment create(@RequestBody BookAppointmentRequestDto request) {
         service.cancelAppointment(id);
         return "Appointment cancelled successfully";
     }
-    
+
+     @GetMapping("/{appointmentId}")
+public Appointment getAppointment(@PathVariable Long appointmentId) {
+    return service.getAppointmentById(appointmentId);
+}
+
 }

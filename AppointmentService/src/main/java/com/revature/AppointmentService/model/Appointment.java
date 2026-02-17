@@ -22,6 +22,8 @@ public class Appointment {
     @Column(name = "patient_id", nullable = false)
     private Long patientId;
 
+    
+
     @Column(name = "slot_id", nullable = false)
     private Long slotId;
 

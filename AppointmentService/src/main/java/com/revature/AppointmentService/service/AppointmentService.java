@@ -102,4 +102,9 @@ public class AppointmentService {
         appt.setStatus(AppointmentStatus.CANCELLED);
         repo.save(appt);
     }
+
+    public Appointment getAppointmentById(Long id) {
+    return repo.findById(id)
+            .orElseThrow(() -> new RuntimeException("Appointment not found"));
+}
 }
