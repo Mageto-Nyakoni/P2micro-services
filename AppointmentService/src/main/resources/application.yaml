@@ -1,6 +1,6 @@
 spring:
   application:
-    name: APPOINTMENT-SERVICE
+    name: AppointmentService
 
 datasource:
     url: jdbc:postgresql://localhost:5433/auth_db

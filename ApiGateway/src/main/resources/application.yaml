@@ -1,6 +1,4 @@
-spring:
-  application:
-    name: api-gateway
+
 
 # datasource:
  #   url: jdbc:postgresql://localhost:5433/auth_db
@@ -28,11 +26,15 @@ eureka:
       prefer-ip-address: true
 
 spring:
+  application:
+    name: ApiGateway
   cloud:
     gateway:
       routes:
-        - id: appointment-service
-          uri: lb://APPOINTMENT-SERVICE   # Must match AppointmentService's spring.application.name
+        - id: AppointmentService
+          uri: lb://APPOINTMENTSERVICE
           predicates:
-            - Path=/api/appointments/**
+            - Path=/appointments/**
+        
+
 
