@@ -71,7 +71,7 @@ public class PatientService implements ServiceInterface<Patient> {
      
     @Transactional
     public Optional<Patient> findByUserId(int user_id) {
-        return patientRepository.findPatientByUser_UserId(user_id);
+        return patientRepository.findPatientByUserId(user_id);
     }
 
     public Patient convertRequestToObject(PatientInfoRequest info){

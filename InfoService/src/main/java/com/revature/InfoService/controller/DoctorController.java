@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.revature.InfoService.client.AuthClient;
-import com.revature.InfoService.client.UserClient;
 import com.revature.InfoService.dto.AppointmentDoctorView;
 import com.revature.InfoService.dto.TimeSlotDoctorView;
 import com.revature.InfoService.dto.request.DoctorInfoRequest;
@@ -17,22 +16,18 @@ import com.revature.InfoService.dto.response.AuthResponse;
 import com.revature.InfoService.model.Doctor;
 import com.revature.InfoService.service.DoctorService;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
 @RestController
 @RequestMapping("/smart-appointment/api/doctors")
 @CrossOrigin("*")
 public class DoctorController {
     private final DoctorService doctorService;
     private final AuthClient authClient;
-    private final UserClient userClient;
+
 
     @Autowired
-    public DoctorController(DoctorService doctorService, AuthClient authClient, UserClient userClient) {
+    public DoctorController(DoctorService doctorService, AuthClient authClient) {
         this.doctorService = doctorService;
         this.authClient = authClient;
-        this.userClient = userClient;
     }
 
     // Basic CRUD for Doctor

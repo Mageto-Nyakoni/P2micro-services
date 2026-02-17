@@ -9,5 +9,5 @@ import com.revature.InfoService.model.Doctor;
 
 @Repository
 public interface DoctorRepository extends JpaRepository<Doctor, Integer> {
-    Optional<Doctor> findDoctorByUser_UserId(Integer userId);
+    Optional<Doctor> findDoctorByUserId(Integer userId);
 }

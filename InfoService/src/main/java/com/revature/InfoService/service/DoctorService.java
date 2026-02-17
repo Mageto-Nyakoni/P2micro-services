@@ -14,10 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.revature.InfoService.client.UserClient;
 import com.revature.InfoService.dto.Appointment;
 import com.revature.InfoService.dto.AppointmentDoctorView;
 import com.revature.InfoService.dto.TimeSlot;
 import com.revature.InfoService.dto.TimeSlotDoctorView;
+import com.revature.InfoService.dto.User;
 import com.revature.InfoService.dto.request.DoctorInfoRequest;
 import com.revature.InfoService.model.Doctor;
 import com.revature.InfoService.repository.DoctorRepository;
@@ -26,11 +28,13 @@ import com.revature.InfoService.repository.DoctorRepository;
 public class DoctorService implements ServiceInterface<Doctor> {
     private final DoctorRepository doctorRepository;
     private final SpecialityService specialityService;
+    private final UserClient userClient;
 
     @Autowired
-    public DoctorService(DoctorRepository doctorRepository, SpecialityService specialityService) {
+    public DoctorService(DoctorRepository doctorRepository, SpecialityService specialityService, UserClient userClient) {
         this.doctorRepository = doctorRepository;
         this.specialityService = specialityService;
+        this.userClient = userClient;
     }
      
     @Override
@@ -74,7 +78,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     }
 
     public Optional<Doctor> findByUserId(int user_id) {
-        return doctorRepository.findDoctorByUser_UserId(user_id);
+        return doctorRepository.findDoctorByUserId(user_id);
     }
     
     public List<AppointmentDoctorView> getUpcomingAppointments(Integer doctorId) {
@@ -85,7 +89,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledAfter(doctorId, now);
 
         return appts.stream()
-            .map(DoctorService::toAppointmentDoctorView)
+            .map(this::toAppointmentDoctorView)
             .toList();
     }
 
@@ -93,19 +97,20 @@ public class DoctorService implements ServiceInterface<Doctor> {
         ensureDoctorExists(doctorId);
         List<Appointment> appointments = appointmentRepository.findBySlotDoctorDoctorIdOrderByDateTimeScheduledAsc(doctorId);
         return appointments.stream()
-            .map(DoctorService::toAppointmentDoctorViewWithPatient)
+            .map(this::toAppointmentDoctorViewWithPatient)
             .toList();
     }
 
-    private static AppointmentDoctorView toAppointmentDoctorViewWithPatient(Appointment a) {
+    private AppointmentDoctorView toAppointmentDoctorViewWithPatient(Appointment a) {
         String firstName = null;
         String lastName = null;
         String appointmentType = null;
         Integer estimatedTime = 0;
 
-        if (a.getPatient() != null && a.getPatient().getUser() != null) {
-            firstName = a.getPatient().getUser().getFirstName();
-            lastName = a.getPatient().getUser().getLastName();
+        if (a.getPatient() != null) {
+            User user = userClient.getUser(a.getPatient().getUserId());
+            firstName = user.getFirstName();
+            lastName = user.getLastName();
         }
 
         if (a.getAppointmentType() != null) {
@@ -136,7 +141,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         // List<Appointment> findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
         List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
-        return appts.stream().map(DoctorService::toAppointmentDoctorView).toList();
+        return appts.stream().map(this::toAppointmentDoctorView).toList();
     }
 
     public List<AppointmentDoctorView> getCurrentWeeksAppointments(Integer doctorId) {
@@ -151,7 +156,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
-        return appts.stream().map(DoctorService::toAppointmentDoctorView).toList();
+        return appts.stream().map(this::toAppointmentDoctorView).toList();
     }
 
     public AppointmentDoctorView getAppointmentDetailsForDoctor(Integer doctorId, Integer appointmentId) {
@@ -163,7 +168,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     }
 
     @Transactional
-    public AppointmentDoctorView updateAppointmentStatus(Integer doctorId, Integer appointmentId, AppointmentStatus newStatus) {
+    public AppointmentDoctorView updateAppointmentStatus(Integer doctorId, Integer appointmentId, String newStatus) {
         // Proposal: doctor can update status completed/cancelled/no-show
         // :contentReference[oaicite:7]{index=7}
 
@@ -178,7 +183,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         TimeSlot slot = appt.getSlot();
         if (slot != null) {
-            if (newStatus == "CANCELLED" || newStatus == "DENIED") {
+            if (newStatus.equals("CANCELLED") || newStatus.equals("DENIED")) {
                 slot.setStatus("AVAILABLE"); // free the slot
             } else {
                 slot.setStatus("BOOKED"); // keep slot booked (COMPLETED, NO_SHOW, etc.)
@@ -194,7 +199,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         // Proposal: doctor can cancel patient appointment
         // :contentReference[oaicite:8]{index=8}
 
-        return updateAppointmentStatus(doctorId, appointmentId, AppointmentStatus.CANCELLED);
+        return updateAppointmentStatus(doctorId, appointmentId, "CANCELLED");
     }
 
     // Read-only: Doctor time slots
@@ -238,12 +243,13 @@ public class DoctorService implements ServiceInterface<Doctor> {
         }
     }
 
-    private static AppointmentDoctorView toAppointmentDoctorView(Appointment a) {
+    private AppointmentDoctorView toAppointmentDoctorView(Appointment a) {
         String patientFirstName = null;
         String patientLastName = null;
-        if (a.getPatient() != null && a.getPatient().getUser() != null) {
-            patientFirstName = a.getPatient().getUser().getFirstName();
-            patientLastName = a.getPatient().getUser().getLastName();
+        if (a.getPatient() != null) {
+            User user = userClient.getUser(a.getPatient().getUserId());
+            patientFirstName = user.getFirstName();
+            patientLastName = user.getLastName();
         }
         // Calculate duration from slot start/end time if slot exists
         Integer estimatedDurationMinutes = null;
