@@ -5,6 +5,8 @@ import java.util.List;
 
 import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import com.revature.AppointmentService.client.InfoClient;
 import com.revature.AppointmentService.client.ScheduleClient;
@@ -67,9 +69,17 @@ public class AppointmentService {
             .status(AppointmentStatus.CONFIRMED)
             .build();
 
-        return repo.save(appt);
+         // Save Appointment
+    Appointment savedAppt = repo.save(appt);
+
+    //  Mark slot as booked in ScheduleService
+    scheduleClient.bookSlot(slotId);
+
+    return savedAppt;
     }
-                      private AppointmentDto mapToDto(Appointment appt) {
+
+
+   private AppointmentDto mapToDto(Appointment appt) {
     return new AppointmentDto(
             appt.getAppointmentId().intValue(),
             "Doctor " + appt.getDoctorId(),
@@ -107,4 +117,9 @@ public class AppointmentService {
     return repo.findById(id)
             .orElseThrow(() -> new RuntimeException("Appointment not found"));
 }
+
+
+
+
+
 }

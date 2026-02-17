@@ -2,13 +2,19 @@ package com.revature.AppointmentService.client;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import com.revature.AppointmentService.dto.response.SlotDto;
 
 // is the slot exist - scheduleservice
-@FeignClient(name = "schedule-service")
+@FeignClient(name = "ScheduleService")
 public interface ScheduleClient {
 
-    @GetMapping("/timeslots/{id}")
-    SlotDto getTimeSlot(@PathVariable("id") Long id);
+    @GetMapping("/slots/{slotId}")
+    SlotDto getTimeSlot(@PathVariable Long slotId);
+
+    
+//===================ScheduleService should mark slot as booked=======================
+     @PutMapping("/slots/{slotId}/book")
+    void bookSlot(@PathVariable Long slotId);
 }
