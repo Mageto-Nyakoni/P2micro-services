@@ -2,7 +2,8 @@ package com.revature.InfoService.dto.request;
 
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorInfoRequest {

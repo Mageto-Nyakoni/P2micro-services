@@ -3,6 +3,7 @@ package com.revature.AuthService.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.revature.AuthService.client.DoctorClient;
@@ -21,6 +22,7 @@ public class UserService implements ServiceInterface<User> {
     private final DoctorClient doctorClient;
     private final PatientClient patientClient;
 
+    @Autowired
     public UserService(UserRepository userRepository, DoctorClient doctorClient, PatientClient patientClient) {
         this.userRepository = userRepository;
         this.doctorClient = doctorClient;
@@ -48,12 +50,12 @@ public class UserService implements ServiceInterface<User> {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
 
-            Doctor doctor = doctorClient.findByUserId(id);
+            Doctor doctor = doctorClient.getDoctorByUserId(id);
             if (doctor != null) {
                 doctorClient.deleteDoctor(doctor.getDoctorId());
             }
 
-            Patient patient = patientClient.findByUserId(id);
+            Patient patient = patientClient.getPatient(id);
             if (patient != null) {
                 patientClient.deletePatient(patient.getPatientId());
             }

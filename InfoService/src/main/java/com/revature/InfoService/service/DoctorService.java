@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.revature.InfoService.dto.Appointment;
 import com.revature.InfoService.dto.AppointmentDoctorView;
+import com.revature.InfoService.dto.TimeSlot;
 import com.revature.InfoService.dto.TimeSlotDoctorView;
 import com.revature.InfoService.dto.request.DoctorInfoRequest;
 import com.revature.InfoService.model.Doctor;
@@ -176,10 +178,10 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         TimeSlot slot = appt.getSlot();
         if (slot != null) {
-            if (newStatus == AppointmentStatus.CANCELLED || newStatus == AppointmentStatus.DENIED) {
-                slot.setStatus(TimeSlotStatus.AVAILABLE); // free the slot
+            if (newStatus == "CANCELLED" || newStatus == "DENIED") {
+                slot.setStatus("AVAILABLE"); // free the slot
             } else {
-                slot.setStatus(TimeSlotStatus.BOOKED); // keep slot booked (COMPLETED, NO_SHOW, etc.)
+                slot.setStatus("BOOKED"); // keep slot booked (COMPLETED, NO_SHOW, etc.)
             }
             timeSlotRepository.save(slot);
         }

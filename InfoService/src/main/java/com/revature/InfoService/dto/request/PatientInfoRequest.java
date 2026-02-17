@@ -4,7 +4,8 @@ import java.time.LocalDate;
 
 import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatientInfoRequest {

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.revature.InfoService.dto.User;
 
-@FeignClient(name = "AuthService", path = "/smart-appointment/api/users")
+@FeignClient(name = "AuthService", contextId = "userService", path = "/smart-appointment/api/users")
 public interface UserClient {
     @GetMapping("/{user_id}")
     User getUser(@PathVariable int user_id);

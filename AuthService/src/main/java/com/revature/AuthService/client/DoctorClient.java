@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.revature.AuthService.model.Doctor;
 
-@FeignClient(name = "InfoService", path = "/smart-appointment/api/doctor")
-public interface DoctorClient{
+@FeignClient(name = "InfoService", contextId = "doctorClient", path = "/smart-appointment/api/doctor")
+public interface DoctorClient {
     @PostMapping
     Doctor createDoctor(@RequestBody Doctor doctor);
 
     @GetMapping("/user/{userId}")
-    Doctor findByUserId(@PathVariable Integer userId);
+    Doctor getDoctorByUserId(@PathVariable Integer userId);
 
     @DeleteMapping("/{doctorId}")
     ResponseEntity<?> deleteDoctor(@PathVariable Integer doctorId);

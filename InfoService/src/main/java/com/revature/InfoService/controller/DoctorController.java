@@ -7,19 +7,32 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.revature.InfoService.client.AuthClient;
+import com.revature.InfoService.client.UserClient;
+import com.revature.InfoService.dto.AppointmentDoctorView;
+import com.revature.InfoService.dto.TimeSlotDoctorView;
+import com.revature.InfoService.dto.request.DoctorInfoRequest;
+import com.revature.InfoService.dto.request.UpdateStatusRequest;
+import com.revature.InfoService.dto.response.AuthResponse;
 import com.revature.InfoService.model.Doctor;
 import com.revature.InfoService.service.DoctorService;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 @RestController
 @RequestMapping("/smart-appointment/api/doctors")
 @CrossOrigin("*")
 public class DoctorController {
     private final DoctorService doctorService;
-    //private final JwtUtil jwtUtil;
+    private final AuthClient authClient;
+    private final UserClient userClient;
 
     @Autowired
-    public DoctorController(DoctorService doctorService) {
+    public DoctorController(DoctorService doctorService, AuthClient authClient, UserClient userClient) {
         this.doctorService = doctorService;
+        this.authClient = authClient;
+        this.userClient = userClient;
     }
 
     // Basic CRUD for Doctor
@@ -36,30 +49,37 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.findAll());
     }
 
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<Doctor> getDoctorByUserId(@PathVariable Integer userId) {
+        return doctorService.findByUserId(userId)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     // GET /doctors/{doctorId}
     @GetMapping("/{doctorId}")
     public ResponseEntity<Doctor> getDoctorById(@PathVariable Integer doctorId) {
         return doctorService.findById(doctorId)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // GET /doctors/me
     @GetMapping("/me")
     public ResponseEntity<Doctor> getMyDoctor(@RequestHeader("Authorization") String authHeader) {
         try {
-            String token = authHeader.substring(7);
+            AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!jwtUtil.validateToken(token)) {
+            if (!authResponse.getValid()) {
                 throw new RuntimeException("Invalid token");
             }
 
-            String privilege = jwtUtil.extractPrivilege(token);
+            String privilege = authResponse.getPrivilege();
             if (!privilege .equals("Doctor")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
-            int userId = jwtUtil.extractId(token);
+            int userId = authResponse.getUserId();
 
             return doctorService.findByUserId(userId).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
@@ -81,18 +101,16 @@ public class DoctorController {
     @PatchMapping("/{user_id}")
     public ResponseEntity<Doctor> updateDoctor(@RequestHeader("Authorization") String authHeader, @PathVariable int user_id, @RequestBody DoctorInfoRequest doctorInfo) {
          try {
-            String token = authHeader.substring(7);
+            AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!jwtUtil.validateToken(token)) {
+            if (!authResponse.getValid()) {
                 throw new RuntimeException("Invalid token");
             }
 
-            String privilege = jwtUtil.extractPrivilege(token);
-            if ((privilege.equals("Doctor") && jwtUtil.extractId(token) == user_id) || privilege.equals("Super")) {
+            String privilege = authResponse.getPrivilege();
+            if ((privilege.equals("Doctor") && authResponse.getUserId() == user_id) || privilege.equals("Super")) {
                 int doctor_id = doctorService.findByUserId(user_id).get().getDoctorId();
-
                 Doctor newDoctor = doctorService.convertRequestToObject(doctorInfo);
-
                 Doctor doctor = doctorService.updateById(doctor_id, newDoctor);
 
                 return ResponseEntity.ok(doctor);
@@ -121,20 +139,18 @@ public class DoctorController {
 
     // GET /doctors/me/appointments/today
     @GetMapping("/me/appointments/today")
-    public ResponseEntity<List<DoctorAppointmentView>> getMyTodaysAppointments(
-        @RequestHeader("Authorization") String authHeader) {
+    public ResponseEntity<List<AppointmentDoctorView>> getMyTodaysAppointments(@RequestHeader("Authorization") String authHeader) {
+        AuthResponse authResponse = authClient.validateToken(authHeader);
 
-        String token = authHeader.substring(7);
-
-        if (!jwtUtil.validateToken(token)) {
+        if (!authResponse.getValid()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        if (!jwtUtil.extractPrivilege(token).equals("Doctor")) {
+        if (!authResponse.getPrivilege().equals("Doctor")) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        int userId = jwtUtil.extractId(token);
+        int userId = authResponse.getUserId();
         int doctorId = doctorService.findByUserId(userId)
             .orElseThrow()
             .getDoctorId();
@@ -145,33 +161,32 @@ public class DoctorController {
     }
     
    @GetMapping("/{doctorId}/appointments/upcoming")
-    public List<DoctorService.DoctorAppointmentView> getUpcomingAppointments(
+    public List<AppointmentDoctorView> getUpcomingAppointments(
             @PathVariable Integer doctorId) {
 
         return doctorService.getUpcomingAppointments(doctorId);
     }
 
     @GetMapping("/{doctorId}/appointments/all")
-    public ResponseEntity<List<DoctorService.DoctorAppointmentView>> getAllAppointments(@PathVariable Integer doctorId) {
+    public ResponseEntity<List<AppointmentDoctorView>> getAllAppointments(@PathVariable Integer doctorId) {
         return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
     }
 
     // GET /doctors/{doctorId}/appointments/today
     @GetMapping("/{doctorId}/appointments/today")
-    public ResponseEntity<List<DoctorAppointmentView>> getTodaysAppointments(@PathVariable Integer doctorId) {
+    public ResponseEntity<List<AppointmentDoctorView>> getTodaysAppointments(@PathVariable Integer doctorId) {
         return ResponseEntity.ok(doctorService.getTodaysAppointments(doctorId));
     }
 
     // GET /doctors/{doctorId}/appointments/week
     @GetMapping("/{doctorId}/appointments/week")
-    public ResponseEntity<List<DoctorAppointmentView>> getWeeksAppointments(@PathVariable Integer doctorId) {
+    public ResponseEntity<List<AppointmentDoctorView>> getWeeksAppointments(@PathVariable Integer doctorId) {
         return ResponseEntity.ok(doctorService.getCurrentWeeksAppointments(doctorId));
     }
 
     // GET /doctors/{doctorId}/appointments/{appointmentId}
     @GetMapping("/{doctorId}/appointments/{appointmentId}")
-    public ResponseEntity<DoctorAppointmentView> getAppointmentDetails(@PathVariable Integer doctorId,
-                                                                       @PathVariable Integer appointmentId) {
+    public ResponseEntity<AppointmentDoctorView> getAppointmentDetails(@PathVariable Integer doctorId, @PathVariable Integer appointmentId) {
         return ResponseEntity.ok(doctorService.getAppointmentDetailsForDoctor(doctorId, appointmentId));
     }
 
@@ -181,18 +196,14 @@ public class DoctorController {
 
     // PATCH /doctors/{doctorId}/appointments/{appointmentId}/status
     @PatchMapping("/{doctorId}/appointments/{appointmentId}/status")
-    public ResponseEntity<DoctorAppointmentView> updateStatus(@PathVariable Integer doctorId,
-                                                              @PathVariable Integer appointmentId,
-                                                              @RequestBody UpdateStatusRequest req) {
-
-                       System.out.println("Received status: " + req.getStatus());                                         
+    public ResponseEntity<AppointmentDoctorView> updateStatus(@PathVariable Integer doctorId, @PathVariable Integer appointmentId, @RequestBody UpdateStatusRequest req) {
+        System.out.println("Received status: " + req.getStatus());                                         
         return ResponseEntity.ok(doctorService.updateAppointmentStatus(doctorId, appointmentId, req.getStatus()));
     }
 
     // POST /doctors/{doctorId}/appointments/{appointmentId}/cancel
     @PostMapping("/{doctorId}/appointments/{appointmentId}/cancel")
-    public ResponseEntity<DoctorAppointmentView> cancelAppointment(@PathVariable Integer doctorId,
-                                                                   @PathVariable Integer appointmentId) {
+    public ResponseEntity<AppointmentDoctorView> cancelAppointment(@PathVariable Integer doctorId, @PathVariable Integer appointmentId) {
         return ResponseEntity.ok(doctorService.cancelAppointment(doctorId, appointmentId));
     }
 
@@ -202,17 +213,7 @@ public class DoctorController {
 
     // GET /doctors/{doctorId}/slots
     @GetMapping("/{doctorId}/slots")
-    public ResponseEntity<List<DoctorTimeSlotView>> getSlots(@PathVariable Integer doctorId) {
+    public ResponseEntity<List<TimeSlotDoctorView>> getSlots(@PathVariable Integer doctorId) {
         return ResponseEntity.ok(doctorService.getDoctorTimeSlots(doctorId));
-    }
-
-    // -----------------------------
-    // Request DTO
-    // -----------------------------
-    @Data
-    @AllArgsConstructor
-    public static class UpdateStatusRequest {
-        private AppointmentStatus status;
-        public UpdateStatusRequest() {}
     }
 }

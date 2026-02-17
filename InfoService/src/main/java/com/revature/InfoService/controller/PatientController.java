@@ -9,9 +9,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.revature.InfoService.client.AuthClient;
+import com.revature.InfoService.client.UserClient;
 import com.revature.InfoService.dto.Appointment;
 import com.revature.InfoService.dto.AppointmentPatientView;
+import com.revature.InfoService.dto.User;
 import com.revature.InfoService.dto.request.PatientInfoRequest;
+import com.revature.InfoService.dto.response.AuthResponse;
 import com.revature.InfoService.model.Patient;
 import com.revature.InfoService.service.PatientService;
 
@@ -20,24 +24,34 @@ import com.revature.InfoService.service.PatientService;
 @CrossOrigin("*")
 public class PatientController {
     private final PatientService patientService;
+    private final AuthClient authClient;
+    private final UserClient userClient;
 
     @Autowired
-    public PatientController(PatientService patientService) {
+    public PatientController(PatientService patientService, AuthClient authClient, UserClient userClient) {
         this.patientService = patientService;
+        this.authClient = authClient;
+        this.userClient = userClient;
     }
     
     @GetMapping("{patientId}/appointments")
     public List<AppointmentPatientView> getPatientAppointments(@PathVariable Integer patientId) {
-        List<Appointment> appointments = findByPatient_PatientIdAndStatus(patientId, AppointmentStatus.CONFIRMED);
+        /*
+        List<Appointment> appointments = findByPatient_PatientIdAndStatus(patientId, "CONFIRMED");
 
-        return appointments.stream().map(appt -> new AppointmentPatientView(
-            appt.getAppointmentId(),
-            appt.getDoctor().getUser().getFirstName() + " " + appt.getDoctor().getUser().getLastName(),
-            appt.getAppointmentType().getName(),
-            appt.getDateTimeScheduled(),
-            appt.getDateTimeScheduled().plusMinutes(30),
-            appt.getStatus()
-        )).collect(Collectors.toList());
+        return appointments.stream().map(appt -> {
+            User user = userClient.getUser(appt.getDoctor().getDoctorId());
+            return new AppointmentPatientView(
+                appt.getAppointmentId(),
+                user.getFirstName() + " " + user.getLastName(),
+                appt.getAppointmentType().getName(),
+                appt.getDateTimeScheduled(),
+                appt.getDateTimeScheduled().plusMinutes(30),
+                appt.getStatus()
+            );  
+        }).collect(Collectors.toList());
+         */
+        return null;
     }
 
     @GetMapping()
@@ -48,15 +62,14 @@ public class PatientController {
     @GetMapping("/{user_id}")
     public ResponseEntity<Patient> getPatient(@RequestHeader("Authorization") String authHeader, @PathVariable int user_id) {
         try {
-            /*
-            String token = authHeader.substring(7);
+            AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!jwtUtil.validateToken(token)) {
+            if (!authResponse.getValid()) {
                 throw new RuntimeException("Invalid token");
             }
 
-            String privilege = jwtUtil.extractPrivilege(token);
-            if ((privilege.equals("Patient") && jwtUtil.extractId(token) == user_id) || privilege.equals("Doctor")) {
+            String privilege = authResponse.getPrivilege();
+            if ((privilege.equals("Patient") && authResponse.getUserId() == user_id) || privilege.equals("Doctor")) {
                 Optional<Patient> optionalPatient = patientService.findByUserId(user_id);
                 if (optionalPatient.isPresent()) {
                     return ResponseEntity.ok(optionalPatient.get());
@@ -65,8 +78,6 @@ public class PatientController {
             } else {
                 throw new RuntimeException("Invalid token");
             }
-            */
-            return null;
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -75,23 +86,20 @@ public class PatientController {
     @GetMapping("/me")
     public ResponseEntity<Patient> getMyPatient(@RequestHeader("Authorization") String authHeader) {
         try {
-            /*
-            String token = authHeader.substring(7);
+            AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!jwtUtil.validateToken(token)) {
+            if (!authResponse.getValid()) {
                 throw new RuntimeException("Invalid token");
             }
-
-            String privilege = jwtUtil.extractPrivilege(token);
+            
+            String privilege = authResponse.getPrivilege();
             if (!privilege .equals("Patient")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 
-            int userId = jwtUtil.extractId(token);
+            int userId = authResponse.getUserId();
 
             return patientService.findByUserId(userId).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-            */
-            return null;
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -100,20 +108,16 @@ public class PatientController {
     @PatchMapping("/{user_id}")
     public ResponseEntity<Patient> updatePatient(@RequestHeader("Authorization") String authHeader, @PathVariable int user_id, @RequestBody PatientInfoRequest patientInfo) {
         try {
-            /*
-            String token = authHeader.substring(7);
+            AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!jwtUtil.validateToken(token)) {
+            if (!authResponse.getValid()) {
                 throw new RuntimeException("Invalid token");
             }
-
-            String privilege = jwtUtil.extractPrivilege(token);
-            if (privilege.equals("Patient") && jwtUtil.extractId(token) == user_id) {
-
+            
+            String privilege = authResponse.getPrivilege();
+            if (privilege.equals("Patient") && authResponse.getUserId() == user_id) {
                 int patient_id = patientService.findByUserId(user_id).get().getPatientId();
-
                 Patient newPatient = patientService.convertRequestToObject(patientInfo);
-
                 Patient patient = patientService.updateById(patient_id, newPatient);
 
                 return ResponseEntity.ok(patient);
@@ -121,8 +125,6 @@ public class PatientController {
             } else {
                 throw new RuntimeException("Unauthorized access");
             }
-            */
-            return null;
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -133,5 +135,10 @@ public class PatientController {
         return patientService.deleteById(patientId)
             .map(p -> ResponseEntity.noContent().build())
             .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
+        return ResponseEntity.ok(patientService.save(patient));
     }
 }
