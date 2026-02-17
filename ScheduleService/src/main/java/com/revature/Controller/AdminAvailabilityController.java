@@ -1,4 +1,4 @@
-package com.revature.smartAppointment.Controller;
+package com.revature.Controller;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -17,10 +17,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.revature.smartAppointment.Model.AvailabilityWindow;
-import com.revature.smartAppointment.Service.AvailabilityWindowService;
-import com.revature.smartAppointment.Util.JwtUtil;
-import com.revature.smartAppointment.dto.AvailabilityWindowDTO;
+import com.revature.Model.AvailabilityWindow;
+import com.revature.Service.AvailabilityWindowService;
+import com.revature.Service.AuthValidationClient;
+import com.revature.Service.DoctorInfoClient;
+import com.revature.dto.AvailabilityWindowDTO;
 
 @RestController
 @RequestMapping("/smart-appointment/api/admin")
@@ -28,11 +29,17 @@ import com.revature.smartAppointment.dto.AvailabilityWindowDTO;
 public class AdminAvailabilityController {
 
     private final AvailabilityWindowService availabilityWindowService;
-    private final JwtUtil jwtUtil;
+    private final AuthValidationClient authValidationClient;
+    private final DoctorInfoClient doctorInfoClient;
 
-    public AdminAvailabilityController(AvailabilityWindowService availabilityWindowService, JwtUtil jwtUtil) {
+    public AdminAvailabilityController(
+            AvailabilityWindowService availabilityWindowService,
+            AuthValidationClient authValidationClient,
+            DoctorInfoClient doctorInfoClient
+    ) {
         this.availabilityWindowService = availabilityWindowService;
-        this.jwtUtil = jwtUtil;
+        this.authValidationClient = authValidationClient;
+        this.doctorInfoClient = doctorInfoClient;
     }
     
    /*  @GetMapping("/{doctorId}/availability-windows")
@@ -70,8 +77,8 @@ public List<AvailabilityWindow> getAvailabilityWindows(
                 window.getStartTime(),
                 window.getEndTime(),
                 window.isActive(),
-                window.getDoctor().getDoctorId(),
-                window.getDoctor().getUser().getFirstName() + " " + window.getDoctor().getUser().getLastName()
+                window.getDoctorId(),
+                doctorInfoClient.getDoctorName(window.getDoctorId())
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
@@ -86,19 +93,16 @@ public List<AvailabilityWindow> getAvailabilityWindows(
     }
 
     private void validateAdmin(String authHeader) {
-        try {
-            String token = authHeader.substring(7);
-            if (!jwtUtil.validateToken(token)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
-            }
-            String privilege = jwtUtil.extractPrivilege(token);
-            if (!"Admin".equals(privilege) && !"Super".equals(privilege)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
-            }
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
+        if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+        }
+        AuthValidationClient.AuthValidationResult validation = authValidationClient.validate(authHeader);
+        if (!validation.valid()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+        }
+        String privilege = validation.privilege();
+        if (!"Admin".equals(privilege) && !"Super".equals(privilege)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
         }
     }
 

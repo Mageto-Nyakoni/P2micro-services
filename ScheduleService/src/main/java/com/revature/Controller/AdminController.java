@@ -1,13 +1,20 @@
-package com.revature.smartAppointment.Controller;
+package com.revature.Controller;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+import java.net.URI;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientResponseException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -20,14 +27,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.revature.smartAppointment.Model.TimeSlot;
-import com.revature.smartAppointment.Model.enums.AppointmentStatus;
-import com.revature.smartAppointment.Model.enums.TimeSlotStatus;
-import com.revature.smartAppointment.Service.TimeSlotService;
-import com.revature.smartAppointment.Service.UserService;
-import com.revature.smartAppointment.Service.admin.AdminAppointmentService;
-import com.revature.smartAppointment.Service.admin.AdminScheduleService;
-import com.revature.smartAppointment.Util.JwtUtil;
+import com.revature.Model.TimeSlot;
+import com.revature.Model.enums.AppointmentStatus;
+import com.revature.Model.enums.TimeSlotStatus;
+import com.revature.Service.TimeSlotService;
+import com.revature.Service.AdminAppointmentService;
+import com.revature.Service.AdminScheduleService;
+import com.revature.Service.AuthValidationClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("smart-appointment/api/admin")
@@ -36,22 +43,26 @@ public class AdminController {
     private final AdminAppointmentService adminAppointmentService;
     private final AdminScheduleService adminScheduleService;
     private final TimeSlotService timeSlotService;
-    private final JwtUtil jwtUtil;
-    private final UserService userService;
+    private final AuthValidationClient authValidationClient;
+    private final RestTemplate restTemplate = new RestTemplate();
+    private final String appointmentServiceBaseUrl;
+    private final String usersTablePath;
 
     @Autowired
     public AdminController(
             AdminAppointmentService adminAppointmentService,
             AdminScheduleService adminScheduleService,
             TimeSlotService timeSlotService,
-            JwtUtil jwtUtil,
-            UserService userService
+            AuthValidationClient authValidationClient,
+            @Value("${appointment.service.base-url:http://localhost:8083}") String appointmentServiceBaseUrl,
+            @Value("${appointment.service.users-table-path:/smart-appointment/api/users/table}") String usersTablePath
     ) {
         this.adminAppointmentService = adminAppointmentService;
         this.adminScheduleService = adminScheduleService;
         this.timeSlotService = timeSlotService;
-        this.jwtUtil = jwtUtil;
-        this.userService = userService;
+        this.authValidationClient = authValidationClient;
+        this.appointmentServiceBaseUrl = appointmentServiceBaseUrl;
+        this.usersTablePath = usersTablePath;
     }
 
     //  View ALL appointments (system-wide)
@@ -61,7 +72,7 @@ public class AdminController {
             @RequestParam(required = false) String status
     ) {
         validateAdmin(authHeader);
-        return ResponseEntity.ok(adminAppointmentService.getAppointments(status));
+        return ResponseEntity.ok(adminAppointmentService.getAppointments(authHeader, status));
     }
 
     //  Accept appointment
@@ -72,7 +83,7 @@ public class AdminController {
     ) {
         validateAdmin(authHeader);
         return ResponseEntity.ok(
-                adminAppointmentService.updateStatus(id, AppointmentStatus.CONFIRMED)
+                adminAppointmentService.updateStatus(authHeader, id, AppointmentStatus.CONFIRMED)
         );
     }
 
@@ -84,7 +95,7 @@ public class AdminController {
     ) {
         validateAdmin(authHeader);
         return ResponseEntity.ok(
-                adminAppointmentService.updateStatus(id, AppointmentStatus.CANCELLED)
+                adminAppointmentService.updateStatus(authHeader, id, AppointmentStatus.CANCELLED)
         );
     }
 
@@ -96,7 +107,7 @@ public class AdminController {
     ) {
         validateAdmin(authHeader);
         return ResponseEntity.ok(
-                adminAppointmentService.updateStatus(id, AppointmentStatus.DENIED)
+                adminAppointmentService.updateStatus(authHeader, id, AppointmentStatus.DENIED)
         );
     }
 
@@ -111,6 +122,7 @@ public class AdminController {
         validateAdmin(authHeader);
         return ResponseEntity.ok(
             adminAppointmentService.reschedule(
+                    authHeader,
                     id,
                     java.time.LocalDateTime.of(date, time)
             )
@@ -153,27 +165,49 @@ public class AdminController {
     }
 
     @GetMapping("/staff")
-    public ResponseEntity<List<com.revature.smartAppointment.Controller.Response.UserTableResponse>> getStaff(
+    public ResponseEntity<List<Map<String, Object>>> getStaff(
             @RequestHeader("Authorization") String authHeader
     ) {
         validateAdmin(authHeader);
-        return ResponseEntity.ok(userService.getUsersForTable());
+        try {
+            URI uri = UriComponentsBuilder.fromHttpUrl(joinUrl(appointmentServiceBaseUrl, usersTablePath))
+                    .build(true)
+                    .toUri();
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", authHeader);
+            ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                    uri,
+                    org.springframework.http.HttpMethod.GET,
+                    new HttpEntity<>(headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+            return ResponseEntity.ok(response.getBody() == null ? List.of() : response.getBody());
+        } catch (RestClientResponseException ex) {
+            throw new ResponseStatusException(HttpStatus.valueOf(ex.getRawStatusCode()), ex.getResponseBodyAsString(), ex);
+        }
     }
 
     private void validateAdmin(String authHeader) {
-        try {
-            String token = authHeader.substring(7);
-            if (!jwtUtil.validateToken(token)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
-            }
-            String privilege = jwtUtil.extractPrivilege(token);
-            if (!"Admin".equals(privilege) && !"Super".equals(privilege)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
-            }
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
+        if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
+        AuthValidationClient.AuthValidationResult validation = authValidationClient.validate(authHeader);
+        if (!validation.valid()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
+        }
+        String privilege = validation.privilege();
+        if (!"Admin".equals(privilege) && !"Super".equals(privilege)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
+        }
+    }
+
+    private String joinUrl(String base, String path) {
+        if (base.endsWith("/") && path.startsWith("/")) {
+            return base.substring(0, base.length() - 1) + path;
+        }
+        if (!base.endsWith("/") && !path.startsWith("/")) {
+            return base + "/" + path;
+        }
+        return base + path;
     }
 }

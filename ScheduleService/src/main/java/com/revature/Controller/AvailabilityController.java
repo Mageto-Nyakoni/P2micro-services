@@ -1,4 +1,4 @@
-package com.revature.smartAppointment.Controller;
+package com.revature.Controller;
 
 import java.util.List;
 import java.util.Map;
@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.revature.smartAppointment.Service.AvailabilityService;
-import com.revature.smartAppointment.Service.AvailabilityWindowService;
-import com.revature.smartAppointment.dto.DoctorAvailabilityDto;
+import com.revature.Service.AvailabilityService;
+import com.revature.Service.AvailabilityWindowService;
+import com.revature.dto.DoctorAvailabilityDto;
 
 import lombok.RequiredArgsConstructor;
 
