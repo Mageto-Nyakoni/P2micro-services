@@ -1,3 +1,39 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: ApiGateway
+  cloud:
+    gateway:
+      routes:
+        - id: AuthService
+          uri: lb://AUTHSERVICE
+          predicates:
+            - Path=/auth/**
+
+        - id: AppointmentService
+          uri: lb://APPOINTMENTSERVICE
+          predicates:
+            - Path=/appointments,/appointments/**
+
+        - id: InfoService
+          uri: lb://INFOSERVICE
+          predicates:
+            - Path=/info/**
+
+        - id: ScheduleService
+          uri: lb://SCHEDULESERVICE
+          predicates:
+            - Path=/schedule/**
+        
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      default-zone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+
