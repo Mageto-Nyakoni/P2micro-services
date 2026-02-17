@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Appointment {
- @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "appointment_id")
     private Long appointmentId;
@@ -22,23 +22,23 @@ public class Appointment {
     @Column(name = "patient_id", nullable = false)
     private Long patientId;
 
-    
-
     @Column(name = "slot_id", nullable = false)
     private Long slotId;
 
     @Column(name = "type_id", nullable = false)
     private Long appointmentTypeId;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "date_time_scheduled")
+    @Column(name = "date_time_scheduled", nullable = false)
     private LocalDateTime dateTimeScheduled;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private AppointmentStatus status;
+    @Builder.Default
+    private AppointmentStatus status = AppointmentStatus.CONFIRMED;
+
 
     @PrePersist
     public void prePersist() {
