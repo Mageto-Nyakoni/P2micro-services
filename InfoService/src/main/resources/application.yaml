@@ -23,4 +23,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     instance:
-      perfer-ip-address: true
+      prefer-ip-address: true

@@ -14,9 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.revature.InfoService.client.TimeSlotClient;
 import com.revature.InfoService.client.UserClient;
 import com.revature.InfoService.dto.Appointment;
 import com.revature.InfoService.dto.AppointmentDoctorView;
+import com.revature.InfoService.dto.Slot;
 import com.revature.InfoService.dto.TimeSlot;
 import com.revature.InfoService.dto.TimeSlotDoctorView;
 import com.revature.InfoService.dto.User;
@@ -29,12 +31,14 @@ public class DoctorService implements ServiceInterface<Doctor> {
     private final DoctorRepository doctorRepository;
     private final SpecialityService specialityService;
     private final UserClient userClient;
+    private final TimeSlotClient timeSlotClient;
 
     @Autowired
-    public DoctorService(DoctorRepository doctorRepository, SpecialityService specialityService, UserClient userClient) {
+    public DoctorService(DoctorRepository doctorRepository, SpecialityService specialityService, UserClient userClient, TimeSlotClient timeSlotClient) {
         this.doctorRepository = doctorRepository;
         this.specialityService = specialityService;
         this.userClient = userClient;
+        this.timeSlotClient = timeSlotClient;
     }
      
     @Override
@@ -172,7 +176,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
         // Proposal: doctor can update status completed/cancelled/no-show
         // :contentReference[oaicite:7]{index=7}
 
-        Appointment appt = appointmentRepository.findById(appointmentId)
+        Appointment appt = appointmentClient.getById(appointmentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
 
         enforceOwnership(doctorId, appt);
@@ -188,7 +192,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
             } else {
                 slot.setStatus("BOOKED"); // keep slot booked (COMPLETED, NO_SHOW, etc.)
             }
-            timeSlotRepository.save(slot);
+            timeSlotClient.updateSlotStatus(slot.getSlotId(), slot.getStatus());
         }
 
         return toAppointmentDoctorView(saved);
@@ -208,13 +212,13 @@ public class DoctorService implements ServiceInterface<Doctor> {
         // Proposal: doctor can view time slot details, but cannot create/delete/modify
         // :contentReference[oaicite:9]{index=9}
 
-        List<TimeSlot> slots = timeSlotRepository.findByDoctor_DoctorIdOrderByDateAvailableAscStartTimeAsc(doctorId);
+        List<Slot> slots = timeSlotClient.getDoctorSlotsByDate(doctorId, "");
 
         return slots.stream()
             .map(s -> new TimeSlotDoctorView(
                 s.getSlotId(),
-                s.getStartTime(),
-                s.getEndTime()))
+                LocalTime.parse(s.getStartTime()),
+                LocalTime.parse(s.getEndTime())))
             .toList();
     }
 
