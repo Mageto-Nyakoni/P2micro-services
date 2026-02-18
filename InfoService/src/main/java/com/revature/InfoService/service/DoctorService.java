@@ -14,9 +14,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.revature.InfoService.client.AppointmentClient;
 import com.revature.InfoService.client.TimeSlotClient;
 import com.revature.InfoService.client.UserClient;
-import com.revature.InfoService.dto.Appointment;
+import com.revature.InfoService.dto.AppointmentDto;
 import com.revature.InfoService.dto.AppointmentDoctorView;
 import com.revature.InfoService.dto.Slot;
 import com.revature.InfoService.dto.TimeSlot;
@@ -30,15 +31,19 @@ import com.revature.InfoService.repository.DoctorRepository;
 public class DoctorService implements ServiceInterface<Doctor> {
     private final DoctorRepository doctorRepository;
     private final SpecialityService specialityService;
+    private final PatientService patientService;
     private final UserClient userClient;
     private final TimeSlotClient timeSlotClient;
+    private final AppointmentClient appointmentClient;
 
     @Autowired
-    public DoctorService(DoctorRepository doctorRepository, SpecialityService specialityService, UserClient userClient, TimeSlotClient timeSlotClient) {
+    public DoctorService(DoctorRepository doctorRepository, SpecialityService specialityService, PatientService patientService, UserClient userClient, TimeSlotClient timeSlotClient, AppointmentClient appointmentClient) {
         this.doctorRepository = doctorRepository;
         this.specialityService = specialityService;
+        this.patientService = patientService;
         this.userClient = userClient;
         this.timeSlotClient = timeSlotClient;
+        this.appointmentClient = appointmentClient;
     }
      
     @Override
@@ -90,7 +95,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledAfter(doctorId, now);
+        List<AppointmentDto> appts = appointmentClient.findBySlotDoctorDoctorIdAndDateTimeScheduledAfter(doctorId, now);
 
         return appts.stream()
             .map(this::toAppointmentDoctorView)
@@ -99,31 +104,31 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
     public List<AppointmentDoctorView> getAllAppointmentsForDoctor(Integer doctorId) {
         ensureDoctorExists(doctorId);
-        List<Appointment> appointments = appointmentRepository.findBySlotDoctorDoctorIdOrderByDateTimeScheduledAsc(doctorId);
+        List<AppointmentDto> appointments = appointmentClient.findBySlotDoctorDoctorIdOrderByDateTimeScheduledAsc(doctorId);
         return appointments.stream()
             .map(this::toAppointmentDoctorViewWithPatient)
             .toList();
     }
 
-    private AppointmentDoctorView toAppointmentDoctorViewWithPatient(Appointment a) {
+    private AppointmentDoctorView toAppointmentDoctorViewWithPatient(AppointmentDto a) {
         String firstName = null;
         String lastName = null;
         String appointmentType = null;
         Integer estimatedTime = 0;
 
-        if (a.getPatient() != null) {
-            User user = userClient.getUser(a.getPatient().getUserId());
+        if (a.getPatientId() != null) {
+            User user = userClient.getUser(patientService.findById(a.getPatientId().intValue()).get().getUserId());
             firstName = user.getFirstName();
             lastName = user.getLastName();
         }
 
-        if (a.getAppointmentType() != null) {
-            appointmentType = a.getAppointmentType().getName(); // if enum
-            estimatedTime = a.getAppointmentType().getEstimatedTime();
+        if (a.getAppointmentTypeId() != null) {
+            appointmentType = appointmentClient.getAppointmentTypeById(a.getAppointmentTypeId()).getName(); // if enum
+            estimatedTime = appointmentClient.getAppointmentTypeById(a.getAppointmentTypeId()).getEstimatedTime();
         }
 
         return new AppointmentDoctorView(
-            a.getAppointmentId(),
+            a.getAppointmentId().intValue(),
             firstName,
             lastName,
             appointmentType,
@@ -143,7 +148,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         // Requires repo method:
         // List<Appointment> findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
-        List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+        List<AppointmentDto> appts = appointmentClient.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
         return appts.stream().map(this::toAppointmentDoctorView).toList();
     }
@@ -158,13 +163,13 @@ public class DoctorService implements ServiceInterface<Doctor> {
         LocalDateTime start = weekStart.atStartOfDay();
         LocalDateTime end = weekEnd.atTime(LocalTime.MAX);
 
-        List<Appointment> appts = appointmentRepository.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+        List<AppointmentDto> appts = appointmentClient.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
 
         return appts.stream().map(this::toAppointmentDoctorView).toList();
     }
 
-    public AppointmentDoctorView getAppointmentDetailsForDoctor(Integer doctorId, Integer appointmentId) {
-        Appointment appt = appointmentRepository.findById(appointmentId)
+    public AppointmentDoctorView getAppointmentDetailsForDoctor(Integer doctorId, Long appointmentId) {
+        AppointmentDto appt = appointmentClient.getAppointment(appointmentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
 
         enforceOwnership(doctorId, appt);
@@ -172,20 +177,20 @@ public class DoctorService implements ServiceInterface<Doctor> {
     }
 
     @Transactional
-    public AppointmentDoctorView updateAppointmentStatus(Integer doctorId, Integer appointmentId, String newStatus) {
+    public AppointmentDoctorView updateAppointmentStatus(Integer doctorId, Long appointmentId, String newStatus) {
         // Proposal: doctor can update status completed/cancelled/no-show
         // :contentReference[oaicite:7]{index=7}
 
-        Appointment appt = appointmentClient.getById(appointmentId)
+        AppointmentDto appt = appointmentClient.getAppointment(appointmentId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
 
         enforceOwnership(doctorId, appt);
 
         appt.setStatus(newStatus);
 
-        Appointment saved = appointmentRepository.save(appt);
+        AppointmentDto saved = appointmentClient.createAppointment(appt);
 
-        TimeSlot slot = appt.getSlot();
+        TimeSlot slot = timeSlotClient.getTimeSlot(appt.getSlotId());
         if (slot != null) {
             if (newStatus.equals("CANCELLED") || newStatus.equals("DENIED")) {
                 slot.setStatus("AVAILABLE"); // free the slot
@@ -199,7 +204,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     }
 
     @Transactional
-    public AppointmentDoctorView cancelAppointment(Integer doctorId, Integer appointmentId) {
+    public AppointmentDoctorView cancelAppointment(Integer doctorId, Long appointmentId) {
         // Proposal: doctor can cancel patient appointment
         // :contentReference[oaicite:8]{index=8}
 
@@ -229,15 +234,15 @@ public class DoctorService implements ServiceInterface<Doctor> {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found"));
     }
 
-    private void enforceOwnership(Integer doctorId, Appointment appt) {
-        if (appt.getSlot() == null || appt.getSlot().getDoctor() == null) {
+    private void enforceOwnership(Integer doctorId, AppointmentDto appt) {
+        if (appt.getSlotId() == null || timeSlotClient.getTimeSlot(appt.getSlotId()).getDoctor() == null) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Appointment has no assigned doctor"
             );
         }
 
-        Integer apptDoctorId = appt.getSlot().getDoctor().getDoctorId();
+        Integer apptDoctorId = timeSlotClient.getTimeSlot(appt.getSlotId()).getDoctor().getDoctorId();
 
         if (!apptDoctorId.equals(doctorId)) {
             throw new ResponseStatusException(
@@ -247,27 +252,27 @@ public class DoctorService implements ServiceInterface<Doctor> {
         }
     }
 
-    private AppointmentDoctorView toAppointmentDoctorView(Appointment a) {
+    private AppointmentDoctorView toAppointmentDoctorView(AppointmentDto a) {
         String patientFirstName = null;
         String patientLastName = null;
-        if (a.getPatient() != null) {
-            User user = userClient.getUser(a.getPatient().getUserId());
+        if (a.getPatientId() != null) {
+            User user = userClient.getUser(patientService.findById(a.getPatientId().intValue()).get().getUserId());
             patientFirstName = user.getFirstName();
             patientLastName = user.getLastName();
         }
         // Calculate duration from slot start/end time if slot exists
         Integer estimatedDurationMinutes = null;
-        if (a.getSlot() != null && a.getSlot().getStartTime() != null && a.getSlot().getEndTime() != null) {
+        if (a.getSlotId() != null && timeSlotClient.getTimeSlot(a.getSlotId()).getStartTime() != null && timeSlotClient.getTimeSlot(a.getSlotId()).getEndTime() != null) {
             estimatedDurationMinutes = (int) java.time.Duration
-                .between(a.getSlot().getStartTime(), a.getSlot().getEndTime())
+                .between(timeSlotClient.getTimeSlot(a.getSlotId()).getStartTime(), timeSlotClient.getTimeSlot(a.getSlotId()).getEndTime())
                 .toMinutes();
         }
 
         return new AppointmentDoctorView(
-            a.getAppointmentId(),
+            a.getAppointmentId().intValue(),
             patientFirstName,
             patientLastName,
-            a.getAppointmentType().getName(), // placeholder for appointment type
+            appointmentClient.getAppointmentTypeById(a.getAppointmentTypeId()).getName(), // placeholder for appointment type
             a.getDateTimeScheduled(),
             estimatedDurationMinutes,
             a.getStatus()

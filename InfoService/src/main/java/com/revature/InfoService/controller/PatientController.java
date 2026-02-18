@@ -9,14 +9,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.revature.InfoService.client.AppointmentClient;
 import com.revature.InfoService.client.AuthClient;
 import com.revature.InfoService.client.UserClient;
-import com.revature.InfoService.dto.Appointment;
+import com.revature.InfoService.dto.AppointmentDto;
 import com.revature.InfoService.dto.AppointmentPatientView;
 import com.revature.InfoService.dto.User;
 import com.revature.InfoService.dto.request.PatientInfoRequest;
 import com.revature.InfoService.dto.response.AuthResponse;
 import com.revature.InfoService.model.Patient;
+import com.revature.InfoService.service.DoctorService;
 import com.revature.InfoService.service.PatientService;
 
 @RestController
@@ -24,34 +26,35 @@ import com.revature.InfoService.service.PatientService;
 @CrossOrigin("*")
 public class PatientController {
     private final PatientService patientService;
+    private final DoctorService doctorService;
     private final AuthClient authClient;
     private final UserClient userClient;
+    private final AppointmentClient appointmentClient;
 
     @Autowired
-    public PatientController(PatientService patientService, AuthClient authClient, UserClient userClient) {
+    public PatientController(PatientService patientService, DoctorService doctorService, AuthClient authClient, UserClient userClient, AppointmentClient appointmentClient) {
         this.patientService = patientService;
+        this.doctorService = doctorService;
         this.authClient = authClient;
         this.userClient = userClient;
+        this.appointmentClient = appointmentClient;
     }
     
     @GetMapping("{patientId}/appointments")
-    public List<AppointmentPatientView> getPatientAppointments(@PathVariable Integer patientId) {
-        /*
-        List<Appointment> appointments = findByPatient_PatientIdAndStatus(patientId, "CONFIRMED");
+    public List<AppointmentPatientView> getPatientAppointments(@PathVariable Long patientId) {
+        List<AppointmentDto> appointmentDtos = appointmentClient.getAppointmentsByPatientId(patientId);
 
-        return appointments.stream().map(appt -> {
-            User user = userClient.getUser(appt.getDoctor().getDoctorId());
+        return appointmentDtos.stream().map(appt -> {
+            User user = userClient.getUser(doctorService.findById(appt.getDoctorId().intValue()).get().getUserId());
             return new AppointmentPatientView(
-                appt.getAppointmentId(),
+                appt.getAppointmentId().intValue(),
                 user.getFirstName() + " " + user.getLastName(),
-                appt.getAppointmentType().getName(),
+                appointmentClient.getAppointmentTypeById(appt.getAppointmentTypeId()).getName(),
                 appt.getDateTimeScheduled(),
                 appt.getDateTimeScheduled().plusMinutes(30),
                 appt.getStatus()
             );  
         }).collect(Collectors.toList());
-         */
-        return null;
     }
 
     @GetMapping()

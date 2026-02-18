@@ -181,7 +181,7 @@ public class DoctorController {
 
     // GET /doctors/{doctorId}/appointments/{appointmentId}
     @GetMapping("/{doctorId}/appointments/{appointmentId}")
-    public ResponseEntity<AppointmentDoctorView> getAppointmentDetails(@PathVariable Integer doctorId, @PathVariable Integer appointmentId) {
+    public ResponseEntity<AppointmentDoctorView> getAppointmentDetails(@PathVariable Integer doctorId, @PathVariable Long appointmentId) {
         return ResponseEntity.ok(doctorService.getAppointmentDetailsForDoctor(doctorId, appointmentId));
     }
 
@@ -191,14 +191,14 @@ public class DoctorController {
 
     // PATCH /doctors/{doctorId}/appointments/{appointmentId}/status
     @PatchMapping("/{doctorId}/appointments/{appointmentId}/status")
-    public ResponseEntity<AppointmentDoctorView> updateStatus(@PathVariable Integer doctorId, @PathVariable Integer appointmentId, @RequestBody UpdateStatusRequest req) {
+    public ResponseEntity<AppointmentDoctorView> updateStatus(@PathVariable Integer doctorId, @PathVariable Long appointmentId, @RequestBody UpdateStatusRequest req) {
         System.out.println("Received status: " + req.getStatus());                                         
         return ResponseEntity.ok(doctorService.updateAppointmentStatus(doctorId, appointmentId, req.getStatus()));
     }
 
     // POST /doctors/{doctorId}/appointments/{appointmentId}/cancel
     @PostMapping("/{doctorId}/appointments/{appointmentId}/cancel")
-    public ResponseEntity<AppointmentDoctorView> cancelAppointment(@PathVariable Integer doctorId, @PathVariable Integer appointmentId) {
+    public ResponseEntity<AppointmentDoctorView> cancelAppointment(@PathVariable Integer doctorId, @PathVariable Long appointmentId) {
         return ResponseEntity.ok(doctorService.cancelAppointment(doctorId, appointmentId));
     }
 
