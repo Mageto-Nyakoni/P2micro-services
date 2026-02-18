@@ -8,24 +8,24 @@ spring:
     gateway:
       routes:
         - id: AuthService
-          uri: lb://AUTHSERVICE
+          uri: lb://AuthService
           predicates:
-            - Path=/auth/**
+            - Path=/smart-appointment/api/auth/**
 
         - id: AppointmentService
-          uri: lb://APPOINTMENTSERVICE
+          uri: lb://AppointmentService
           predicates:
-            - Path=/appointments,/appointments/**
+            - Path=/smart-appointment/api/appointments/**
 
         - id: InfoService
-          uri: lb://INFOSERVICE
+          uri: lb://InfoService
           predicates:
-            - Path=/info/**
+            - Path=/smart-appointment/api/info/**
 
         - id: ScheduleService
           uri: lb://SCHEDULESERVICE
           predicates:
-            - Path=/schedule/**
+            - Path=/smart-appointment/api/schedule/**
         
 eureka:
   client:

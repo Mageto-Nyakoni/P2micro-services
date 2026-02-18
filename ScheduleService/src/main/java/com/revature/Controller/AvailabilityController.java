@@ -30,7 +30,7 @@ public class AvailabilityController {
     private AvailabilityWindowService availabilityWindowService;
 
 
-     @Autowired
+    @Autowired
     public AvailabilityController(AvailabilityService availabilityService) {
         this.availabilityService = availabilityService;
     }

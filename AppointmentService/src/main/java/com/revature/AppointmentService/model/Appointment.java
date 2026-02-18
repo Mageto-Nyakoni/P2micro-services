@@ -45,7 +45,4 @@ public class Appointment {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (status == null) status = AppointmentStatus.CONFIRMED;
     }
-
-
-    
 }

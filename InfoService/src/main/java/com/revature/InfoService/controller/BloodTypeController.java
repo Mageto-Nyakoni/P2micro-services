@@ -25,7 +25,7 @@ public class BloodTypeController {
         return ResponseEntity.ok(bloodTypeService.findAll());
     }
 
-    @GetMapping("/blood_type_id")
+    @GetMapping("/{blood_type_id}")
     public ResponseEntity<BloodType> getBloodType(@RequestHeader("Authorization") String authHeader, @PathVariable int blood_type_id){
         try {
             /*

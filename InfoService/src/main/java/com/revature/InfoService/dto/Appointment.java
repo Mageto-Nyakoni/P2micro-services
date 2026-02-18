@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 import com.revature.InfoService.model.Doctor;
 import com.revature.InfoService.model.Patient;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.*;
 
 @Getter
@@ -12,16 +15,16 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Appointment {
-    private Integer appointmentId;
-    private Doctor doctor;
-    private TimeSlot slot;
-    private AppointmentType appointmentType;
-    private Patient patient;
+    private Long appointmentId;
+    private Long doctorId;
+    private Long patientId;
+    private Long slotId;
+    private Long appointmentTypeId;
     private LocalDateTime createdAt;
     private LocalDateTime dateTimeScheduled;
-    private String status;
+    private String status = "CONFIRMED";
 
-    public Appointment(Doctor doctor, TimeSlot slot, AppointmentType appointmentType, Patient patient, LocalDateTime dateTimeScheduled) {
+    public Appointment(Long doctorId, Long slotId, AppointmentType appointmentType, Long patientId, LocalDateTime dateTimeScheduled) {
         this.doctor = doctor;
         this.slot = slot;
         this.appointmentType = appointmentType;

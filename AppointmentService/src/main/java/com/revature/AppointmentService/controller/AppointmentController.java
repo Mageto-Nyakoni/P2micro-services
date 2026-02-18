@@ -9,28 +9,28 @@ import com.revature.AppointmentService.model.Appointment;
 import com.revature.AppointmentService.service.AppointmentService;
 
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("smart-appointment/api/appointments")
 @CrossOrigin(origins = "*")
 public class AppointmentController {
-
-     private final AppointmentService service;
+    private final AppointmentService service;
 
     public AppointmentController(AppointmentService service) {
         this.service = service;
     }
-//=================book====================
-@PostMapping
-public Long create(@RequestBody BookAppointmentRequestDto request) {
-     Appointment appointment = service.bookAppointment(
+
+    //=================book====================
+    @PostMapping
+    public Long create(@RequestBody BookAppointmentRequestDto request) {
+        Appointment appointment = service.bookAppointment(
             request.getPatientId(),
             request.getDoctorId(),
             request.getSlotId(),
             request.getAppointmentTypeId()
-    );
+        );
 
-    return appointment.getAppointmentId(); 
-}
-//====================get doctor===================
+        return appointment.getAppointmentId(); 
+    }
+    //====================get doctor===================
     @GetMapping("/doctor/{doctorId}")
     public List<AppointmentDto> getDoctorAppointments(@PathVariable Long doctorId) {
         return service.getDoctorAppointments(doctorId);
@@ -47,9 +47,9 @@ public Long create(@RequestBody BookAppointmentRequestDto request) {
         return "Appointment cancelled successfully";
     }
 
-     @GetMapping("/{appointmentId}")
-public Appointment getAppointment(@PathVariable Long appointmentId) {
-    return service.getAppointmentById(appointmentId);
-}
+    @GetMapping("/{appointmentId}")
+    public Appointment getAppointment(@PathVariable Long appointmentId) {
+        return service.getAppointmentById(appointmentId);
+    }
 
 }
