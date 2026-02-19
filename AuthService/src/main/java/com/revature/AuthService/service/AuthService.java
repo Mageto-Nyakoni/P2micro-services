@@ -67,12 +67,12 @@ public class AuthService {
 
         if (registerRequest.getPrivilegeId() == 1) {
             Patient patient = new Patient();
-            patient.setUser(newUser);
+            patient.setUserID(newUser.getUserId());
             patientClient.createPatient(patient);
         }
         if(registerRequest.getPrivilegeId() == 2) {
             Doctor doctor = new Doctor();
-            doctor.setUser(newUser);
+            doctor.setUserId(newUser.getUserId());
             doctorClient.createDoctor(doctor);
         }
 

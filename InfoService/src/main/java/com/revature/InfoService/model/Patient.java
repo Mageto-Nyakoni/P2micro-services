@@ -4,8 +4,21 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "patient")
@@ -49,7 +62,7 @@ public class Patient {
     @Column(name = "user_id")
     private Integer userId;
 
-    public Patient(Integer age, String gender, String phoneNumber, LocalDate dateOfBirth, String address, BloodType bloodType, List<Allergy> allergies) {
+    public Patient(Integer age, String gender, String phoneNumber, LocalDate dateOfBirth, String address, BloodType bloodType, List<Allergy> allergies, Integer userId) {
         this.age = age;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
@@ -57,5 +70,6 @@ public class Patient {
         this.address = address;
         this.bloodType = bloodType;
         this.allergies = allergies;
+        this.userId = userId;
     }
 }

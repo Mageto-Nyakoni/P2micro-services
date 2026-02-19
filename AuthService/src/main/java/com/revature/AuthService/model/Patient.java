@@ -15,7 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Patient {
-    private User user;
+    private Integer userID;
     private Integer patientId;
     private Integer age;
     private String gender;

@@ -13,7 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Doctor {
     private Integer doctorId;
-    private User user;
+    private Integer userId;
     private Integer experienceYears;
     private String gender;
     private Speciality speciality;

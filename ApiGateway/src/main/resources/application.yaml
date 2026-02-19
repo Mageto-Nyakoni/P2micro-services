@@ -9,18 +9,21 @@ spring:
         webflux:
           routes:
             - id: AuthService
-              uri: lb://AUTHSERVICE
+              # uri: lb://AUTHSERVICE
+              uri: http://localhost:8081
               predicates:
                 - Path=/smart-appointment/api/auth/**, 
                        /smart-appointment/api/users/**
 
             - id: AppointmentService
-              uri: lb://APPOINTMENTSERVICE
+              # uri: lb://APPOINTMENTSERVICE
+              uri: http://localhost:8083
               predicates:
                 - Path=/smart-appointment/api/appointments/**
 
             - id: InfoService
-              uri: lb://INFOSERVICE
+              # uri: lb://INFOSERVICE
+              uri: http://localhost:8082
               predicates:
                 - Path=/smart-appointment/api/patients/**, 
                        /smart-appointment/api/doctors/**, 
@@ -28,7 +31,8 @@ spring:
                        /smart-appointment/api/specialities/**
 
             - id: ScheduleService
-              uri: lb://SCHEDULESERVICE
+              # uri: lb://SCHEDULESERVICE
+              uri: http://localhost:8084
               predicates:
                 - Path=/smart-appointment/api/schedule/**
 
