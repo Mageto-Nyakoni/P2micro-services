@@ -2,12 +2,15 @@ package com.revature.AppointmentService.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import java.time.format.DateTimeFormatter;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import com.revature.AppointmentService.client.InfoClient;
 import com.revature.AppointmentService.client.ScheduleClient;
+import com.revature.AppointmentService.dto.request.BookAppointmentRequestDto;
 import com.revature.AppointmentService.dto.response.AppointmentDto;
 import com.revature.AppointmentService.dto.response.SlotDto;
 import com.revature.AppointmentService.model.Appointment;
@@ -29,97 +32,132 @@ public class AppointmentService {
         this.typeRepo = typeRepo;
         this.scheduleClient = scheduleClient;
     }
-  
+    private AppointmentDto mapToDto(Appointment appointment, SlotDto slot) {
 
-    // ================= BOOK APPOINTMENT =================
-    public Appointment bookAppointment(Integer patientId, Integer doctorId, Integer slotId, Integer appointmentTypeId) {
-        // Validate Patient (Info Service)
-        infoClient.getPatient(patientId);
+    String doctorName = "Doctor " + appointment.getDoctorId();
+    String appointmentType = appointment.getAppointmentTypeId() != null
+            ? "Type " + appointment.getAppointmentTypeId()
+            : "General";
 
-        // Validate Doctor (Info Service)
-        infoClient.getDoctor(doctorId);
-        // Validate Slot
-        SlotDto slot = scheduleClient.getTimeSlot(slotId);
-        if (!slot.isAvailable()) {
-            throw new RuntimeException("Slot is not available");
-        }
-        // Convert slot start time from String to LocalDateTime
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME; // or match your string format
-        LocalDateTime slotTime = LocalDateTime.parse(slot.getStartTime(), formatter);
-
-
-        // Create Appointment
-        Appointment appt = new Appointment(
-            patientId,
-            doctorId,
-            slotId,
-            typeRepo.findById(appointmentTypeId).get(),
-            slotTime,
-            AppointmentStatus.CONFIRMED
-        );
-
-         // Save Appointment
-        Appointment savedAppt = apptRepo.save(appt);
-
-        //  Mark slot as booked in ScheduleService
-        scheduleClient.bookSlot(slotId);
-
-        return savedAppt;
-    }
-
-
-   private AppointmentDto mapToDto(Appointment appt) {
     return new AppointmentDto(
-        appt.getAppointmentId().intValue(),
-        "Doctor " + appt.getDoctorId(),
-        "Type " + appt.getAppointmentType().getName(),
-        appt.getDateTimeScheduled(),
-        appt.getDateTimeScheduled().plusMinutes(30),
-        appt.getStatus()
+            appointment.getAppointmentId(),
+            doctorName,
+            appointmentType,
+            slot != null ? slot.getDateTime() : null,
+            slot != null ? slot.getDateTime().plusMinutes(30) : null,
+            appointment.getStatus()
     );
 }
-    // ================= GET DOCTOR APPOINTMENTS =================
-    public List<AppointmentDto> getDoctorAppointments(Integer doctorId) {
-        return apptRepo.findByDoctorId(doctorId)
+        // BOOK appointment
+    @Transactional
+    public AppointmentDto bookAppointment(BookAppointmentRequestDto request) {
+
+        if (request.getDoctorId() == null ||
+            request.getPatientId() == null ||
+            request.getSlotId() == null) {
+
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Doctor, Patient and Slot are required");
+        }
+
+        //  validate doctor & patient exists (InfoService)
+       infoClient.getDoctor(request.getDoctorId());
+        infoClient.getPatient(request.getPatientId());
+
+        //get slot from ScheduleService
+         SlotDto slot = scheduleClient.getTimeSlot(request.getSlotId());
+
+          if (slot == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Slot not found");
+        }
+
+        if (!slot.getDoctorId().equals(request.getDoctorId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Slot does not belong to doctor");
+        }
+
+        if (!slot.isAvailable()) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Slot not available");
+        }
+
+        //book slot in ScheduleService
+         scheduleClient.bookSlot(request.getSlotId());
+        
+        Appointment appointment = new Appointment();
+        appointment.setDoctorId(request.getDoctorId().intValue());
+        appointment.setPatientId(request.getPatientId().intValue());
+        appointment.setSlotId(request.getSlotId().intValue());
+        appointment.setAppointmentTypeId(
+                request.getAppointmentTypeId() != null
+                        ? request.getAppointmentTypeId().intValue()
+                        : null);
+        appointment.setDateTimeScheduled(slot.getDateTime());
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        Appointment saved = apptRepo.save(appointment);
+        return mapToDto(saved, slot);
+    }
+
+    //get appointment by id
+   public AppointmentDto getById(Integer id) {
+
+        Appointment appointment =
+                apptRepo.findById(id)
+                        .orElseThrow(() ->
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "Appointment not found"));
+        SlotDto slot =
+                scheduleClient.getTimeSlot(
+                        appointment.getSlotId());
+
+        return mapToDto(appointment, slot);
+    }
+
+    //  Get All Appointments
+    public List<AppointmentDto> getAll() {
+    return apptRepo.findAll()
             .stream()
-            .map(this::mapToDto)
-            .toList();
-    }
+            .map(appointment ->
+                    mapToDto(
+                            appointment,
+                            scheduleClient.getTimeSlot(
+                                    appointment.getSlotId())))
+            .collect(Collectors.toList());  
+     }
 
-    // ================= GET PATIENT APPOINTMENTS =================
-    public List<AppointmentDto> getPatientAppointments(Integer patientId) {
-        return apptRepo.findByPatientId(patientId)
+
+    //Get Appointments For Patient
+    public List<AppointmentDto> getForPatient(Integer patientId) {
+    return apptRepo.findByPatientId(patientId)
             .stream()
-            .map(this::mapToDto)
-            .toList();
-    }
-    // ================= CANCEL APPOINTMENT =================
-    public void cancelAppointment(Integer id) {
-        Appointment appt = apptRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+            .map(appointment ->
+                    mapToDto(
+                            appointment,
+                            scheduleClient.getTimeSlot(
+                                    appointment.getSlotId())))
+            .collect(Collectors.toList());
+}
+    //  Cancel Appointment
+   @Transactional
+public void cancelAppointment(Integer appointmentId) {
 
-        appt.setStatus(AppointmentStatus.CANCELLED);
-        apptRepo.save(appt);
-    }
+    Appointment appointment = apptRepo.findById(appointmentId)
+            .orElseThrow(() ->
+                    new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Appointment not found"));
 
-    public Appointment getAppointmentById(Integer id) {
-        return apptRepo.findById(id)
-            .orElseThrow(() -> new RuntimeException("Appointment not found"));
-    }
+   scheduleClient.freeSlot(
+        appointment.getSlotId());
 
+    appointment.setStatus(AppointmentStatus.CANCELLED);
+    apptRepo.save(appointment);
+}
 
-    public List<AppointmentDto> getDoctorAppointmentBetweenStartAndEnd(Integer doctorId, LocalDateTime start, LocalDateTime end) {
-        return apptRepo.findByDoctorIdAndDateTimeScheduledBetween(doctorId, start, end)
-            .stream()
-            .map(this::mapToDto)
-            .toList();
-    }
-
-
-    public List<AppointmentDto> getDoctorAppointmentAfterNow(Integer doctorId, LocalDateTime now) {
-        return apptRepo.findByDoctorIdAndDateTimeScheduledAfter(doctorId, now)
-            .stream()
-            .map(this::mapToDto)
-            .toList();
-    }
 }

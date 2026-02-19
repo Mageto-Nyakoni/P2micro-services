@@ -3,6 +3,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import java.util.List;
 
 import com.revature.AppointmentService.dto.response.SlotDto;
 
@@ -17,4 +18,11 @@ public interface ScheduleClient {
 //===================ScheduleService should mark slot as booked=======================
      @PutMapping("/slots/{slotId}/book")
     void bookSlot(@PathVariable Integer slotId);
+
+    @PutMapping("/slots/{slotId}/free")
+    void freeSlot(@PathVariable Integer slotId);   
+
+    @GetMapping("/doctors/{doctorId}/slots")
+     List<SlotDto> getAvailableSlots(@PathVariable Integer doctorId);
+
 }

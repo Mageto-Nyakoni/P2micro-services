@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "appointment")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,51 +17,31 @@ public class Appointment {
     @Column(name = "appointment_id")
     private Integer appointmentId;
 
-    //  Store only IDs (microservice safe)
     @Column(name = "doctor_id", nullable = false)
     private Integer doctorId;
-
-    @Column(name = "patient_id", nullable = false)
-    private Integer patientId;
 
     @Column(name = "slot_id", nullable = false)
     private Integer slotId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "type_id", nullable = false)
-    private AppointmentType appointmentType;
+    @Column(name = "type_id", nullable = false)
+    private Integer appointmentTypeId;
 
-    @Column(name = "created_at", nullable = false)
+    @Column(name = "patient_id", nullable = false)
+    private Integer patientId;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "date_time_scheduled", nullable = false)
+    @Column(name = "date_time_scheduled")
     private LocalDateTime dateTimeScheduled;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private AppointmentStatus status = AppointmentStatus.CONFIRMED;
+    private AppointmentStatus status;
 
     @PrePersist
     public void prePersist() {
         if (createdAt == null) createdAt = LocalDateTime.now();
         if (status == null) status = AppointmentStatus.CONFIRMED;
-    }
-
-    public Appointment(Integer doctorId, Integer patientId, Integer slotId, AppointmentType appointmentType, LocalDateTime createdAt, LocalDateTime dateTimeScheduled) {
-        this.doctorId = doctorId;
-        this.patientId = patientId;
-        this.slotId = slotId;
-        this.appointmentType = appointmentType;
-        this.createdAt = createdAt;
-        this.dateTimeScheduled = dateTimeScheduled;
-    }
-
-    public Appointment(Integer doctorId, Integer patientId, Integer slotId, AppointmentType appointmentType, LocalDateTime dateTimeScheduled, AppointmentStatus status) {
-        this.doctorId = doctorId;
-        this.patientId = patientId;
-        this.slotId = slotId;
-        this.appointmentType = appointmentType;
-        this.dateTimeScheduled = dateTimeScheduled;
-        this.status = status;
     }
 }
