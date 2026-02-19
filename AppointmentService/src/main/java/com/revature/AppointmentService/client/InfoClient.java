@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface InfoClient {
 
     @GetMapping("/doctors/{id}")
-    Object getDoctor(@PathVariable("id") Long id);
+    Object getDoctor(@PathVariable("id") Integer id);
 
     @GetMapping("/patients/{id}")
-    Object getPatient(@PathVariable("id") Long id);
+    Object getPatient(@PathVariable("id") Integer id);
 }

@@ -11,10 +11,10 @@ import com.revature.AppointmentService.dto.response.SlotDto;
 public interface ScheduleClient {
 
     @GetMapping("/slots/{slotId}")
-    SlotDto getTimeSlot(@PathVariable Long slotId);
+    SlotDto getTimeSlot(@PathVariable Integer slotId);
 
     
 //===================ScheduleService should mark slot as booked=======================
      @PutMapping("/slots/{slotId}/book")
-    void bookSlot(@PathVariable Long slotId);
+    void bookSlot(@PathVariable Integer slotId);
 }

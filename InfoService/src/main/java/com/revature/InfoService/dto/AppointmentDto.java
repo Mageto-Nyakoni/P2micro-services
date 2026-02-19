@@ -9,19 +9,19 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppointmentDto {
-    private Long appointmentId;
-    private Long doctorId;
-    private Long patientId;
-    private Long slotId;
-    private Long appointmentTypeId;
+    private Integer appointmentId;
+    private Integer doctorId;
+    private Integer patientId;
+    private Integer slotId;
+    private AppointmentType appointmentType;
     private LocalDateTime createdAt;
     private LocalDateTime dateTimeScheduled;
     private String status = "CONFIRMED";
 
-    public AppointmentDto(Long doctorId, Long slotId, Long appointmentTypeId, Long patientId, LocalDateTime dateTimeScheduled) {
+    public AppointmentDto(Integer doctorId, Integer slotId, AppointmentType appointmentType, Integer patientId, LocalDateTime dateTimeScheduled) {
         this.doctorId = doctorId;
         this.slotId = slotId;
-        this.appointmentTypeId = appointmentTypeId;
+        this.appointmentType = appointmentType;
         this.patientId = patientId;
         this.dateTimeScheduled = dateTimeScheduled;
     }

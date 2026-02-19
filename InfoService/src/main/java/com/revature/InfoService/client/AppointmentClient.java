@@ -11,28 +11,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.revature.InfoService.dto.AppointmentDto;
-import com.revature.InfoService.dto.AppointmentType;
 
-@FeignClient(name = "AppointmentService", contextId = "appointmentService", path = "/smart-appointment/api")
+@FeignClient(name = "AppointmentService", contextId = "appointmentService", path = "/smart-appointment/api/appointments")
 public interface AppointmentClient {
-    @GetMapping("/appointments/{appointmentId}")
-    AppointmentDto getAppointment(@PathVariable Long appointmentId);
-
-    @GetMapping("/appointments/patients/{patientId}")
-    List<AppointmentDto> getAppointmentsByPatientId(@PathVariable Long patientId);
-
-    @GetMapping("/appointments/doctor/{doctorId}")
-    List<AppointmentDto> getAppointmentsDoctorId(@PathVariable Long doctorId);
-
-    @GetMapping("/appointment-types/{appointmentTypeId}")
-    AppointmentType getAppointmentTypeById(@PathVariable Long appointmentTypeId);
-
-    @GetMapping("/appointments")
-    List<AppointmentDto> findByDoctorIdAndStartEndTimeBetween(@RequestParam(required = false) Integer doctorId, @RequestParam(required = false) LocalDateTime start, @RequestParam(required = false) LocalDateTime end);
-
-    @PostMapping("/appointments")
+    @PostMapping("/book")
     AppointmentDto createAppointment(@RequestBody AppointmentDto appointment);
+    
+    @GetMapping("/{appointmentId}")
+    AppointmentDto getAppointment(@PathVariable Integer appointmentId);
 
-    @GetMapping("/appointments/doctor/{doctorId}")
-    List<AppointmentDto> findByDoctorIdAndDateTimeScheduledAfter(@PathVariable Integer doctorId,@RequestParam LocalDateTime now);
+    @GetMapping("/patients/{patientId}")
+    List<AppointmentDto> getAppointmentsByPatientId(@PathVariable Integer patientId);
+
+    @GetMapping("/doctor/{doctorId}")
+    List<AppointmentDto> getAppointmentsDoctorIdWithOptionalParams(@PathVariable Integer doctorId, @RequestParam(required = false) LocalDateTime start, @RequestParam(required = false) LocalDateTime end, @RequestParam(required = false) LocalDateTime now);
 }

@@ -129,7 +129,7 @@ public class PatientController {
     }
 
     @GetMapping("{patientId}/appointments")
-    public List<AppointmentPatientView> getPatientAppointments(@PathVariable Long patientId) {
+    public List<AppointmentPatientView> getPatientAppointments(@PathVariable Integer patientId) {
         List<AppointmentDto> appointmentDtos = appointmentClient.getAppointmentsByPatientId(patientId);
 
         return appointmentDtos.stream().map(appt -> {
@@ -137,7 +137,7 @@ public class PatientController {
             return new AppointmentPatientView(
                 appt.getAppointmentId().intValue(),
                 user.getFirstName() + " " + user.getLastName(),
-                appointmentClient.getAppointmentTypeById(appt.getAppointmentTypeId()).getName(),
+                appt.getAppointmentType().getName(),
                 appt.getDateTimeScheduled(),
                 appt.getDateTimeScheduled().plusMinutes(30),
                 appt.getStatus()

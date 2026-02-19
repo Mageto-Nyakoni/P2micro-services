@@ -95,16 +95,16 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<AppointmentDto> appts = appointmentClient.findByDoctorIdAndDateTimeScheduledAfter(doctorId, now);
+        List<AppointmentDto> appts = appointmentClient.getAppointmentsDoctorIdWithOptionalParams(doctorId, null, null, now);
 
         return appts.stream()
             .map(this::toAppointmentDoctorView)
             .toList();
     }
 
-    public List<AppointmentDoctorView> getAllAppointmentsForDoctor(Long doctorId) {
-        ensureDoctorExists(doctorId.intValue());
-        List<AppointmentDto> appointments = appointmentClient.getAppointmentsDoctorId(doctorId);
+    public List<AppointmentDoctorView> getAllAppointmentsForDoctor(Integer doctorId) {
+        ensureDoctorExists(doctorId);
+        List<AppointmentDto> appointments = appointmentClient.getAppointmentsDoctorIdWithOptionalParams(doctorId, null, null, null);
         return appointments.stream()
             .map(this::toAppointmentDoctorViewWithPatient)
             .toList();
@@ -117,14 +117,14 @@ public class DoctorService implements ServiceInterface<Doctor> {
         Integer estimatedTime = 0;
 
         if (a.getPatientId() != null) {
-            User user = userClient.getUser(patientService.findById(a.getPatientId().intValue()).get().getUserId());
+            User user = userClient.getUser(patientService.findById(a.getPatientId()).get().getUserId());
             firstName = user.getFirstName();
             lastName = user.getLastName();
         }
 
-        if (a.getAppointmentTypeId() != null) {
-            appointmentType = appointmentClient.getAppointmentTypeById(a.getAppointmentTypeId()).getName(); // if enum
-            estimatedTime = appointmentClient.getAppointmentTypeById(a.getAppointmentTypeId()).getEstimatedTime();
+        if (a.getAppointmentType() != null) {
+            appointmentType = a.getAppointmentType().getName(); // if enum
+            estimatedTime = a.getAppointmentType().getEstimatedTime();
         }
 
         return new AppointmentDoctorView(
@@ -138,8 +138,6 @@ public class DoctorService implements ServiceInterface<Doctor> {
         );
     }
 
-
-
     public List<AppointmentDoctorView> getTodaysAppointments(Integer doctorId) {
         ensureDoctorExists(doctorId);
         LocalDate today = LocalDate.now();
@@ -148,7 +146,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         // Requires repo method:
         // List<Appointment> findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
-        List<AppointmentDto> appts = appointmentClient.findByDoctorIdAndStartEndTimeBetween(doctorId, start, end);
+        List<AppointmentDto> appts = appointmentClient.getAppointmentsDoctorIdWithOptionalParams(doctorId, start, end, null);
 
         return appts.stream().map(this::toAppointmentDoctorView).toList();
     }
@@ -163,12 +161,12 @@ public class DoctorService implements ServiceInterface<Doctor> {
         LocalDateTime start = weekStart.atStartOfDay();
         LocalDateTime end = weekEnd.atTime(LocalTime.MAX);
 
-        List<AppointmentDto> appts = appointmentClient.findByDoctorIdAndStartEndTimeBetween(doctorId, start, end);
+        List<AppointmentDto> appts = appointmentClient.getAppointmentsDoctorIdWithOptionalParams(doctorId, start, end, null);
 
         return appts.stream().map(this::toAppointmentDoctorView).toList();
     }
 
-    public AppointmentDoctorView getAppointmentDetailsForDoctor(Integer doctorId, Long appointmentId) {
+    public AppointmentDoctorView getAppointmentDetailsForDoctor(Integer doctorId, Integer appointmentId) {
         AppointmentDto appt = appointmentClient.getAppointment(appointmentId);
         if (appt == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found");
@@ -179,7 +177,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     }
 
     @Transactional
-    public AppointmentDoctorView updateAppointmentStatus(Integer doctorId, Long appointmentId, String newStatus) {
+    public AppointmentDoctorView updateAppointmentStatus(Integer doctorId, Integer appointmentId, String newStatus) {
         // Proposal: doctor can update status completed/cancelled/no-show
         // :contentReference[oaicite:7]{index=7}
 
@@ -208,7 +206,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
     }
 
     @Transactional
-    public AppointmentDoctorView cancelAppointment(Integer doctorId, Long appointmentId) {
+    public AppointmentDoctorView cancelAppointment(Integer doctorId, Integer appointmentId) {
         // Proposal: doctor can cancel patient appointment
         // :contentReference[oaicite:8]{index=8}
 
@@ -276,7 +274,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
             a.getAppointmentId().intValue(),
             patientFirstName,
             patientLastName,
-            appointmentClient.getAppointmentTypeById(a.getAppointmentTypeId()).getName(), // placeholder for appointment type
+            a.getAppointmentType().getName(), // placeholder for appointment type
             a.getDateTimeScheduled(),
             estimatedDurationMinutes,
             a.getStatus()
