@@ -1,10 +1,9 @@
-package com.revature.Service;
+package com.revature.ScheduleService.service;
 
-import com.revature.Model.TimeSlot;
-import com.revature.Repository.TimeSlotRepository;
-import com.revature.Model.enums.TimeSlotStatus;
+import com.revature.ScheduleService.model.TimeSlot;
+import com.revature.ScheduleService.repository.TimeSlotRepository;
+import com.revature.ScheduleService.model.enums.TimeSlotStatus;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -14,12 +13,11 @@ import java.time.LocalTime;
 
 @Service
 public class AdminScheduleService {
-    private final DoctorInfoClient doctorInfoClient;
+    private final DoctorInfoService doctorInfoService;
     private final TimeSlotRepository timeSlotRepository;
 
-    @Autowired
-    public AdminScheduleService(DoctorInfoClient doctorInfoClient, TimeSlotRepository timeSlotRepository) {
-        this.doctorInfoClient = doctorInfoClient;
+    public AdminScheduleService(DoctorInfoService doctorInfoService, TimeSlotRepository timeSlotRepository) {
+        this.doctorInfoService = doctorInfoService;
         this.timeSlotRepository = timeSlotRepository;
     }
 
@@ -28,7 +26,7 @@ public class AdminScheduleService {
             throw new IllegalArgumentException("Start time must be before end time");
         }
 
-        if (!doctorInfoClient.doctorExists(doctorId)) {
+        if (!doctorInfoService.doctorExists(doctorId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Doctor not found");
         }
 

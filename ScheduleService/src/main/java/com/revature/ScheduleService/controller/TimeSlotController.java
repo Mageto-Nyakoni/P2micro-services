@@ -1,9 +1,8 @@
-package com.revature.Controller;
+package com.revature.ScheduleService.controller;
 
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -15,21 +14,24 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.revature.Model.TimeSlot;
-import com.revature.Model.enums.TimeSlotStatus;
-import com.revature.Repository.TimeSlotRepository;
-import com.revature.Service.TimeSlotService;
-import com.revature.dto.SlotDto;
+import com.revature.ScheduleService.model.TimeSlot;
+import com.revature.ScheduleService.model.enums.TimeSlotStatus;
+import com.revature.ScheduleService.repository.TimeSlotRepository;
+import com.revature.ScheduleService.service.TimeSlotService;
+import com.revature.ScheduleService.dto.SlotDto;
 
 @RestController
 @RequestMapping("/smart-appointment/api/slots")
 @CrossOrigin(origins = "http://localhost:5173")
 public class TimeSlotController {
 
-    @Autowired
-    private TimeSlotRepository timeSlotRepository;
-    @Autowired
-    private TimeSlotService timeSlotService;
+    private final TimeSlotRepository timeSlotRepository;
+    private final TimeSlotService timeSlotService;
+
+    public TimeSlotController(TimeSlotRepository timeSlotRepository, TimeSlotService timeSlotService) {
+        this.timeSlotRepository = timeSlotRepository;
+        this.timeSlotService = timeSlotService;
+    }
 
     @GetMapping("/doctor/{doctorId}")
     public List<SlotDto> getDoctorSlotsByDate(

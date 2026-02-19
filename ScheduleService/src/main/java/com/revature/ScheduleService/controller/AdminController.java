@@ -1,20 +1,10 @@
-package com.revature.Controller;
+package com.revature.ScheduleService.controller;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
-import java.net.URI;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientResponseException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,16 +15,14 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.revature.Model.TimeSlot;
-import com.revature.Model.enums.AppointmentStatus;
-import com.revature.Model.enums.TimeSlotStatus;
-import com.revature.Service.TimeSlotService;
-import com.revature.Service.AdminAppointmentService;
-import com.revature.Service.AdminScheduleService;
-import com.revature.Service.AuthValidationClient;
-import org.springframework.web.util.UriComponentsBuilder;
+import com.revature.ScheduleService.model.TimeSlot;
+import com.revature.ScheduleService.model.enums.AppointmentStatus;
+import com.revature.ScheduleService.model.enums.TimeSlotStatus;
+import com.revature.ScheduleService.service.AdminAppointmentService;
+import com.revature.ScheduleService.service.AdminScheduleService;
+import com.revature.ScheduleService.service.AuthValidationService;
+import com.revature.ScheduleService.service.TimeSlotService;
 
 @RestController
 @RequestMapping("smart-appointment/api/admin")
@@ -43,26 +31,18 @@ public class AdminController {
     private final AdminAppointmentService adminAppointmentService;
     private final AdminScheduleService adminScheduleService;
     private final TimeSlotService timeSlotService;
-    private final AuthValidationClient authValidationClient;
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final String appointmentServiceBaseUrl;
-    private final String usersTablePath;
+    private final AuthValidationService authValidationService;
 
-    @Autowired
     public AdminController(
             AdminAppointmentService adminAppointmentService,
             AdminScheduleService adminScheduleService,
             TimeSlotService timeSlotService,
-            AuthValidationClient authValidationClient,
-            @Value("${appointment.service.base-url:http://localhost:8083}") String appointmentServiceBaseUrl,
-            @Value("${appointment.service.users-table-path:/smart-appointment/api/users/table}") String usersTablePath
+            AuthValidationService authValidationService
     ) {
         this.adminAppointmentService = adminAppointmentService;
         this.adminScheduleService = adminScheduleService;
         this.timeSlotService = timeSlotService;
-        this.authValidationClient = authValidationClient;
-        this.appointmentServiceBaseUrl = appointmentServiceBaseUrl;
-        this.usersTablePath = usersTablePath;
+        this.authValidationService = authValidationService;
     }
 
     //  View ALL appointments (system-wide)
@@ -169,45 +149,10 @@ public class AdminController {
             @RequestHeader("Authorization") String authHeader
     ) {
         validateAdmin(authHeader);
-        try {
-            URI uri = UriComponentsBuilder.fromHttpUrl(joinUrl(appointmentServiceBaseUrl, usersTablePath))
-                    .build(true)
-                    .toUri();
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", authHeader);
-            ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
-                    uri,
-                    org.springframework.http.HttpMethod.GET,
-                    new HttpEntity<>(headers),
-                    new ParameterizedTypeReference<>() {}
-            );
-            return ResponseEntity.ok(response.getBody() == null ? List.of() : response.getBody());
-        } catch (RestClientResponseException ex) {
-            throw new ResponseStatusException(HttpStatus.valueOf(ex.getRawStatusCode()), ex.getResponseBodyAsString(), ex);
-        }
+        return ResponseEntity.ok(adminAppointmentService.getStaff(authHeader));
     }
 
     private void validateAdmin(String authHeader) {
-        if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
-        }
-        AuthValidationClient.AuthValidationResult validation = authValidationClient.validate(authHeader);
-        if (!validation.valid()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
-        }
-        String privilege = validation.privilege();
-        if (!"Admin".equals(privilege) && !"Super".equals(privilege)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
-        }
-    }
-
-    private String joinUrl(String base, String path) {
-        if (base.endsWith("/") && path.startsWith("/")) {
-            return base.substring(0, base.length() - 1) + path;
-        }
-        if (!base.endsWith("/") && !path.startsWith("/")) {
-            return base + "/" + path;
-        }
-        return base + path;
+        authValidationService.validateAdmin(authHeader);
     }
 }

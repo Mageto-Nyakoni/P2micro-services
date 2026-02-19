@@ -1,14 +1,14 @@
-package com.revature.Service;
+package com.revature.ScheduleService.service;
 
 import java.util.*;
 
 import org.springframework.stereotype.Service;
 
-import com.revature.Model.TimeSlot;
-import com.revature.Model.enums.TimeSlotStatus;
-import com.revature.Repository.TimeSlotRepository;
-import com.revature.dto.DoctorAvailabilityDto;
-import com.revature.dto.SlotDto;
+import com.revature.ScheduleService.model.TimeSlot;
+import com.revature.ScheduleService.model.enums.TimeSlotStatus;
+import com.revature.ScheduleService.repository.TimeSlotRepository;
+import com.revature.ScheduleService.dto.DoctorAvailabilityDto;
+import com.revature.ScheduleService.dto.SlotDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class AvailabilityService {
 
     private final TimeSlotRepository timeSlotRepository;
-    private final DoctorInfoClient doctorInfoClient;
+    private final DoctorInfoService doctorInfoService;
 
     public Map<String, List<DoctorAvailabilityDto>> getAvailability() {
 
@@ -70,7 +70,7 @@ public class AvailabilityService {
             return null;
         }
         if (!doctorNameCache.containsKey(doctorId)) {
-            doctorNameCache.put(doctorId, doctorInfoClient.getDoctorName(doctorId));
+            doctorNameCache.put(doctorId, doctorInfoService.getDoctorName(doctorId));
         }
         return doctorNameCache.get(doctorId);
     }

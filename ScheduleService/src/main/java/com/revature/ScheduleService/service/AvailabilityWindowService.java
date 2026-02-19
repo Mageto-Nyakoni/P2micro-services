@@ -1,4 +1,4 @@
-package com.revature.Service;
+package com.revature.ScheduleService.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.revature.Model.AvailabilityWindow;
-import com.revature.Model.TimeSlot;
-import com.revature.Model.enums.TimeSlotStatus;
-import com.revature.Repository.AvailabilityWindowRepository;
-import com.revature.dto.AvailabilityWindowDTO;
-import com.revature.dto.DoctorAvailabilityDto;
-import com.revature.dto.SlotDto;
+import com.revature.ScheduleService.model.AvailabilityWindow;
+import com.revature.ScheduleService.model.TimeSlot;
+import com.revature.ScheduleService.model.enums.TimeSlotStatus;
+import com.revature.ScheduleService.repository.AvailabilityWindowRepository;
+import com.revature.ScheduleService.dto.AvailabilityWindowDTO;
+import com.revature.ScheduleService.dto.DoctorAvailabilityDto;
+import com.revature.ScheduleService.dto.SlotDto;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class AvailabilityWindowService {
 
     private final AvailabilityWindowRepository windowRepository;
     private final TimeSlotService timeSlotService;
-    private final DoctorInfoClient doctorInfoClient;
+    private final DoctorInfoService doctorInfoService;
 
     @Transactional
     public AvailabilityWindow createWindow(
@@ -52,6 +52,25 @@ public class AvailabilityWindowService {
     }
 
     @Transactional
+    public AvailabilityWindowDTO createWindowDto(
+            Integer doctorId,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime
+    ) {
+        AvailabilityWindow window = createWindow(doctorId, date, startTime, endTime);
+        return new AvailabilityWindowDTO(
+                window.getWindowId(),
+                window.getDate(),
+                window.getStartTime(),
+                window.getEndTime(),
+                window.isActive(),
+                window.getDoctorId(),
+                doctorInfoService.getDoctorName(window.getDoctorId())
+        );
+    }
+
+    @Transactional
     public Map<String, Object> deactivateWindow(Integer windowId) {
         AvailabilityWindow window = windowRepository.findById(windowId)
                 .orElseThrow(() -> new RuntimeException("Availability window not found"));
@@ -71,7 +90,7 @@ public class AvailabilityWindowService {
     @Transactional
     public List<AvailabilityWindowDTO> getWindowsForDoctor(Integer doctorId) {
         List<AvailabilityWindow> windows = windowRepository.findActiveWindowsByDoctorIdWithDoctor(doctorId);
-        String doctorName = doctorInfoClient.getDoctorName(doctorId);
+        String doctorName = doctorInfoService.getDoctorName(doctorId);
 
         return windows.stream().map(w -> new AvailabilityWindowDTO(
                 w.getWindowId(),
@@ -128,7 +147,7 @@ public class AvailabilityWindowService {
             return null;
         }
         if (!doctorNameCache.containsKey(doctorId)) {
-            doctorNameCache.put(doctorId, doctorInfoClient.getDoctorName(doctorId));
+            doctorNameCache.put(doctorId, doctorInfoService.getDoctorName(doctorId));
         }
         return doctorNameCache.get(doctorId);
     }

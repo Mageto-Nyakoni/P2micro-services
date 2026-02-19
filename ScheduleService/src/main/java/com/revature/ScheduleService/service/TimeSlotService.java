@@ -1,4 +1,4 @@
-package com.revature.Service;
+package com.revature.ScheduleService.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,14 +9,13 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.revature.Model.AvailabilityWindow;
-import com.revature.Model.TimeSlot;
-import com.revature.Model.enums.TimeSlotStatus;
-import com.revature.Repository.TimeSlotRepository;
+import com.revature.ScheduleService.model.AvailabilityWindow;
+import com.revature.ScheduleService.model.TimeSlot;
+import com.revature.ScheduleService.model.enums.TimeSlotStatus;
+import com.revature.ScheduleService.repository.TimeSlotRepository;
 
 @Service
 public class TimeSlotService {
@@ -24,12 +23,11 @@ public class TimeSlotService {
     private static final Logger log = LoggerFactory.getLogger(TimeSlotService.class);
 
     private final TimeSlotRepository timeSlotRepository;
-    private final DoctorInfoClient doctorInfoClient;
+    private final DoctorInfoService doctorInfoService;
 
-    @Autowired
-    public TimeSlotService(TimeSlotRepository timeSlotRepository, DoctorInfoClient doctorInfoClient) {
+    public TimeSlotService(TimeSlotRepository timeSlotRepository, DoctorInfoService doctorInfoService) {
         this.timeSlotRepository = timeSlotRepository;
-        this.doctorInfoClient = doctorInfoClient;
+        this.doctorInfoService = doctorInfoService;
     }
 
     @Transactional
@@ -324,7 +322,7 @@ public class TimeSlotService {
             return null;
         }
         if (!doctorNameCache.containsKey(doctorId)) {
-            doctorNameCache.put(doctorId, doctorInfoClient.getDoctorName(doctorId));
+            doctorNameCache.put(doctorId, doctorInfoService.getDoctorName(doctorId));
         }
         return doctorNameCache.get(doctorId);
     }

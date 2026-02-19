@@ -1,6 +1,6 @@
-package com.revature.Service;
+package com.revature.ScheduleService.service;
 
-import com.revature.Model.enums.AppointmentStatus;
+import com.revature.ScheduleService.model.enums.AppointmentStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -26,17 +26,20 @@ public class AdminAppointmentService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String appointmentServiceBaseUrl;
     private final String adminAppointmentsPath;
+    private final String usersTablePath;
 
     public AdminAppointmentService(
             @Value("${appointment.service.base-url:http://localhost:8083}") String appointmentServiceBaseUrl,
-            @Value("${appointment.service.admin-appointments-path:/smart-appointment/api/admin/appointments}") String adminAppointmentsPath
+            @Value("${appointment.service.admin-appointments-path:/smart-appointment/api/admin/appointments}") String adminAppointmentsPath,
+            @Value("${appointment.service.users-table-path:/smart-appointment/api/users/table}") String usersTablePath
     ) {
         this.appointmentServiceBaseUrl = appointmentServiceBaseUrl;
         this.adminAppointmentsPath = adminAppointmentsPath;
+        this.usersTablePath = usersTablePath;
     }
 
     public List<Map<String, Object>> getAppointments(String authHeader, String status) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseAppointmentsUrl());
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseAppointmentsUrl());
         if (status != null && !status.isBlank()) {
             builder.queryParam("status", status);
         }
@@ -74,7 +77,7 @@ public class AdminAppointmentService {
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     UriComponentsBuilder
-                            .fromHttpUrl(baseAppointmentsUrl() + "/" + id + actionPath)
+                            .fromUriString(baseAppointmentsUrl() + "/" + id + actionPath)
                             .build(true)
                             .toUri(),
                     method,
@@ -91,7 +94,7 @@ public class AdminAppointmentService {
         try {
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                     UriComponentsBuilder
-                            .fromHttpUrl(baseAppointmentsUrl() + "/" + appointmentId + "/reschedule")
+                            .fromUriString(baseAppointmentsUrl() + "/" + appointmentId + "/reschedule")
                             .queryParam("date", newDateTime.toLocalDate())
                             .queryParam("time", newDateTime.toLocalTime())
                             .build(true)
@@ -101,6 +104,21 @@ public class AdminAppointmentService {
                     new ParameterizedTypeReference<>() {}
             );
             return response.getBody() != null ? response.getBody() : new HashMap<>();
+        } catch (RestClientResponseException ex) {
+            throw mapClientException(ex);
+        }
+    }
+
+    public List<Map<String, Object>> getStaff(String authHeader) {
+        String url = joinUrl(appointmentServiceBaseUrl, usersTablePath);
+        try {
+            ResponseEntity<List<Map<String, Object>>> response = restTemplate.exchange(
+                    UriComponentsBuilder.fromUriString(url).build(true).toUri(),
+                    HttpMethod.GET,
+                    authEntity(authHeader),
+                    new ParameterizedTypeReference<>() {}
+            );
+            return response.getBody() == null ? List.of() : response.getBody();
         } catch (RestClientResponseException ex) {
             throw mapClientException(ex);
         }
@@ -119,7 +137,7 @@ public class AdminAppointmentService {
     private ResponseStatusException mapClientException(RestClientResponseException ex) {
         HttpStatusCode statusCode;
         try {
-            statusCode = HttpStatusCode.valueOf(ex.getRawStatusCode());
+            statusCode = ex.getStatusCode();
         } catch (IllegalArgumentException ignore) {
             statusCode = HttpStatus.BAD_GATEWAY;
         }
@@ -130,12 +148,21 @@ public class AdminAppointmentService {
         return new ResponseStatusException(statusCode, message, ex);
     }
 
-    private HttpEntity<Void> authEntity(String authHeader) {
-        if (authHeader == null || authHeader.isBlank()) {
-            return HttpEntity.EMPTY;
-        }
+    private HttpEntity<?> authEntity(String authHeader) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", authHeader);
+        if (authHeader != null && !authHeader.isBlank()) {
+            headers.set("Authorization", authHeader);
+        }
         return new HttpEntity<>(headers);
+    }
+
+    private String joinUrl(String base, String path) {
+        if (base.endsWith("/") && path.startsWith("/")) {
+            return base.substring(0, base.length() - 1) + path;
+        }
+        if (!base.endsWith("/") && !path.startsWith("/")) {
+            return base + "/" + path;
+        }
+        return base + path;
     }
 }

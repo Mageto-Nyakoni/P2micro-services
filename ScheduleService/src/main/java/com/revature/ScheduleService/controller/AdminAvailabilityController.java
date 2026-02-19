@@ -1,4 +1,5 @@
-package com.revature.Controller;
+package com.revature.ScheduleService.controller;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -15,13 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.revature.Model.AvailabilityWindow;
-import com.revature.Service.AvailabilityWindowService;
-import com.revature.Service.AuthValidationClient;
-import com.revature.Service.DoctorInfoClient;
-import com.revature.dto.AvailabilityWindowDTO;
+import com.revature.ScheduleService.dto.AvailabilityWindowDTO;
+import com.revature.ScheduleService.service.AuthValidationService;
+import com.revature.ScheduleService.service.AvailabilityWindowService;
 
 @RestController
 @RequestMapping("/smart-appointment/api/admin")
@@ -29,17 +27,14 @@ import com.revature.dto.AvailabilityWindowDTO;
 public class AdminAvailabilityController {
 
     private final AvailabilityWindowService availabilityWindowService;
-    private final AuthValidationClient authValidationClient;
-    private final DoctorInfoClient doctorInfoClient;
+    private final AuthValidationService authValidationService;
 
     public AdminAvailabilityController(
             AvailabilityWindowService availabilityWindowService,
-            AuthValidationClient authValidationClient,
-            DoctorInfoClient doctorInfoClient
+            AuthValidationService authValidationService
     ) {
         this.availabilityWindowService = availabilityWindowService;
-        this.authValidationClient = authValidationClient;
-        this.doctorInfoClient = doctorInfoClient;
+        this.authValidationService = authValidationService;
     }
     
    /*  @GetMapping("/{doctorId}/availability-windows")
@@ -65,22 +60,13 @@ public List<AvailabilityWindow> getAvailabilityWindows(
             @RequestBody AvailabilityWindowRequest request
     ) {
         validateAdmin(authHeader);
-        AvailabilityWindow window = availabilityWindowService.createWindow(
+        AvailabilityWindowDTO window = availabilityWindowService.createWindowDto(
                 doctorId,
                 request.getDate(),
                 request.getStartTime(),
                 request.getEndTime()
         );
-        AvailabilityWindowDTO dto = new AvailabilityWindowDTO(
-                window.getWindowId(),
-                window.getDate(),
-                window.getStartTime(),
-                window.getEndTime(),
-                window.isActive(),
-                window.getDoctorId(),
-                doctorInfoClient.getDoctorName(window.getDoctorId())
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(window);
     }
 
     @DeleteMapping("/availability-windows/{windowId}")
@@ -93,17 +79,7 @@ public List<AvailabilityWindow> getAvailabilityWindows(
     }
 
     private void validateAdmin(String authHeader) {
-        if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
-        }
-        AuthValidationClient.AuthValidationResult validation = authValidationClient.validate(authHeader);
-        if (!validation.valid()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
-        }
-        String privilege = validation.privilege();
-        if (!"Admin".equals(privilege) && !"Super".equals(privilege)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Admin access required");
-        }
+        authValidationService.validateAdmin(authHeader);
     }
 
     public static class AvailabilityWindowRequest {
