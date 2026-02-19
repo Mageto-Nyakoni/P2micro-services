@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -361,5 +363,13 @@ public class TimeSlotService {
         public LocalTime getStartTime() { return startTime; }
         public LocalTime getEndTime() { return endTime; }
         public TimeSlotStatus getStatus() { return status; }
+    }
+
+    public TimeSlot findById(Integer slotId) {
+        Optional<TimeSlot> optSlot = timeSlotRepository.findById(slotId);
+        if (optSlot.isPresent()) {
+            return optSlot.get();
+        }
+        return null;
     }
 }

@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import java.time.format.DateTimeFormatter;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.revature.AppointmentService.client.InfoClient;
@@ -17,12 +19,12 @@ import com.revature.AppointmentService.repository.AppointmentTypeRepository;
 
 @Service
 public class AppointmentService {
-
     private final AppointmentRepository apptRepo;
     private final AppointmentTypeRepository typeRepo;
     private final InfoClient infoClient;
     private final ScheduleClient scheduleClient;
 
+    @Autowired
     public AppointmentService(AppointmentRepository apptRepo, AppointmentTypeRepository typeRepo, InfoClient infoClient, ScheduleClient scheduleClient) {
         this.apptRepo = apptRepo;
         this.infoClient = infoClient;
@@ -68,15 +70,17 @@ public class AppointmentService {
     }
 
 
-   private AppointmentDto mapToDto(Appointment appt) {
-    return new AppointmentDto(
-        appt.getAppointmentId().intValue(),
-        "Doctor " + appt.getDoctorId(),
-        "Type " + appt.getAppointmentType().getName(),
-        appt.getDateTimeScheduled(),
-        appt.getDateTimeScheduled().plusMinutes(30),
-        appt.getStatus()
-    );
+    private AppointmentDto mapToDto(Appointment appt) {
+        return new AppointmentDto(
+            appt.getAppointmentId(),
+            appt.getDoctorId(),
+            appt.getPatientId(),
+            appt.getSlotId(),
+            appt.getAppointmentType(),
+            appt.getDateTimeScheduled(),
+            appt.getDateTimeScheduled().plusMinutes(30),
+            appt.getStatus()
+        );
 }
     // ================= GET DOCTOR APPOINTMENTS =================
     public List<AppointmentDto> getDoctorAppointments(Integer doctorId) {
