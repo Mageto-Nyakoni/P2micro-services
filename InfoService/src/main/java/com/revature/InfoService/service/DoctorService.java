@@ -95,16 +95,16 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         LocalDateTime now = LocalDateTime.now();
 
-        List<AppointmentDto> appts = appointmentClient.findBySlotDoctorDoctorIdAndDateTimeScheduledAfter(doctorId, now);
+        List<AppointmentDto> appts = appointmentClient.findByDoctorIdAndDateTimeScheduledAfter(doctorId, now);
 
         return appts.stream()
             .map(this::toAppointmentDoctorView)
             .toList();
     }
 
-    public List<AppointmentDoctorView> getAllAppointmentsForDoctor(Integer doctorId) {
-        ensureDoctorExists(doctorId);
-        List<AppointmentDto> appointments = appointmentClient.findBySlotDoctorDoctorIdOrderByDateTimeScheduledAsc(doctorId);
+    public List<AppointmentDoctorView> getAllAppointmentsForDoctor(Long doctorId) {
+        ensureDoctorExists(doctorId.intValue());
+        List<AppointmentDto> appointments = appointmentClient.getAppointmentsDoctorId(doctorId);
         return appointments.stream()
             .map(this::toAppointmentDoctorViewWithPatient)
             .toList();
@@ -148,7 +148,7 @@ public class DoctorService implements ServiceInterface<Doctor> {
 
         // Requires repo method:
         // List<Appointment> findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(Integer doctorId, LocalDateTime start, LocalDateTime end);
-        List<AppointmentDto> appts = appointmentClient.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+        List<AppointmentDto> appts = appointmentClient.findByDoctorIdAndStartEndTimeBetween(doctorId, start, end);
 
         return appts.stream().map(this::toAppointmentDoctorView).toList();
     }
@@ -163,14 +163,16 @@ public class DoctorService implements ServiceInterface<Doctor> {
         LocalDateTime start = weekStart.atStartOfDay();
         LocalDateTime end = weekEnd.atTime(LocalTime.MAX);
 
-        List<AppointmentDto> appts = appointmentClient.findBySlotDoctorDoctorIdAndDateTimeScheduledBetween(doctorId, start, end);
+        List<AppointmentDto> appts = appointmentClient.findByDoctorIdAndStartEndTimeBetween(doctorId, start, end);
 
         return appts.stream().map(this::toAppointmentDoctorView).toList();
     }
 
     public AppointmentDoctorView getAppointmentDetailsForDoctor(Integer doctorId, Long appointmentId) {
-        AppointmentDto appt = appointmentClient.getAppointment(appointmentId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
+        AppointmentDto appt = appointmentClient.getAppointment(appointmentId);
+        if (appt == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found");
+        }
 
         enforceOwnership(doctorId, appt);
         return toAppointmentDoctorView(appt);
@@ -181,8 +183,10 @@ public class DoctorService implements ServiceInterface<Doctor> {
         // Proposal: doctor can update status completed/cancelled/no-show
         // :contentReference[oaicite:7]{index=7}
 
-        AppointmentDto appt = appointmentClient.getAppointment(appointmentId)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found"));
+        AppointmentDto appt = appointmentClient.getAppointment(appointmentId);
+        if (appt == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Appointment not found");
+        }
 
         enforceOwnership(doctorId, appt);
 

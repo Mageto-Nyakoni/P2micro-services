@@ -163,7 +163,7 @@ public class DoctorController {
     }
 
     @GetMapping("/{doctorId}/appointments/all")
-    public ResponseEntity<List<AppointmentDoctorView>> getAllAppointments(@PathVariable Integer doctorId) {
+    public ResponseEntity<List<AppointmentDoctorView>> getAllAppointments(@PathVariable Long doctorId) {
         return ResponseEntity.ok(doctorService.getAllAppointmentsForDoctor(doctorId));
     }
 
