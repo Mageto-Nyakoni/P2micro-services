@@ -17,7 +17,7 @@ public class SlotDto {
 
     // All-args constructor
     public SlotDto(Integer slotId,String startTime, String endTime, boolean available) {
-          this.slotId = slotId;
+        this.slotId = slotId;
         this.startTime = startTime;
         this.endTime = endTime;
         this.available = available;
