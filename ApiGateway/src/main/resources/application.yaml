@@ -1,32 +1,40 @@
-server:
-  port: 8080
+
 
 spring:
   application:
     name: ApiGateway
   cloud:
     gateway:
-      routes:
-        - id: AuthService
-          uri: lb://AuthService
-          predicates:
-            - Path=/smart-appointment/api/auth/**
+      server:
+        webflux:
+          routes:
+            - id: AuthService
+              uri: lb://AUTHSERVICE
+              predicates:
+                - Path=/smart-appointment/api/auth/**, 
+                       /smart-appointment/api/users/**
 
-        - id: AppointmentService
-          uri: lb://AppointmentService
-          predicates:
-            - Path=/smart-appointment/api/appointments/**
+            - id: AppointmentService
+              uri: lb://APPOINTMENTSERVICE
+              predicates:
+                - Path=/smart-appointment/api/appointments/**
 
-        - id: InfoService
-          uri: lb://InfoService
-          predicates:
-            - Path=/smart-appointment/api/info/**
+            - id: InfoService
+              uri: lb://INFOSERVICE
+              predicates:
+                - Path=/smart-appointment/api/patients/**, 
+                       /smart-appointment/api/doctors/**, 
+                       /smart-appointment/api/blood-types/**, 
+                       /smart-appointment/api/specialities/**
 
-        - id: ScheduleService
-          uri: lb://SCHEDULESERVICE
-          predicates:
-            - Path=/smart-appointment/api/schedule/**
-        
+            - id: ScheduleService
+              uri: lb://SCHEDULESERVICE
+              predicates:
+                - Path=/smart-appointment/api/schedule/**
+
+server:
+  port: 8080
+
 eureka:
   client:
     enabled: true
@@ -37,3 +45,7 @@ eureka:
   instance:
     prefer-ip-address: true
 
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.cloud.gateway.route.RouteDefinitionRouteLocator: TRACE
