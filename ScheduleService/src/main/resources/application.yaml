@@ -9,9 +9,16 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 3000
+            readTimeout: 5000
 
 server:
-  port: 8081
+  port: 8084
 
 eureka:
   client:
@@ -22,3 +29,17 @@ eureka:
     fetch-registry: true
     instance:
       prefer-ip-address: true
+
+clients:
+  auth:
+    service-name: ${AUTH_SERVICE_NAME:AuthService}
+    path: ${AUTH_SERVICE_PATH:/smart-appointment/api/auth}
+  doctor:
+    service-name: ${INFO_SERVICE_NAME:InfoService}
+    path: ${INFO_SERVICE_DOCTOR_PATH:/smart-appointment/api/doctors}
+
+appointment:
+  service:
+    base-url: ${APPOINTMENT_SERVICE_BASE_URL:http://localhost:8083}
+    admin-appointments-path: ${APPOINTMENT_SERVICE_ADMIN_APPOINTMENTS_PATH:/smart-appointment/api/admin/appointments}
+    users-table-path: ${APPOINTMENT_SERVICE_USERS_TABLE_PATH:/smart-appointment/api/users/table}
