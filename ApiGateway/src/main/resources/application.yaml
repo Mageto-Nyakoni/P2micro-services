@@ -7,29 +7,21 @@ spring:
         webflux:
           routes:
             - id: AuthService
-              # uri: lb://AUTHSERVICE
               uri: http://localhost:8081
               predicates:
-                - Path=/smart-appointment/api/auth/**, 
-                       /smart-appointment/api/users/**
+                - Path=/smart-appointment/api/auth/**,/smart-appointment/api/users/**
 
             - id: AppointmentService
-              # uri: lb://APPOINTMENTSERVICE
               uri: http://localhost:8083
               predicates:
                 - Path=/smart-appointment/api/appointments/**
 
             - id: InfoService
-              # uri: lb://INFOSERVICE
               uri: http://localhost:8082
               predicates:
-                - Path=/smart-appointment/api/patients/**, 
-                       /smart-appointment/api/doctors/**, 
-                       /smart-appointment/api/blood-types/**, 
-                       /smart-appointment/api/specialities/**
+                - Path=/smart-appointment/api/patients/**,/smart-appointment/api/doctors/**,/smart-appointment/api/blood-types/**,/smart-appointment/api/specialities/**
 
             - id: ScheduleService
-              # uri: lb://SCHEDULESERVICE
               uri: http://localhost:8084
               predicates:
                 - Path=/smart-appointment/api/schedule/**
@@ -39,13 +31,14 @@ server:
 
 eureka:
   client:
-    enabled: true
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      default-zone: http://localhost:8761/eureka
+      defaultZone: http://localhost:8761/eureka
   instance:
     prefer-ip-address: true
+    ip-address: 127.0.0.1
+    hostname: localhost
 
 logging:
   level:

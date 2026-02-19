@@ -67,7 +67,7 @@ public class AuthService {
 
         if (registerRequest.getPrivilegeId() == 1) {
             Patient patient = new Patient();
-            patient.setUserID(newUser.getUserId());
+            patient.setUserId(newUser.getUserId());
             patientClient.createPatient(patient);
         }
         if(registerRequest.getPrivilegeId() == 2) {

@@ -40,26 +40,14 @@ public class PatientController {
         this.appointmentClient = appointmentClient;
     }
     
-    @GetMapping("{patientId}/appointments")
-    public List<AppointmentPatientView> getPatientAppointments(@PathVariable Long patientId) {
-        List<AppointmentDto> appointmentDtos = appointmentClient.getAppointmentsByPatientId(patientId);
-
-        return appointmentDtos.stream().map(appt -> {
-            User user = userClient.getUser(doctorService.findById(appt.getDoctorId().intValue()).get().getUserId());
-            return new AppointmentPatientView(
-                appt.getAppointmentId().intValue(),
-                user.getFirstName() + " " + user.getLastName(),
-                appointmentClient.getAppointmentTypeById(appt.getAppointmentTypeId()).getName(),
-                appt.getDateTimeScheduled(),
-                appt.getDateTimeScheduled().plusMinutes(30),
-                appt.getStatus()
-            );  
-        }).collect(Collectors.toList());
-    }
-
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<Patient>> getPatients() {
         return ResponseEntity.ok(patientService.findAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
+        return ResponseEntity.ok(patientService.save(patient));
     }
 
     @GetMapping("/{user_id}")
@@ -140,8 +128,20 @@ public class PatientController {
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
-        return ResponseEntity.ok(patientService.save(patient));
-    }
+    @GetMapping("{patientId}/appointments")
+    public List<AppointmentPatientView> getPatientAppointments(@PathVariable Long patientId) {
+        List<AppointmentDto> appointmentDtos = appointmentClient.getAppointmentsByPatientId(patientId);
+
+        return appointmentDtos.stream().map(appt -> {
+            User user = userClient.getUser(doctorService.findById(appt.getDoctorId().intValue()).get().getUserId());
+            return new AppointmentPatientView(
+                appt.getAppointmentId().intValue(),
+                user.getFirstName() + " " + user.getLastName(),
+                appointmentClient.getAppointmentTypeById(appt.getAppointmentTypeId()).getName(),
+                appt.getDateTimeScheduled(),
+                appt.getDateTimeScheduled().plusMinutes(30),
+                appt.getStatus()
+            );  
+        }).collect(Collectors.toList());
+    } 
 }

@@ -14,25 +14,13 @@ server:
   port: 8081
 
 eureka:
-<<<<<<< HEAD
-  instance:
-        ip-address: 127.0.0.1
-        hostname: localhost
-        prefer-ip-address: true
   client:
-      enable: true
-      service-url:
-        default-zone: http://localhost:8761/eureka
-      register-with-eureka: true
-      fetch-registry: true
-  
-=======
-  client:
-    enable: true
-    service-url:
-      default-zone: http://localhost:8761/eureka
     register-with-eureka: true
     fetch-registry: true
-    instance:
-      prefer-ip-address: true
->>>>>>> 3a4e46f5a06713bb06cab62c7d8e0bdbb1ab48fe
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    prefer-ip-address: true
+    ip-address: 127.0.0.1
+    hostname: localhost
+  

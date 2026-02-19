@@ -9,13 +9,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Patient {
-    private Integer userID;
     private Integer patientId;
     private Integer age;
     private String gender;
@@ -24,5 +22,5 @@ public class Patient {
     private String address;
     private BloodType bloodType;
     private List<Allergy> allergies = new ArrayList<>();
-    
+    private Integer userId;
 }

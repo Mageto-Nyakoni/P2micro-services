@@ -10,7 +10,7 @@ import com.revature.AppointmentService.service.AppointmentService;
 
 @RestController
 @RequestMapping("smart-appointment/api/appointments")
-@CrossOrigin(origins = "*")
+@CrossOrigin("*")
 public class AppointmentController {
     private final AppointmentService service;
 

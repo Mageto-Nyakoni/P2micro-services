@@ -20,7 +20,7 @@ import com.revature.AuthService.service.AuthService;
 
 @RestController
 @RequestMapping("/smart-appointment/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin("*")
 public class AuthController {
     private final AuthService authService;
 

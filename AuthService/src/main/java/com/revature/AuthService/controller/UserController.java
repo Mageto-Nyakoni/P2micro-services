@@ -21,7 +21,7 @@ import com.revature.AuthService.util.JwtUtil;
 
 @RestController
 @RequestMapping("/smart-appointment/api/users")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin("*")
 public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
