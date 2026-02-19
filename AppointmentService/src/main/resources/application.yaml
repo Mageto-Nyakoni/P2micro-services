@@ -1,13 +1,11 @@
 spring:
   application:
     name: AppointmentService
-
-datasource:
+  datasource:
     url: jdbc:postgresql://localhost:5435/appointment_db
     username: appointment_user
     password: appointment_password
-
-jpa:
+  jpa:
     hibernate:
       ddl-auto: update
     show-sql: false
@@ -16,6 +14,7 @@ server:
   port: 8083
 
 eureka:
+<<<<<<< HEAD
   instance:
         ip-address: 127.0.0.1
         hostname: localhost
@@ -28,5 +27,15 @@ eureka:
       register-with-eureka: true
       fetch-registry: true
 
+=======
+  client:
+    enable: true
+    service-url:
+      default-zone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+    instance:
+      prefer-ip-address: true
+>>>>>>> 3a4e46f5a06713bb06cab62c7d8e0bdbb1ab48fe
 
      

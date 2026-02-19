@@ -70,7 +70,7 @@ public class DoctorController {
             }
 
             String privilege = authResponse.getPrivilege();
-            if (!privilege .equals("Doctor")) {
+            if (!privilege.equals("Doctor")) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
 

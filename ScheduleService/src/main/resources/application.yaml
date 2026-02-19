@@ -1,30 +1,49 @@
 spring:
   application:
     name: ScheduleService
-
-datasource:
+  datasource:
     url: jdbc:postgresql://localhost:5436/schedule_db
     username: schedule_user
     password: schedule_password
-
-jpa:
+  jpa:
     hibernate:
       ddl-auto: update
     show-sql: false
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 3000
+            readTimeout: 5000
 
 server:
-  port: 8081
+  port: 8084
 
 eureka:
 
   instance:
-          ip-address: 127.0.0.1
-          hostname: localhost
-          prefer-ip-address: true
-
+            ip-address: 127.0.0.1
+            hostname: localhost
+            prefer-ip-address: true
   client:
-      enable: true
-      service-url:
-        default-zone: http://localhost:8761/eureka
-      register-with-eureka: true
-      fetch-registry: true
+    enable: true
+    service-url:
+      default-zone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+    
+
+clients:
+  auth:
+    service-name: ${AUTH_SERVICE_NAME:AuthService}
+    path: ${AUTH_SERVICE_PATH:/smart-appointment/api/auth}
+  doctor:
+    service-name: ${INFO_SERVICE_NAME:InfoService}
+    path: ${INFO_SERVICE_DOCTOR_PATH:/smart-appointment/api/doctors}
+
+appointment:
+  service:
+    base-url: ${APPOINTMENT_SERVICE_BASE_URL:http://localhost:8083}
+    admin-appointments-path: ${APPOINTMENT_SERVICE_ADMIN_APPOINTMENTS_PATH:/smart-appointment/api/admin/appointments}
+    users-table-path: ${APPOINTMENT_SERVICE_USERS_TABLE_PATH:/smart-appointment/api/users/table}
