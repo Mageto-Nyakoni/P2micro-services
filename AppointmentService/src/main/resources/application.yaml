@@ -3,14 +3,14 @@ spring:
     name: AppointmentService
 
 datasource:
-    url: jdbc:postgresql://localhost:5433/auth_db
-    username: auth_user
-    password: auth_password
+    url: jdbc:postgresql://localhost:5435/appointment_db
+    username: appointment_user
+    password: appointment_password
 
 jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 
 server:
   port: 8083
@@ -24,6 +24,6 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     instance:
-       prefer-ip-address: true
+      prefer-ip-address: true
 
      

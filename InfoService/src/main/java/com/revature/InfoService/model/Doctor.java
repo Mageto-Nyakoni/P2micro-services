@@ -19,7 +19,7 @@ public class Doctor {
     private String gender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "speciality_id")
+    @JoinColumn(name = "speciality_id")
     private Speciality speciality;
 
     @Column(name = "experience_years")

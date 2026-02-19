@@ -65,7 +65,7 @@ public class DoctorController {
         try {
             AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!authResponse.getValid()) {
+            if (!authResponse.getIsValid()) {
                 throw new RuntimeException("Invalid token");
             }
 
@@ -98,7 +98,7 @@ public class DoctorController {
          try {
             AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!authResponse.getValid()) {
+            if (!authResponse.getIsValid()) {
                 throw new RuntimeException("Invalid token");
             }
 
@@ -137,7 +137,7 @@ public class DoctorController {
     public ResponseEntity<List<AppointmentDoctorView>> getMyTodaysAppointments(@RequestHeader("Authorization") String authHeader) {
         AuthResponse authResponse = authClient.validateToken(authHeader);
 
-        if (!authResponse.getValid()) {
+        if (!authResponse.getIsValid()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

@@ -1,3 +1,27 @@
 spring:
   application:
     name: ScheduleService
+
+datasource:
+    url: jdbc:postgresql://localhost:5436/schedule_db
+    username: schedule_user
+    password: schedule_password
+
+jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: 8081
+
+eureka:
+
+ client:
+    enable: true
+    service-url:
+      default-zone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+    instance:
+      prefer-ip-address: true

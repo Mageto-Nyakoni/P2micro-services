@@ -67,7 +67,7 @@ public class PatientController {
         try {
             AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!authResponse.getValid()) {
+            if (!authResponse.getIsValid()) {
                 throw new RuntimeException("Invalid token");
             }
 
@@ -79,7 +79,7 @@ public class PatientController {
                 }
                 return ResponseEntity.status(400).build();
             } else {
-                throw new RuntimeException("Invalid token");
+                throw new RuntimeException("Invalid token: Privilege found was " + privilege + " and user id was " + authResponse.getUserId());
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -91,7 +91,7 @@ public class PatientController {
         try {
             AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!authResponse.getValid()) {
+            if (!authResponse.getIsValid()) {
                 throw new RuntimeException("Invalid token");
             }
             
@@ -113,7 +113,7 @@ public class PatientController {
         try {
             AuthResponse authResponse = authClient.validateToken(authHeader);
 
-            if (!authResponse.getValid()) {
+            if (!authResponse.getIsValid()) {
                 throw new RuntimeException("Invalid token");
             }
             

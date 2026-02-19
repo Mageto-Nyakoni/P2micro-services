@@ -10,5 +10,5 @@ public class AuthResponse {
     private String privilege;
     private Integer userId;
     private String token;
-    private Boolean valid;
+    private Boolean isValid;
 }
