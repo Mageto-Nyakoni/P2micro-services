@@ -20,7 +20,7 @@ public interface AppointmentClient {
     @GetMapping("/{appointmentId}")
     AppointmentDto getAppointment(@PathVariable Integer appointmentId);
 
-    @GetMapping("/patients/{patientId}")
+    @GetMapping("/patient/{patientId}")
     List<AppointmentDto> getAppointmentsByPatientId(@PathVariable Integer patientId);
 
     @GetMapping("/doctor/{doctorId}")

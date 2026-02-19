@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,17 +16,18 @@ import com.revature.AppointmentService.dto.response.AppointmentDto;
 import com.revature.AppointmentService.dto.response.SlotDto;
 import com.revature.AppointmentService.model.Appointment;
 import com.revature.AppointmentService.model.AppointmentStatus;
+import com.revature.AppointmentService.model.AppointmentType;
 import com.revature.AppointmentService.repository.AppointmentRepository;
 import com.revature.AppointmentService.repository.AppointmentTypeRepository;
 
 @Service
 public class AppointmentService {
-
     private final AppointmentRepository apptRepo;
     private final AppointmentTypeRepository typeRepo;
     private final InfoClient infoClient;
     private final ScheduleClient scheduleClient;
 
+    @Autowired
     public AppointmentService(AppointmentRepository apptRepo, AppointmentTypeRepository typeRepo, InfoClient infoClient, ScheduleClient scheduleClient) {
         this.apptRepo = apptRepo;
         this.infoClient = infoClient;
@@ -34,18 +36,22 @@ public class AppointmentService {
     }
     private AppointmentDto mapToDto(Appointment appointment, SlotDto slot) {
 
-    String doctorName = "Doctor " + appointment.getDoctorId();
-    String appointmentType = appointment.getAppointmentTypeId() != null
-            ? "Type " + appointment.getAppointmentTypeId()
-            : "General";
+         // Fetch AppointmentType from repository
+    AppointmentType type = null;
+    if (appointment.getAppointmentTypeId() != null) {
+        type = typeRepo.findById(appointment.getAppointmentTypeId())
+                       .orElse(null);
+    }
 
     return new AppointmentDto(
-            appointment.getAppointmentId(),
-            doctorName,
-            appointmentType,
-            slot != null ? slot.getDateTime() : null,
-            slot != null ? slot.getDateTime().plusMinutes(30) : null,
-            appointment.getStatus()
+        appointment.getAppointmentId(),
+        appointment.getDoctorId(),
+        appointment.getPatientId(),
+        appointment.getSlotId(),
+        type,
+        appointment.getCreatedAt(),       // or LocalDateTime.now() if not in model
+        slot != null ? slot.getDateTime() : appointment.getDateTimeScheduled(),
+        appointment.getStatus()
     );
 }
         // BOOK appointment

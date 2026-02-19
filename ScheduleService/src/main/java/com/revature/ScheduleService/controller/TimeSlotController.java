@@ -59,14 +59,20 @@ public class TimeSlotController {
     }
 
     @PatchMapping("/{slotId}/status")
-    public ResponseEntity<TimeSlot> updateSlotStatus(
-            @PathVariable Integer slotId,
-            @RequestParam TimeSlotStatus status
-    ) {
+    public ResponseEntity<TimeSlot> updateSlotStatus(@PathVariable Integer slotId, @RequestParam TimeSlotStatus status) {
         TimeSlot slot = timeSlotRepository.findById(slotId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Time slot not found"));
 
         TimeSlot updated = timeSlotService.updateStatus(slot, status);
         return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("{slotId}")
+    public ResponseEntity<TimeSlot> getTimeSlotById(@PathVariable Integer slotId) {
+        TimeSlot slot = timeSlotService.findById(slotId);
+        if (slot != null) {
+                return ResponseEntity.ok(slot);
+        }
+        return ResponseEntity.notFound().build();
     }
 }

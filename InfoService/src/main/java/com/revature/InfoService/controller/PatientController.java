@@ -133,9 +133,9 @@ public class PatientController {
         List<AppointmentDto> appointmentDtos = appointmentClient.getAppointmentsByPatientId(patientId);
 
         return appointmentDtos.stream().map(appt -> {
-            User user = userClient.getUser(doctorService.findById(appt.getDoctorId().intValue()).get().getUserId());
+            User user = userClient.getUser(doctorService.findById(appt.getDoctorId()).get().getUserId());
             return new AppointmentPatientView(
-                appt.getAppointmentId().intValue(),
+                appt.getAppointmentId(),
                 user.getFirstName() + " " + user.getLastName(),
                 appt.getAppointmentType().getName(),
                 appt.getDateTimeScheduled(),

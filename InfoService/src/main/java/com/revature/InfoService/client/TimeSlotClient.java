@@ -20,5 +20,5 @@ public interface TimeSlotClient {
     TimeSlot updateSlotStatus(@PathVariable Integer slotId, @RequestParam String status);
 
     @GetMapping("/{slotId}")
-    TimeSlot getTimeSlot(@PathVariable Long slotId);
+    TimeSlot getTimeSlot(@PathVariable Integer slotId);
 }
