@@ -1,4 +1,4 @@
-package com.revature.Model.enums;
+package com.revature.ScheduleService.model.enums;
 
 public enum TimeSlotStatus {
    AVAILABLE,

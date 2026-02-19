@@ -1,11 +1,11 @@
-package com.revature.Repository;
+package com.revature.ScheduleService.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.revature.Model.AvailabilityWindow;
+import com.revature.ScheduleService.model.AvailabilityWindow;
 
 
 public interface AvailabilityWindowRepository

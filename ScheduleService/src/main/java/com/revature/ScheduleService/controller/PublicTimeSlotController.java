@@ -1,4 +1,4 @@
-package com.revature.Controller;
+package com.revature.ScheduleService.controller;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.revature.Service.TimeSlotService;
+import com.revature.ScheduleService.service.TimeSlotService;
 
 @RestController
 @RequestMapping("/smart-appointment/api/public/time-slots")

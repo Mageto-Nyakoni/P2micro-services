@@ -1,10 +1,10 @@
-package com.revature.Model;
+package com.revature.ScheduleService.model;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import com.revature.Model.enums.TimeSlotStatus;
+import com.revature.ScheduleService.model.enums.TimeSlotStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -1,4 +1,4 @@
-package com.revature.Repository;
+package com.revature.ScheduleService.repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,8 +11,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.revature.Model.TimeSlot;
-import com.revature.Model.enums.TimeSlotStatus;
+import com.revature.ScheduleService.model.TimeSlot;
+import com.revature.ScheduleService.model.enums.TimeSlotStatus;
 
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Integer> {

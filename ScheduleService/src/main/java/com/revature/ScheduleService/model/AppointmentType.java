@@ -1,4 +1,4 @@
-package com.revature.Model;
+package com.revature.ScheduleService.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

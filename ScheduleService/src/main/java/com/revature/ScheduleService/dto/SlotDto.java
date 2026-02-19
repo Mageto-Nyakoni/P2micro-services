@@ -1,4 +1,4 @@
-package com.revature.dto;
+package com.revature.ScheduleService.dto;
 
 import lombok.Data;
 
